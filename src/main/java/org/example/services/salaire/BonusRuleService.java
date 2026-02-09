@@ -131,5 +131,25 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
 
         return null;
     }
+
+    // fonction GET RULES BY SALAIRE ID
+    public List<BonusRule> getRulesBySalaire(int salaireId) {
+        List<BonusRule> rules = new ArrayList<>();
+        String sql = "SELECT * FROM bonus_rule WHERE salaryId = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, salaireId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                rules.add(mapResultSetToBonusRule(rs));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erreur getRulesBySalaire: " + e.getMessage());
+        }
+
+        return rules;
+    }
 }
 

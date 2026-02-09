@@ -2,6 +2,7 @@ package org.example.services.salaire;
 
 import org.example.enums.SalaireStatus;
 import org.example.interfaces.GlobalInterface;
+import org.example.model.salaire.BonusRule;
 import org.example.model.salaire.Salaire;
 import org.example.util.DatabaseConnection;
 
@@ -112,6 +113,8 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
         return salaire;
     }
+
+
 
     // fonction GET BY ID
     public Salaire getById(int id) {
