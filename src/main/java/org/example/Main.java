@@ -1,11 +1,13 @@
 package org.example;
 
+import org.example.model.salaire.Salaire;
 import org.example.services.salaire.BonusRuleService;
 import org.example.services.salaire.SalaireService;
 import org.example.util.DatabaseConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.time.LocalDate;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
@@ -40,6 +42,18 @@ public class Main {
         } catch (Exception e) {
             System.out.println("Erreur insertion EMPLOYE : " + e.getMessage());
         }*/
+
+
+        // add un salaire
+
+        Salaire salaire = new Salaire(
+            2,                       // userId
+            3500,                    // baseAmount
+            LocalDate.of(2026, 6, 11) // datePaiement
+        );
+        salaireService.create(salaire);
+        System.out.println("✅ Salaire ajouté avec succès");
+
 
 
 

@@ -19,8 +19,8 @@ public class SalaireService implements GlobalInterface<Salaire> {
     @Override
     public void create(Salaire salaire) {
         String sql = """
-            INSERT INTO salaire(user_id, base_amount, bonus_amount, total_amount, status, date_paiement)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO salaire(userId, baseAmount, bonusAmount, totalAmount, status, datePaiement, createdAt, updatedAt)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -43,11 +43,11 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
         String sql = """
             SELECT 
-                s.id, s.user_id, s.base_amount, s.bonus_amount, s.total_amount,
-                s.status, s.date_paiement,
+                s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
+                s.status, s.datePaiement,
                 u.name, u.email
             FROM salaire s
-            JOIN useraccount u ON s.user_id = u.id
+            JOIN useraccount u ON s.userId = u.id
         """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -69,7 +69,9 @@ public class SalaireService implements GlobalInterface<Salaire> {
     @Override
     public void update(Salaire salaire) {
         String sql = """
-            UPDATE salaire SET status = ?, date_paiement = ? WHERE id = ?
+            UPDATE salaire 
+            SET status = ?, datePaiement = ?, updatedAt = ?
+            WHERE id = ?
         """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -100,12 +102,12 @@ public class SalaireService implements GlobalInterface<Salaire> {
         Salaire salaire = new Salaire();
 
         salaire.setId(rs.getInt("id"));
-        salaire.setUserId(rs.getInt("user_id"));
-        salaire.setBaseAmount(rs.getDouble("base_amount"));
-        salaire.setBonusAmount(rs.getDouble("bonus_amount"));
-        salaire.setTotalAmount(rs.getDouble("total_amount"));
+        salaire.setUserId(rs.getInt("userId"));
+        salaire.setBaseAmount(rs.getDouble("baseAmount"));
+        salaire.setBonusAmount(rs.getDouble("bonusAmount"));
+        salaire.setTotalAmount(rs.getDouble("totalAmount"));
         salaire.setStatus(SalaireStatus.valueOf(rs.getString("status")));
-        salaire.setDatePaiement(rs.getDate("date_paiement").toLocalDate());
+        salaire.setDatePaiement(rs.getDate("datePaiement").toLocalDate());
 
         // User info
         salaire.setUserName(rs.getString("name"));
@@ -120,11 +122,11 @@ public class SalaireService implements GlobalInterface<Salaire> {
     public Salaire getById(int id) {
         String sql = """
             SELECT 
-                s.id, s.user_id, s.base_amount, s.bonus_amount, s.total_amount,
-                s.status, s.date_paiement,
+                s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
+                s.status, s.datePaiement,
                 u.name, u.email
             FROM salaire s
-            JOIN useraccount u ON s.user_id = u.id
+            JOIN useraccount u ON s.userId = u.id
             WHERE s.id = ?
         """;
 
