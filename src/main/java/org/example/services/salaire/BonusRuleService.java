@@ -83,11 +83,11 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
 
     // fonction DELETE
     @Override
-    public void delete(BonusRule rule) {
+    public void delete(int id) {
         String sql = "DELETE FROM bonus_rule WHERE id = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, rule.getId());
+            ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Erreur delete: " + e.getMessage());

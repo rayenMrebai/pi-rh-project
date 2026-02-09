@@ -86,14 +86,13 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
     // fonction DELETE
     @Override
-    public void delete(Salaire salaire) {
-        String sql = "DELETE FROM salaire WHERE id = ?";
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, salaire.getId());
+    public void delete(int id) {
+        try (PreparedStatement ps =
+                     conn.prepareStatement("DELETE FROM salaire WHERE id = ?")) {
+            ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Erreur delete: " + e.getMessage());
+            System.out.println(e.getMessage());
         }
     }
 
