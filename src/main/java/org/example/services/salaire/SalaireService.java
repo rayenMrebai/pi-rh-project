@@ -14,7 +14,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
     private final Connection conn = DatabaseConnection.getInstance().getConnection();
 
-    // ===== CREATE =====
+    // fonction CREATE
     @Override
     public void create(Salaire salaire) {
         String sql = """
@@ -35,7 +35,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
         }
     }
 
-    // ===== READ ALL =====
+    // fonction READ ALL
     @Override
     public List<Salaire> getAll() {
         List<Salaire> salaires = new ArrayList<>();
@@ -64,7 +64,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
         return salaires;
     }
 
-    // ===== UPDATE =====
+    // fonction UPDATE
     @Override
     public void update(Salaire salaire) {
         String sql = """
@@ -81,7 +81,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
         }
     }
 
-    // ===== DELETE =====
+    // fonction DELETE
     @Override
     public void delete(Salaire salaire) {
         String sql = "DELETE FROM salaire WHERE id = ?";
@@ -94,7 +94,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
         }
     }
 
-    // ===== HELPER METHOD TO MAP RESULTSET TO SALAIRE =====
+    // fonction MAP RESULTSET TO SALAIRE
     private Salaire mapResultSetToSalaire(ResultSet rs) throws SQLException {
         Salaire salaire = new Salaire();
 
@@ -113,7 +113,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
         return salaire;
     }
 
-    // ===== ADDITIONAL HELPER: GET BY ID =====
+    // fonction GET BY ID
     public Salaire getById(int id) {
         String sql = """
             SELECT 
