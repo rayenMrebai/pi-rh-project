@@ -91,8 +91,7 @@ public class Main {
         }*/
         // Supprimer un salaire
         // ==========================================
-        salaireService.delete(1); // supprime le salaire récupéré
-        System.out.println("🗑️ Salaire supprimé");
+        //salaireService.delete(1);
 
 
 
