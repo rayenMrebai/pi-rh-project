@@ -52,7 +52,6 @@ public class Main {
             LocalDate.of(2026, 6, 11) // datePaiement
         );
         salaireService.create(salaire);
-        System.out.println("✅ Salaire ajouté avec succès");
 
 
 

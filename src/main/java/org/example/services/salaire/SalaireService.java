@@ -19,8 +19,8 @@ public class SalaireService implements GlobalInterface<Salaire> {
     @Override
     public void create(Salaire salaire) {
         String sql = """
-            INSERT INTO salaire(userId, baseAmount, bonusAmount, totalAmount, status, datePaiement, createdAt, updatedAt)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO salaire(userId, baseAmount, bonusAmount, totalAmount, status, datePaiement)
+            VALUES (?, ?, ?, ?, ?, ?)
         """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
