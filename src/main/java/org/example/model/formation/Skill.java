@@ -1,7 +1,5 @@
 package org.example.model.formation;
 
-import java.security.PrivateKey;
-
 public class Skill {
     //Attributs
     private int id;

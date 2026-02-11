@@ -1,8 +1,6 @@
 package org.example.model.formation;
 
-import java.security.PrivateKey;
 import java.util.Date;
-
 public class TrainingProgram {
     //Attributs
     private int id;
