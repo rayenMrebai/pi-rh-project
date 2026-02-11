@@ -14,6 +14,6 @@ public interface GlobalInterface<T> {
     void update(T entity);
 
     // Delete
-    void delete(T entity);
+    void delete(int id);
 }
 
