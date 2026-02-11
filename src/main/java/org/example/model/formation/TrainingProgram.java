@@ -1,5 +1,4 @@
 package org.example.model.formation;
-
 import java.util.Date;
 public class TrainingProgram {
     //Attributs

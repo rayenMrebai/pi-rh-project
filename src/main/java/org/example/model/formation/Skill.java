@@ -1,5 +1,4 @@
 package org.example.model.formation;
-
 public class Skill {
     //Attributs
     private int id;
