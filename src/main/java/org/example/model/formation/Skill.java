@@ -21,8 +21,6 @@ public class Skill {
         this.levelRequired = levelRequired;
     }
     //getters
-
-
     public String getDescription() {
         return description;
     }
