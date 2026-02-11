@@ -1,6 +1,6 @@
 package org.example.services.salaire;
 
-
+import org.example.model.salaire.Salaire;
 import org.example.model.salaire.BonusRule;
 import org.example.util.DatabaseConnection;
 import org.example.enums.BonusRuleStatus;
@@ -24,7 +24,7 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
         """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, rule.getSalaryId());
+            ps.setInt(1, rule.getSalaire().getId());
             ps.setString(2, rule.getNomRegle());
             ps.setDouble(3, rule.getPercentage());
             ps.setDouble(4, rule.getBonus());
@@ -99,7 +99,6 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
         BonusRule rule = new BonusRule();
 
         rule.setId(rs.getInt("id"));
-        rule.setSalaryId(rs.getInt("salaryId"));
         rule.setNomRegle(rs.getString("nomRegle"));
         rule.setPercentage(rs.getDouble("percentage"));
         rule.setBonus(rs.getDouble("bonus"));
@@ -107,6 +106,11 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
         rule.setStatus(BonusRuleStatus.valueOf(rs.getString("status")));
         rule.setCreatedAt(rs.getTimestamp("createdAt").toLocalDateTime());
         rule.setUpdatedAt(rs.getTimestamp("updatedAt").toLocalDateTime());
+
+        Salaire salaire = new Salaire();
+        salaire.setId(rs.getInt("salaryId"));
+
+        rule.setSalaire(salaire);
 
         return rule;
     }

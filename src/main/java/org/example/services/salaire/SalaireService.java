@@ -1,4 +1,5 @@
 package org.example.services.salaire;
+import org.example.model.user.UserAccount;
 
 import org.example.enums.SalaireStatus;
 import org.example.interfaces.GlobalInterface;
@@ -24,7 +25,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
         """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, salaire.getUserId());
+            ps.setInt(1, salaire.getUser().getId());
             ps.setDouble(2, salaire.getBaseAmount());
             ps.setDouble(3, salaire.getBonusAmount());
             ps.setDouble(4, salaire.getTotalAmount());
@@ -101,7 +102,6 @@ public class SalaireService implements GlobalInterface<Salaire> {
         Salaire salaire = new Salaire();
 
         salaire.setId(rs.getInt("id"));
-        salaire.setUserId(rs.getInt("userId"));
         salaire.setBaseAmount(rs.getDouble("baseAmount"));
         salaire.setBonusAmount(rs.getDouble("bonusAmount"));
         salaire.setTotalAmount(rs.getDouble("totalAmount"));
@@ -109,8 +109,11 @@ public class SalaireService implements GlobalInterface<Salaire> {
         salaire.setDatePaiement(rs.getDate("datePaiement").toLocalDate());
 
         // User info
-        salaire.setUserName(rs.getString("name"));
-        salaire.setUserEmail(rs.getString("email"));
+        UserAccount user = new UserAccount();
+        user.setId(rs.getInt("userId"));
+        user.setName(rs.getString("name"));
+        user.setEmail(rs.getString("email"));
+        salaire.setUser(user);
 
         return salaire;
     }

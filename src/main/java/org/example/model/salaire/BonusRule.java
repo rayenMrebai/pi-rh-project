@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 public class BonusRule {
 
     private int id;
-    private int salaryId;
 
     private String nomRegle;
     private double percentage;
@@ -18,11 +17,14 @@ public class BonusRule {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    // asssociation avec salaire
+    private Salaire salaire;
+
     public BonusRule() {}
 
     // Création règle
-    public BonusRule(int salaryId, String nomRegle, double percentage, String condition) {
-        this.salaryId = salaryId;
+    public BonusRule(Salaire salaire, String nomRegle, double percentage, String condition) {
+        this.salaire = salaire;
         this.nomRegle = nomRegle;
         this.percentage = percentage;
         this.condition = condition;
@@ -34,7 +36,6 @@ public class BonusRule {
 
     // ===== Getters =====
     public int getId() { return id; }
-    public int getSalaryId() { return salaryId; }
     public String getNomRegle() { return nomRegle; }
     public double getPercentage() { return percentage; }
     public double getBonus() { return bonus; }
@@ -46,12 +47,6 @@ public class BonusRule {
     // ===== Setters =====
     public void setId(int id) {
         this.id = id;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void setSalaryId(int salaryId) {
-        this.salaryId = salaryId;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void setNomRegle(String nomRegle) {
@@ -66,7 +61,6 @@ public class BonusRule {
 
     public void setBonus(double bonus) {
         this.bonus = bonus;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void setCondition(String condition) {
@@ -87,7 +81,16 @@ public class BonusRule {
         this.updatedAt = updatedAt;
     }
 
-    // ===== Activation =====
+    // add setter et getter salaire
+    public Salaire getSalaire() {
+        return salaire;
+    }
+
+    public void setSalaire(Salaire salaire) {
+        this.salaire = salaire;
+    }
+
+    // Activation
     public void activate(double baseAmount) {
         this.bonus = baseAmount * (percentage / 100);
         this.status = BonusRuleStatus.ACTIVE;
@@ -99,7 +102,7 @@ public class BonusRule {
     public String toString() {
         return "BonusRule {" +
                 "id=" + id +
-                ", salaryId=" + salaryId +
+                ", salaryId=" + salaire.getId() +
                 ", nomRegle='" + nomRegle + '\'' +
                 ", percentage=" + percentage +
                 ", bonus=" + bonus +
