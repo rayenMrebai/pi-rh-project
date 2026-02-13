@@ -12,8 +12,18 @@ public class UserAccount {
     private String email;
     private UserRole role;
 
+
+    // Constructeur user
+    public UserAccount(int id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+    public UserAccount() {}
     // association avec salaire
     private List<Salaire> salaires = new ArrayList<>();
+
+
 
     // Getters
     public int getId() {

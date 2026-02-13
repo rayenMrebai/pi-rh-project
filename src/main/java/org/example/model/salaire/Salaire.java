@@ -30,7 +30,7 @@ public class Salaire {
     public Salaire() {
     }
 
-    // Création salaire
+    // Constructeur de creation
     public Salaire(UserAccount user, double baseAmount, LocalDate datePaiement) {
         this.user = user;
         this.baseAmount = baseAmount;
@@ -40,6 +40,20 @@ public class Salaire {
         this.datePaiement = datePaiement;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+    }
+
+    // constructeur de creation et affichage
+    public Salaire(int id, UserAccount user, double baseAmount, double bonusAmount, double totalAmount, SalaireStatus status, LocalDate datePaiement, LocalDateTime createdAt, LocalDateTime updatedAt) {
+
+        this.id = id;
+        this.user = user;
+        this.baseAmount = baseAmount;
+        this.bonusAmount = bonusAmount;
+        this.totalAmount = totalAmount;
+        this.status = status;
+        this.datePaiement = datePaiement;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     // Getters

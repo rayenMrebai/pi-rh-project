@@ -9,6 +9,7 @@ import org.example.util.DatabaseConnection;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,13 +44,14 @@ public class SalaireService implements GlobalInterface<Salaire> {
         List<Salaire> salaires = new ArrayList<>();
 
         String sql = """
-            SELECT 
-                s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
-                s.status, s.datePaiement,
-                u.name, u.email
-            FROM salaire s
-            JOIN useraccount u ON s.userId = u.id
-        """;
+                    SELECT 
+                        s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
+                        s.status, s.datePaiement,
+                        s.createdAt, s.updatedAt,
+                        u.name, u.email
+                    FROM salaire s
+                    JOIN useraccount u ON s.userId = u.id
+                """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -78,7 +80,8 @@ public class SalaireService implements GlobalInterface<Salaire> {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, salaire.getStatus().name());
             ps.setDate(2, Date.valueOf(salaire.getDatePaiement()));
-            ps.setInt(3, salaire.getId());
+            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(4, salaire.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
             System.out.println("Erreur update: " + e.getMessage());
@@ -99,38 +102,41 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
     // fonction MAP RESULTSET TO SALAIRE
     private Salaire mapResultSetToSalaire(ResultSet rs) throws SQLException {
-        Salaire salaire = new Salaire();
 
-        salaire.setId(rs.getInt("id"));
-        salaire.setBaseAmount(rs.getDouble("baseAmount"));
-        salaire.setBonusAmount(rs.getDouble("bonusAmount"));
-        salaire.setTotalAmount(rs.getDouble("totalAmount"));
-        salaire.setStatus(SalaireStatus.valueOf(rs.getString("status")));
-        salaire.setDatePaiement(rs.getDate("datePaiement").toLocalDate());
+        UserAccount user = new UserAccount(
+                rs.getInt("userId"),
+                rs.getString("name"),
+                rs.getString("email")
+        );
 
-        // User info
-        UserAccount user = new UserAccount();
-        user.setId(rs.getInt("userId"));
-        user.setName(rs.getString("name"));
-        user.setEmail(rs.getString("email"));
-        salaire.setUser(user);
-
-        return salaire;
+        return new Salaire(
+                rs.getInt("id"),
+                user,
+                rs.getDouble("baseAmount"),
+                rs.getDouble("bonusAmount"),
+                rs.getDouble("totalAmount"),
+                SalaireStatus.valueOf(rs.getString("status")),
+                rs.getDate("datePaiement").toLocalDate(),
+                rs.getTimestamp("createdAt").toLocalDateTime(),
+                rs.getTimestamp("updatedAt").toLocalDateTime()
+        );
     }
+
 
 
 
     // fonction GET BY ID
     public Salaire getById(int id) {
         String sql = """
-            SELECT 
-                s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
-                s.status, s.datePaiement,
-                u.name, u.email
-            FROM salaire s
-            JOIN useraccount u ON s.userId = u.id
-            WHERE s.id = ?
-        """;
+                    SELECT 
+                        s.id, s.baseAmount, s.bonusAmount, s.totalAmount,
+                        s.status, s.datePaiement,
+                        s.createdAt, s.updatedAt,
+                        u.id as userId, u.name, u.email
+                    FROM salaire s
+                    JOIN useraccount u ON s.userId = u.id
+                    WHERE s.id = ?
+                """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
