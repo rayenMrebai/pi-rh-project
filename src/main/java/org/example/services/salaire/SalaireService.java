@@ -1,6 +1,6 @@
 package org.example.services.salaire;
-import org.example.model.user.UserAccount;
 
+import org.example.model.user.UserAccount;
 import org.example.enums.SalaireStatus;
 import org.example.interfaces.GlobalInterface;
 import org.example.model.salaire.BonusRule;
@@ -8,7 +8,6 @@ import org.example.model.salaire.Salaire;
 import org.example.util.DatabaseConnection;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,8 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
     private final Connection conn = DatabaseConnection.getInstance().getConnection();
 
-    // fonction CREATE
+    // ❌ NE PAS FAIRE : private final BonusRuleService bonusRuleService = new BonusRuleService();
+
     @Override
     public void create(Salaire salaire) {
         String sql = """
@@ -38,7 +38,6 @@ public class SalaireService implements GlobalInterface<Salaire> {
         }
     }
 
-    // fonction READ ALL
     @Override
     public List<Salaire> getAll() {
         List<Salaire> salaires = new ArrayList<>();
@@ -68,7 +67,6 @@ public class SalaireService implements GlobalInterface<Salaire> {
         return salaires;
     }
 
-    // fonction UPDATE
     @Override
     public void update(Salaire salaire) {
         String sql = """
@@ -88,7 +86,24 @@ public class SalaireService implements GlobalInterface<Salaire> {
         }
     }
 
-    // fonction DELETE
+    public void updateBonusAndTotal(Salaire salaire) {
+        String sql = """
+            UPDATE salaire 
+            SET bonusAmount = ?, totalAmount = ?, updatedAt = ?
+            WHERE id = ?
+        """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, salaire.getBonusAmount());
+            ps.setDouble(2, salaire.getTotalAmount());
+            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(4, salaire.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Erreur updateBonusAndTotal: " + e.getMessage());
+        }
+    }
+
     @Override
     public void delete(int id) {
         try (PreparedStatement ps =
@@ -100,7 +115,6 @@ public class SalaireService implements GlobalInterface<Salaire> {
         }
     }
 
-    // fonction MAP RESULTSET TO SALAIRE
     private Salaire mapResultSetToSalaire(ResultSet rs) throws SQLException {
 
         UserAccount user = new UserAccount(
@@ -122,10 +136,9 @@ public class SalaireService implements GlobalInterface<Salaire> {
         );
     }
 
-
-
-
-    // fonction GET BY ID
+    /**
+     * ⭐ Créer BonusRuleService UNIQUEMENT quand nécessaire
+     */
     public Salaire getById(int id) {
         String sql = """
                     SELECT 
@@ -143,7 +156,14 @@ public class SalaireService implements GlobalInterface<Salaire> {
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return mapResultSetToSalaire(rs);
+                Salaire salaire = mapResultSetToSalaire(rs);
+
+                // ⭐ Créer le service UNIQUEMENT ici (pas dans le constructeur)
+                BonusRuleService bonusRuleService = new BonusRuleService();
+                List<BonusRule> rules = bonusRuleService.getRulesBySalaire(id);
+                salaire.setBonusRules(rules);
+
+                return salaire;
             }
 
         } catch (SQLException e) {
@@ -152,5 +172,4 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
         return null;
     }
-
 }

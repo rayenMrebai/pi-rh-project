@@ -2,6 +2,7 @@ package org.example.services.salaire;
 
 import org.example.model.salaire.Salaire;
 import org.example.model.salaire.BonusRule;
+import org.example.model.user.UserAccount;
 import org.example.util.DatabaseConnection;
 import org.example.enums.BonusRuleStatus;
 import org.example.interfaces.GlobalInterface;
@@ -15,7 +16,8 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
 
     private final Connection conn = DatabaseConnection.getInstance().getConnection();
 
-    // fonction CREATE
+    // ❌ NE PAS FAIRE : private final SalaireService salaireService = new SalaireService();
+
     @Override
     public void create(BonusRule rule) {
         String sql = """
@@ -38,7 +40,6 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
         }
     }
 
-    // fonction READ ALL
     @Override
     public List<BonusRule> getAll() {
         List<BonusRule> rules = new ArrayList<>();
@@ -58,7 +59,6 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
         return rules;
     }
 
-    // fonction UPDATE
     @Override
     public void update(BonusRule rule) {
         String sql = """
@@ -81,7 +81,6 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
         }
     }
 
-    // fonction DELETE
     @Override
     public void delete(int id) {
         String sql = "DELETE FROM bonus_rule WHERE id = ?";
@@ -94,7 +93,6 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
         }
     }
 
-    // MAP RESULTSET TO BONUSRULE
     private BonusRule mapResultSetToBonusRule(ResultSet rs) throws SQLException {
         BonusRule rule = new BonusRule();
 
@@ -115,9 +113,6 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
         return rule;
     }
 
-
-
-    // fonction GET BY ID
     public BonusRule getById(int id) {
         String sql = "SELECT * FROM bonus_rule WHERE id = ?";
 
@@ -136,17 +131,55 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
         return null;
     }
 
-    // fonction GET RULES BY SALAIRE ID
+    /**
+     * ⭐ Charger les règles AVEC les informations du salaire
+     */
     public List<BonusRule> getRulesBySalaire(int salaireId) {
         List<BonusRule> rules = new ArrayList<>();
-        String sql = "SELECT * FROM bonus_rule WHERE salaryId = ?";
+        String sql = """
+            SELECT 
+                br.id, br.nomRegle, br.percentage, br.bonus, 
+                br.condition_text, br.status, br.createdAt, br.updatedAt,
+                s.id as salaryId, s.baseAmount, s.bonusAmount, s.totalAmount,
+                u.id as userId, u.name, u.email
+            FROM bonus_rule br
+            JOIN salaire s ON br.salaryId = s.id
+            JOIN useraccount u ON s.userId = u.id
+            WHERE br.salaryId = ?
+        """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, salaireId);
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                rules.add(mapResultSetToBonusRule(rs));
+                BonusRule rule = new BonusRule();
+
+                rule.setId(rs.getInt("id"));
+                rule.setNomRegle(rs.getString("nomRegle"));
+                rule.setPercentage(rs.getDouble("percentage"));
+                rule.setBonus(rs.getDouble("bonus"));
+                rule.setCondition(rs.getString("condition_text"));
+                rule.setStatus(BonusRuleStatus.valueOf(rs.getString("status")));
+                rule.setCreatedAt(rs.getTimestamp("createdAt").toLocalDateTime());
+                rule.setUpdatedAt(rs.getTimestamp("updatedAt").toLocalDateTime());
+
+                // Créer le salaire complet
+                UserAccount user = new UserAccount(
+                        rs.getInt("userId"),
+                        rs.getString("name"),
+                        rs.getString("email")
+                );
+
+                Salaire salaire = new Salaire();
+                salaire.setId(rs.getInt("salaryId"));
+                salaire.setUser(user);
+                salaire.setBaseAmount(rs.getDouble("baseAmount"));
+                salaire.setBonusAmount(rs.getDouble("bonusAmount"));
+                salaire.setTotalAmount(rs.getDouble("totalAmount"));
+
+                rule.setSalaire(salaire);
+                rules.add(rule);
             }
 
         } catch (SQLException e) {
@@ -156,4 +189,3 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
         return rules;
     }
 }
-

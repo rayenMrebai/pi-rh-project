@@ -1,5 +1,6 @@
 package org.example.model.salaire;
 
+import org.example.enums.BonusRuleStatus;
 import org.example.enums.SalaireStatus;
 import org.example.model.user.UserAccount;
 import java.time.LocalDate;
@@ -116,10 +117,14 @@ public class Salaire {
         this.bonusRules.add(rule);
     }
 
-    // Logique métier
+    // methode de calcule de total amount a partir de bonus des regles de bonus
 
-    public void addBonus(double bonus) {
-        this.bonusAmount += bonus;
+    public void recalculateBonusFromActiveRules() {
+        this.bonusAmount = bonusRules.stream()
+                .filter(rule -> rule.getStatus() == BonusRuleStatus.ACTIVE)
+                .mapToDouble(BonusRule::getBonus)
+                .sum();
+
         this.totalAmount = this.baseAmount + this.bonusAmount;
         this.updatedAt = LocalDateTime.now();
     }
