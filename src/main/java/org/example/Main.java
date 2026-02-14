@@ -25,7 +25,7 @@ public class Main {
 
         // CREATE (2 exemples)
         System.out.println("--- CREATE ---");
-        Skill skill1 = new Skill("Java", "Langage de programmation", "technique");
+        Skill skill1 = new Skill("symfony", "tech web", "technique");
         skill1.setLevelRequired(3);
         skillService.create(skill1);
 
@@ -36,7 +36,7 @@ public class Main {
         // UPDATE
         System.out.println("\n--- UPDATE ---");
         skill1.setLevelRequired(4);
-        skill1.setDescription("Langage POO très populaire");
+        skill1.setDescription("technologie web");
         skillService.update(skill1);
 
         // DELETE
