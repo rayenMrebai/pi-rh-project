@@ -177,15 +177,28 @@ public class SalaireManagementController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // ⭐ Bouton Edit pour CHAQUE règle
-        Button btnEdit = new Button("Edit");
-        btnEdit.setStyle("-fx-background-color: #4299e1; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 5 10; -fx-background-radius: 5; -fx-cursor: hand;");
-        btnEdit.setOnAction(e -> handleEditRule(rule));
+        // ⭐ Vérifier si la règle est ACTIVE
+        boolean isActive = rule.getStatus() == BonusRuleStatus.ACTIVE;
 
-        // ⭐ Bouton Delete pour CHAQUE règle
+        // ⭐ Bouton Edit (désactivé si ACTIVE)
+        Button btnEdit = new Button("Edit");
+        if (isActive) {
+            btnEdit.setDisable(true);
+            btnEdit.setStyle("-fx-background-color: #cbd5e0; -fx-text-fill: #718096; -fx-font-size: 12px; -fx-padding: 5 10; -fx-background-radius: 5; -fx-opacity: 0.6;");
+        } else {
+            btnEdit.setStyle("-fx-background-color: #4299e1; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 5 10; -fx-background-radius: 5; -fx-cursor: hand;");
+            btnEdit.setOnAction(e -> handleEditRule(rule));
+        }
+
+        // ⭐ Bouton Delete (désactivé si ACTIVE)
         Button btnDelete = new Button("Delete");
-        btnDelete.setStyle("-fx-background-color: #f56565; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 5 10; -fx-background-radius: 5; -fx-cursor: hand;");
-        btnDelete.setOnAction(e -> handleDeleteRule(rule));
+        if (isActive) {
+            btnDelete.setDisable(true);
+            btnDelete.setStyle("-fx-background-color: #cbd5e0; -fx-text-fill: #718096; -fx-font-size: 12px; -fx-padding: 5 10; -fx-background-radius: 5; -fx-opacity: 0.6;");
+        } else {
+            btnDelete.setStyle("-fx-background-color: #f56565; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 5 10; -fx-background-radius: 5; -fx-cursor: hand;");
+            btnDelete.setOnAction(e -> handleDeleteRule(rule));
+        }
 
         row.getChildren().addAll(ruleId, ruleName, percentage, condition, spacer, btnEdit, btnDelete);
         return row;
@@ -255,6 +268,26 @@ public class SalaireManagementController {
         lblStatus.setText(salaire.getStatus().name());
         lblStatus.setStyle(getStatusStyle(salaire.getStatus()));
         lblDatePaiement.setText(salaire.getDatePaiement().format(formatter));
+
+        // ⭐ Vérifier si le salaire est PAYÉ
+        boolean isPaid = salaire.getStatus() == SalaireStatus.PAYÉ;
+
+        // ⭐ Désactiver les boutons Update et Delete
+        btnUpdateSalary.setDisable(isPaid);
+        btnDeleteSalary.setDisable(isPaid);
+
+        // ⭐ Désactiver le bouton Add Bonus Rule
+        btnAddRule.setDisable(isPaid);
+
+        if (isPaid) {
+            btnUpdateSalary.setStyle("-fx-background-color: #cbd5e0; -fx-text-fill: #718096; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-opacity: 0.6;");
+            btnDeleteSalary.setStyle("-fx-background-color: #cbd5e0; -fx-text-fill: #718096; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-opacity: 0.6;");
+            btnAddRule.setStyle("-fx-background-color: #cbd5e0; -fx-text-fill: #718096; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-opacity: 0.6;");
+        } else {
+            btnUpdateSalary.setStyle("-fx-background-color: #4299e1; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8;");
+            btnDeleteSalary.setStyle("-fx-background-color: #f56565; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8;");
+            btnAddRule.setStyle("-fx-background-color: #9f7aea; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8;");
+        }
     }
 
     /**
@@ -302,6 +335,12 @@ public class SalaireManagementController {
     @FXML
     private void handleUpdateSalary() {
         if (selectedSalaire != null) {
+            // ⭐ Vérifier si le salaire est PAYÉ
+            if (selectedSalaire.getStatus() == SalaireStatus.PAYÉ) {
+                showAlert("Action refusée", "Un salaire PAYÉ ne peut pas être modifié.", Alert.AlertType.WARNING);
+                return;
+            }
+
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/UpdateFormSalaire.fxml"));
                 Parent root = loader.load();
@@ -317,7 +356,6 @@ public class SalaireManagementController {
 
                 loadAllSalaries();
 
-                // Rafraîchir les détails
                 Salaire updatedSalaire = salaireService.getById(selectedSalaire.getId());
                 if (updatedSalaire != null) {
                     selectedSalaire = updatedSalaire;
@@ -335,10 +373,17 @@ public class SalaireManagementController {
 
     /**
      * Supprime le salaire sélectionné
+     * ⭐ Vérification : Impossible si le salaire est PAYÉ
      */
     @FXML
     private void handleDeleteSalary() {
         if (selectedSalaire != null) {
+            // ⭐ Vérifier si le salaire est PAYÉ
+            if (selectedSalaire.getStatus() == SalaireStatus.PAYÉ) {
+                showAlert("Action refusée", "Un salaire PAYÉ ne peut pas être supprimé.", Alert.AlertType.WARNING);
+                return;
+            }
+
             Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
             confirmation.setTitle("Confirmation");
             confirmation.setHeaderText("Supprimer le salaire de " + selectedSalaire.getUser().getName());
@@ -370,6 +415,14 @@ public class SalaireManagementController {
     @FXML
     private void handleAddRule() {
         if (selectedSalaire != null) {
+            // ⭐ Vérifier si le salaire est PAYÉ
+            if (selectedSalaire.getStatus() == SalaireStatus.PAYÉ) {
+                showAlert("Action refusée",
+                        "Impossible d'ajouter une règle de bonus à un salaire PAYÉ.",
+                        Alert.AlertType.WARNING);
+                return;
+            }
+
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddFormBonusRule.fxml"));
                 Parent root = loader.load();
@@ -399,6 +452,12 @@ public class SalaireManagementController {
      * Ouvre le formulaire pour MODIFIER une règle de bonus spécifique
      */
     private void handleEditRule(BonusRule rule) {
+        // ⭐ Vérifier si la règle est ACTIVE
+        if (rule.getStatus() == BonusRuleStatus.ACTIVE) {
+            showAlert("Action refusée", "Une règle de bonus ACTIVE ne peut pas être modifiée.", Alert.AlertType.WARNING);
+            return;
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/UpdateFormBonusRule.fxml"));
             Parent root = loader.load();
@@ -412,18 +471,12 @@ public class SalaireManagementController {
             stage.setScene(new Scene(root));
             stage.showAndWait();
 
-            // ⭐ 1. Rafraîchir TOUTE la liste des salaires (pour voir les nouveaux bonus)
             loadAllSalaries();
 
-            // ⭐ 2. Récupérer le salaire mis à jour depuis la DB
             Salaire updatedSalaire = salaireService.getById(selectedSalaire.getId());
             if (updatedSalaire != null) {
                 selectedSalaire = updatedSalaire;
-
-                // ⭐ 3. Afficher les détails mis à jour
                 displaySalaryDetails(updatedSalaire);
-
-                // ⭐ 4. Rafraîchir les règles de bonus
                 loadBonusRules(updatedSalaire);
             }
 
@@ -435,8 +488,15 @@ public class SalaireManagementController {
 
     /**
      * Supprime une règle de bonus spécifique
+     * ⭐ Vérification : Impossible si la règle est ACTIVE
      */
     private void handleDeleteRule(BonusRule rule) {
+        // ⭐ Vérifier si la règle est ACTIVE
+        if (rule.getStatus() == BonusRuleStatus.ACTIVE) {
+            showAlert("Action refusée", "Une règle de bonus ACTIVE ne peut pas être supprimée.", Alert.AlertType.WARNING);
+            return;
+        }
+
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Supprimer Règle");
         confirmation.setHeaderText("Supprimer: " + rule.getNomRegle());
