@@ -32,9 +32,41 @@ public class UpdateFormBonusRuleController {
     @FXML
     public void initialize() {
         bonusRuleService = new BonusRuleService();
-
-        // Remplir la ComboBox avec les statuts
         cmbStatus.setItems(FXCollections.observableArrayList(BonusRuleStatus.values()));
+        setupValidation();
+    }
+
+    private void setupValidation() {
+        // Validation du pourcentage en temps réel
+        txtPercentage.textProperty().addListener((obs, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*\\.?\\d*")) {
+                txtPercentage.setText(oldValue);
+            }
+        });
+
+        txtPercentage.setTextFormatter(new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.length() > 6) {
+                return null;
+            }
+            return change;
+        }));
+
+        txtNomRegle.setTextFormatter(new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.length() > 100) {
+                return null;
+            }
+            return change;
+        }));
+
+        txtCondition.setTextFormatter(new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.length() > 500) {
+                return null;
+            }
+            return change;
+        }));
     }
 
     public void setBonusRule(BonusRule bonusRule) {
@@ -130,35 +162,60 @@ public class UpdateFormBonusRuleController {
         closeWindow();
     }
 
+    /**
+     * ⭐ VALIDATION COMPLÈTE (Version améliorée)
+     */
     private boolean validateInputs() {
+        StringBuilder errors = new StringBuilder();
+
+        // 1. Vérifier le nom de la règle
         if (txtNomRegle.getText() == null || txtNomRegle.getText().trim().isEmpty()) {
-            showAlert("Validation", "Veuillez entrer le nom de la règle", Alert.AlertType.WARNING);
-            return false;
-        }
-
-        if (txtPercentage.getText() == null || txtPercentage.getText().trim().isEmpty()) {
-            showAlert("Validation", "Veuillez entrer le pourcentage", Alert.AlertType.WARNING);
-            return false;
-        }
-
-        try {
-            double percentage = Double.parseDouble(txtPercentage.getText().trim());
-            if (percentage <= 0 || percentage > 100) {
-                showAlert("Validation", "Le pourcentage doit être entre 0 et 100", Alert.AlertType.WARNING);
-                return false;
+            errors.append("• Le nom de la règle est obligatoire\n");
+        } else {
+            String nomRegle = txtNomRegle.getText().trim();
+            if (nomRegle.length() < 3) {
+                errors.append("• Le nom doit contenir au moins 3 caractères\n");
+            } else if (nomRegle.length() > 100) {
+                errors.append("• Le nom ne peut pas dépasser 100 caractères\n");
             }
-        } catch (NumberFormatException e) {
-            showAlert("Validation", "Le pourcentage doit être un nombre valide", Alert.AlertType.WARNING);
-            return false;
         }
 
+        // 2. Vérifier le pourcentage
+        if (txtPercentage.getText() == null || txtPercentage.getText().trim().isEmpty()) {
+            errors.append("• Le pourcentage est obligatoire\n");
+        } else {
+            try {
+                double percentage = Double.parseDouble(txtPercentage.getText().trim());
+                if (percentage <= 0) {
+                    errors.append("• Le pourcentage doit être supérieur à 0%\n");
+                } else if (percentage > 100) {
+                    errors.append("• Le pourcentage ne peut pas dépasser 100%\n");
+                }
+            } catch (NumberFormatException e) {
+                errors.append("• Le pourcentage doit être un nombre valide\n");
+            }
+        }
+
+        // 3. Vérifier la condition
         if (txtCondition.getText() == null || txtCondition.getText().trim().isEmpty()) {
-            showAlert("Validation", "Veuillez entrer une condition", Alert.AlertType.WARNING);
-            return false;
+            errors.append("• La condition est obligatoire\n");
+        } else {
+            String condition = txtCondition.getText().trim();
+            if (condition.length() < 5) {
+                errors.append("• La condition doit contenir au moins 5 caractères\n");
+            } else if (condition.length() > 500) {
+                errors.append("• La condition ne peut pas dépasser 500 caractères\n");
+            }
         }
 
+        // 4. Vérifier le statut
         if (cmbStatus.getValue() == null) {
-            showAlert("Validation", "Veuillez sélectionner un statut", Alert.AlertType.WARNING);
+            errors.append("• Veuillez sélectionner un statut\n");
+        }
+
+        // Afficher les erreurs
+        if (errors.length() > 0) {
+            showAlert("Validation", errors.toString(), Alert.AlertType.WARNING);
             return false;
         }
 
@@ -172,6 +229,9 @@ public class UpdateFormBonusRuleController {
 
     private void showAlert(String title, String content, Alert.AlertType type) {
         Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);

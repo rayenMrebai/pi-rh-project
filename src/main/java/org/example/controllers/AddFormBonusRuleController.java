@@ -25,11 +25,46 @@ public class AddFormBonusRuleController {
     @FXML
     public void initialize() {
         bonusRuleService = new BonusRuleService();
+        setupValidation();
     }
 
     /**
-     * Méthode appelée depuis SalaireManagementController
+     * ⭐ Configuration de la validation en temps réel
      */
+    private void setupValidation() {
+        // Validation du pourcentage en temps réel
+        txtPercentage.textProperty().addListener((obs, oldValue, newValue) -> {
+            if (!newValue.matches("\\d*\\.?\\d*")) {
+                txtPercentage.setText(oldValue);
+            }
+        });
+
+        // Limiter la longueur
+        txtPercentage.setTextFormatter(new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.length() > 6) { // Max: 100.99
+                return null;
+            }
+            return change;
+        }));
+
+        txtNomRegle.setTextFormatter(new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.length() > 100) {
+                return null;
+            }
+            return change;
+        }));
+
+        txtCondition.setTextFormatter(new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.length() > 500) {
+                return null;
+            }
+            return change;
+        }));
+    }
+
     public void setSalaire(Salaire salaire) {
         this.currentSalaire = salaire;
         displaySalaireInfo();
@@ -53,56 +88,78 @@ public class AddFormBonusRuleController {
             double percentage = Double.parseDouble(txtPercentage.getText().trim());
             String condition = txtCondition.getText().trim();
 
-            // ⭐ Créer la règle - Le bonus est calculé automatiquement dans le constructeur
             BonusRule bonusRule = new BonusRule(currentSalaire, nomRegle, percentage, condition);
-
-            // Sauvegarder dans la DB
             bonusRuleService.create(bonusRule);
 
             showAlert("Succès", "Règle de bonus créée avec succès !", Alert.AlertType.INFORMATION);
             closeWindow();
 
         } catch (NumberFormatException e) {
-            showAlert("Erreur", "Le pourcentage doit être un nombre valide", Alert.AlertType.ERROR);
+            showAlert("Erreur", "Format de pourcentage invalide", Alert.AlertType.ERROR);
         } catch (Exception e) {
             showAlert("Erreur", "Erreur lors de la création: " + e.getMessage(), Alert.AlertType.ERROR);
             e.printStackTrace();
         }
     }
 
-    @FXML
-    private void handleCancel() {
-        closeWindow();
-    }
-
+    /**
+     * ⭐ VALIDATION COMPLÈTE
+     */
     private boolean validateInputs() {
+        StringBuilder errors = new StringBuilder();
+
+        // 1. Vérifier le nom de la règle
         if (txtNomRegle.getText() == null || txtNomRegle.getText().trim().isEmpty()) {
-            showAlert("Validation", "Veuillez entrer le nom de la règle", Alert.AlertType.WARNING);
-            return false;
-        }
-
-        if (txtPercentage.getText() == null || txtPercentage.getText().trim().isEmpty()) {
-            showAlert("Validation", "Veuillez entrer le pourcentage", Alert.AlertType.WARNING);
-            return false;
-        }
-
-        try {
-            double percentage = Double.parseDouble(txtPercentage.getText().trim());
-            if (percentage <= 0 || percentage > 100) {
-                showAlert("Validation", "Le pourcentage doit être entre 0 et 100", Alert.AlertType.WARNING);
-                return false;
+            errors.append("• Le nom de la règle est obligatoire\n");
+        } else {
+            String nomRegle = txtNomRegle.getText().trim();
+            if (nomRegle.length() < 3) {
+                errors.append("• Le nom doit contenir au moins 3 caractères\n");
+            } else if (nomRegle.length() > 100) {
+                errors.append("• Le nom ne peut pas dépasser 100 caractères\n");
             }
-        } catch (NumberFormatException e) {
-            showAlert("Validation", "Le pourcentage doit être un nombre valide", Alert.AlertType.WARNING);
-            return false;
         }
 
+        // 2. Vérifier le pourcentage
+        if (txtPercentage.getText() == null || txtPercentage.getText().trim().isEmpty()) {
+            errors.append("• Le pourcentage est obligatoire\n");
+        } else {
+            try {
+                double percentage = Double.parseDouble(txtPercentage.getText().trim());
+                if (percentage <= 0) {
+                    errors.append("• Le pourcentage doit être supérieur à 0%\n");
+                } else if (percentage > 100) {
+                    errors.append("• Le pourcentage ne peut pas dépasser 100%\n");
+                }
+            } catch (NumberFormatException e) {
+                errors.append("• Le pourcentage doit être un nombre valide\n");
+            }
+        }
+
+        // 3. Vérifier la condition
         if (txtCondition.getText() == null || txtCondition.getText().trim().isEmpty()) {
-            showAlert("Validation", "Veuillez entrer une condition", Alert.AlertType.WARNING);
+            errors.append("• La condition est obligatoire\n");
+        } else {
+            String condition = txtCondition.getText().trim();
+            if (condition.length() < 5) {
+                errors.append("• La condition doit contenir au moins 5 caractères\n");
+            } else if (condition.length() > 500) {
+                errors.append("• La condition ne peut pas dépasser 500 caractères\n");
+            }
+        }
+
+        // Afficher les erreurs
+        if (errors.length() > 0) {
+            showAlert("Validation", errors.toString(), Alert.AlertType.WARNING);
             return false;
         }
 
         return true;
+    }
+
+    @FXML
+    private void handleCancel() {
+        closeWindow();
     }
 
     private void closeWindow() {
