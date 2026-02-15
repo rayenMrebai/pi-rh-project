@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Controllers.candidatForm"
+            prefWidth="560" prefHeight="520"
+            style="-fx-background-color: white;">
+
+    <top>
+        <Label text="Add Candidate"
+               style="-fx-font-size: 16; -fx-font-weight: bold;">
+            <BorderPane.margin>
+                <Insets top="14" right="14" bottom="10" left="14"/>
+            </BorderPane.margin>
+        </Label>
+    </top>
+
+    <center>
+        <GridPane hgap="12" vgap="10">
+            <BorderPane.margin>
+                <Insets top="0" right="14" bottom="14" left="14"/>
+            </BorderPane.margin>
+
+            <columnConstraints>
+                <ColumnConstraints percentWidth="30"/>
+                <ColumnConstraints percentWidth="70"/>
+            </columnConstraints>
+
+            <Label text="First Name" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="tfFirstName" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <Label text="Last Name" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="tfLastName" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <Label text="Email" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="tfEmail" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+            <Label text="Phone" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <TextField fx:id="tfPhone" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+            <Label text="Education" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <TextField fx:id="tfEducation" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+            <Label text="Status" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="cbStatus" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+            <Label text="Skills" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+            <TextArea fx:id="taSkills" prefRowCount="3" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+            <Label text="Job Position" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+            <ComboBox fx:id="cbJob" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+        </GridPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <BorderPane.margin>
+                <Insets top="10" right="14" bottom="14" left="14"/>
+            </BorderPane.margin>
+
+            <Button text="Cancel" onAction="#onCancel"/>
+            <Button text="Save" onAction="#onSave"
+                    style="-fx-background-color:#16a34a; -fx-text-fill:white; -fx-font-weight:bold;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

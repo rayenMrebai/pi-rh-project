@@ -21,6 +21,22 @@ public class manageRecruitment {
     @FXML private TableView<JobPosition> jobTable;
     @FXML private TableView<Candidat> candidatTable;
 
+    // Colonnes JOB
+    @FXML private TableColumn<JobPosition, Integer> colJobId;
+    @FXML private TableColumn<JobPosition, String> colJobTitle;
+    @FXML private TableColumn<JobPosition, String> colJobDept;
+    @FXML private TableColumn<JobPosition, String> colJobType;
+    @FXML private TableColumn<JobPosition, String> colJobStatus;
+    @FXML private TableColumn<JobPosition, String> colJobPostedAt;
+
+    // Colonnes CANDIDAT
+    @FXML private TableColumn<Candidat, Integer> colCandId;
+    @FXML private TableColumn<Candidat, String> colCandFullName;
+    @FXML private TableColumn<Candidat, String> colCandEmail;
+    @FXML private TableColumn<Candidat, String> colCandEducation;
+    @FXML private TableColumn<Candidat, String> colCandStatus;
+
+    // Details
     @FXML private Label dFullName;
     @FXML private Label dEmail;
     @FXML private Label dPhone;
@@ -32,6 +48,21 @@ public class manageRecruitment {
 
     @FXML
     public void initialize() {
+
+        // Liaison colonnes (adapte si tes getters ont un autre nom)
+        colJobId.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("idJob"));
+        colJobTitle.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("title"));
+        colJobDept.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("department"));
+        colJobType.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("type"));
+        colJobStatus.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("status"));
+        colJobPostedAt.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("postedAt"));
+
+        colCandId.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("id"));
+        colCandFullName.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("fullName"));
+        colCandEmail.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("email"));
+        colCandEducation.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("education"));
+        colCandStatus.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("status"));
+
         loadJobs();
         loadCandidats();
     }
@@ -90,7 +121,7 @@ public class manageRecruitment {
         System.out.println("Edit Candidat clicked");
     }
 
-    // ================= DETAILS ACTIONS (manquantes) =================
+    // ================= DETAILS ACTIONS =================
 
     @FXML
     private void onUpdateStatus() {
