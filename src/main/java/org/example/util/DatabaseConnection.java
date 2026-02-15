@@ -11,7 +11,7 @@ public class DatabaseConnection {
     private Connection connection;
 
     // preparation de la bd
-    private final String URL = "jdbc:mysql://localhost:3305/pi_rh";
+    private final String URL = "jdbc:mysql://localhost:3306/recrutement";
     private final String USER = "root";
     private final String PASSWORD = "";
 
