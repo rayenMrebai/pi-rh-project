@@ -60,13 +60,13 @@ public class UpdateFormBonusRuleController {
             return change;
         }));
 
-        txtCondition.setTextFormatter(new TextFormatter<>(change -> {
-            String newText = change.getControlNewText();
-            if (newText.length() > 500) {
-                return null;
+        // ⭐ Validation de la condition en temps réel (CORRIGÉE)
+        txtCondition.textProperty().addListener((obs, oldValue, newValue) -> {
+            // Bloquer les caractères interdits - REGEX IDENTIQUE à validateInputs()
+            if (!newValue.matches("[a-zA-ZÀ-ÿ0-9\\s.,;:!?'\"()\\->=<%]*")) {
+                txtCondition.setText(oldValue);
             }
-            return change;
-        }));
+        });
     }
 
     public void setBonusRule(BonusRule bonusRule) {
