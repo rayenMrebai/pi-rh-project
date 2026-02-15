@@ -1,81 +1,78 @@
+package org.example.tests;
+
 import org.example.enums.SalaireStatus;
 import org.example.model.salaire.Salaire;
 import org.example.model.user.UserAccount;
 import org.example.services.salaire.SalaireService;
+import org.example.services.user.UserAccountService;
 import org.junit.jupiter.api.*;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
-//excution test selon ordre
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SalaireServiceTest {
 
-    static SalaireService salaireService;
-    static Salaire testSalaire;
-    static UserAccount user;
+    private static SalaireService salaireService;
+    private static UserAccountService userAccountService;
+    private static UserAccount testUser;
+    private static int createdSalaireId;
 
     @BeforeAll
     static void setup() {
         salaireService = new SalaireService();
-
-        // User pour le test (id déjà existant dans ta base)
-        user = new UserAccount();
-        user.setId(1);
-        user.setName("Mohamed Manager");
-        user.setEmail("Mohamed.manager@mail.com");
+        userAccountService = new UserAccountService();
+        testUser = userAccountService.getById(1);
     }
 
     @Test
     @Order(1)
     void testCreateSalaire() {
-        testSalaire = new Salaire(user, 1000.0, LocalDate.now());
-        salaireService.create(testSalaire);
+        Salaire salaire = new Salaire(testUser, 3000.0, LocalDate.now().plusDays(30));
+        salaireService.create(salaire);
 
         List<Salaire> salaires = salaireService.getAll();
-        assertFalse(salaires.isEmpty(), "La liste des salaires est vide");
-        assertTrue(
-                salaires.stream().anyMatch(s -> s.getBaseAmount() == 1000.0),
-                "le salaire crée nest pas dans la base, insertion invalide"
-        );
+        Salaire created = salaires.stream()
+                .filter(s -> s.getUser().getId() == testUser.getId() && s.getBaseAmount() == 3000.0)
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(created, "Échec de création du salaire");
+        createdSalaireId = created.getId();
+        assertEquals(3000.0, created.getBaseAmount(), 0.01);
     }
 
     @Test
     @Order(2)
-    void testUpdateSalaire() throws SQLException {
-        Salaire salaire = salaireService.getById(5);
-        assertNotNull(salaire, "Le salaire n'existe pas en base");
-        // nouveau donnee
-        LocalDate newDatePaiement = LocalDate.of(2026, 3, 1);
-        SalaireStatus status= SalaireStatus.PAYÉ;
-        //modification
-        salaire.setStatus(status);
-        salaire.setDatePaiement(newDatePaiement);
-        salaireService.update(salaire);
+    void testReadSalaire() {
+        Salaire salaire = salaireService.getById(createdSalaireId);
 
-        // verif
-        Salaire updatedSalaire = salaireService.getById(salaire.getId());
-        assertNotNull(updatedSalaire, "Le salaire n'existe plus après update");
-        assertEquals(SalaireStatus.PAYÉ, updatedSalaire.getStatus(), "le statut n'a pas été mis à jour");
-        assertEquals(newDatePaiement, updatedSalaire.getDatePaiement(), "la date de paiement n'a pas été mise à jour");
+        assertNotNull(salaire, "Salaire introuvable");
+        assertEquals(3000.0, salaire.getBaseAmount(), 0.01);
+        assertEquals(testUser.getId(), salaire.getUser().getId());
     }
 
     @Test
     @Order(3)
-    void testDeleteSalaire() {
-        salaireService.delete(6);
+    void testUpdateSalaire() {
+        Salaire salaire = salaireService.getById(createdSalaireId);
+        salaire.setStatus(SalaireStatus.EN_COURS);
+        salaire.setDatePaiement(LocalDate.now().plusDays(15));
 
-        Salaire deleted = salaireService.getById(4);
-        assertNull(deleted, "le salaire nest pas supprime de la base");
+        salaireService.update(salaire);
+
+        Salaire updated = salaireService.getById(createdSalaireId);
+        assertEquals(SalaireStatus.EN_COURS, updated.getStatus());
     }
 
-    @AfterAll
-    static void cleanUp() {
-        // pour nettoyer tous les salaires test
-        //salaireService.delete(testSalaire.getId());
+    @Test
+    @Order(4)
+    void testDeleteSalaire() {
+        salaireService.delete(createdSalaireId);
+
+        Salaire deleted = salaireService.getById(createdSalaireId);
+        assertNull(deleted, "Échec suppression du salaire");
     }
 }
