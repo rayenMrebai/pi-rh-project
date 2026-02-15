@@ -8,10 +8,11 @@ public class Skill {
     private int levelRequired;
     //constructeurs
     public Skill() {}
-    public Skill(String nom, String description, String categorie) {
+    public Skill(String nom, String description, String categorie, int levelRequired) {
         this.nom = nom;
         this.description = description;
         this.categorie = categorie;
+        this.levelRequired = levelRequired;
     }
     public Skill(int id, String nom, String description, String categorie, int levelRequired) {
         this.id = id;
