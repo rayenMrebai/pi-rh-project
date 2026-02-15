@@ -4,8 +4,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-
 <?import javafx.scene.Cursor?>
+
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.Controllers.ListSkills"
@@ -68,22 +68,15 @@
         </VBox>
     </top>
 
-    <!-- CONTENU PRINCIPAL - TABLEAU -->
+    <!-- CONTENU PRINCIPAL - LISTVIEW -->
     <center>
         <VBox spacing="0">
             <padding>
-                <Insets top="0" right="0" bottom="0" left="0"/>
+                <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
 
-            <!-- TableView -->
-            <TableView fx:id="skillTable" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="idColumn" text="ID" prefWidth="80.0" style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="nomColumn" text="Nom de la compétence" prefWidth="250.0"/>
-                    <TableColumn fx:id="descriptionColumn" text="Description" prefWidth="450.0"/>
-                    <TableColumn fx:id="categorieColumn" text="Catégorie" prefWidth="150.0" style="-fx-alignment: CENTER;"/>
-                    <TableColumn fx:id="levelColumn" text="Niveau requis" prefWidth="150.0" style="-fx-alignment: CENTER;"/>
-                </columns>
+            <!-- ListView -->
+            <ListView fx:id="skillListView" VBox.vgrow="ALWAYS">
                 <placeholder>
                     <VBox alignment="CENTER" spacing="10">
                         <Label text="📋" style="-fx-font-size: 48px;"/>
@@ -93,7 +86,7 @@
                                style="-fx-text-fill: #bdc3c7; -fx-font-size: 13px;"/>
                     </VBox>
                 </placeholder>
-            </TableView>
+            </ListView>
         </VBox>
     </center>
 
