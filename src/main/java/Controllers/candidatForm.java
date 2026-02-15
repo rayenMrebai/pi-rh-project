@@ -1,15 +1,10 @@
 package Controllers;
 
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.model.recrutement.Candidat;
-import org.example.model.recrutement.JobPosition;
 import org.example.services.recrutement.CandidatService;
-import org.example.services.recrutement.JobPositionService;
-
-import java.util.List;
 
 public class candidatForm {
 
@@ -20,40 +15,33 @@ public class candidatForm {
     @FXML private TextField tfEducation;
     @FXML private TextArea taSkills;
     @FXML private ComboBox<String> cbStatus;
-    @FXML private ComboBox<JobPosition> cbJob;
 
-    private final CandidatService candidatService = new CandidatService();
-    private final JobPositionService jobService = new JobPositionService();
+    private final CandidatService service = new CandidatService();
+    private Candidat candidatToEdit = null; // null => ADD
 
     @FXML
     public void initialize() {
-        cbStatus.setItems(FXCollections.observableArrayList("New", "Applied", "Interview", "Accepted", "Rejected"));
-        cbStatus.getSelectionModel().select("New");
+        cbStatus.getItems().addAll("NEW", "IN_REVIEW", "ACCEPTED", "REJECTED");
+        cbStatus.getSelectionModel().selectFirst();
+    }
 
-        List<JobPosition> jobs = jobService.getAll();
-        cbJob.setItems(FXCollections.observableArrayList(jobs));
+    // appelé depuis manageRecruitment
+    public void setCandidatToEdit(Candidat c) {
+        this.candidatToEdit = c;
 
-        // affichage lisible dans la combobox
-        cbJob.setCellFactory(list -> new ListCell<>() {
-            @Override
-            protected void updateItem(JobPosition item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : item.getIdJob() + " - " + item.getTitle());
-            }
-        });
-        cbJob.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(JobPosition item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? "" : item.getIdJob() + " - " + item.getTitle());
-            }
-        });
+        tfFirstName.setText(c.getFirstName());
+        tfLastName.setText(c.getLastName());
+        tfEmail.setText(c.getEmail());
+        tfPhone.setText(String.valueOf(c.getPhone()));
+        tfEducation.setText(c.getEducationLevel());
+        taSkills.setText(c.getSkills());
+        cbStatus.setValue(c.getStatus());
     }
 
     @FXML
     private void onSave() {
-        if (tfFirstName.getText().isBlank() || tfLastName.getText().isBlank()) {
-            showAlert("First name and last name are required.");
+        if (tfFirstName.getText().isEmpty() || tfLastName.getText().isEmpty()) {
+            alert("First name and Last name are required!");
             return;
         }
 
@@ -61,23 +49,35 @@ public class candidatForm {
         try {
             phone = Integer.parseInt(tfPhone.getText().trim());
         } catch (Exception e) {
-            showAlert("Phone must be a number.");
+            alert("Phone must be a number!");
             return;
         }
 
-        Candidat c = new Candidat();
-        c.setFirstName(tfFirstName.getText().trim());
-        c.setLastName(tfLastName.getText().trim());
-        c.setEmail(tfEmail.getText().trim());
-        c.setPhone(phone);
-        c.setEducationLevel(tfEducation.getText().trim());
-        c.setSkills(taSkills.getText().trim());
-        c.setStatus(cbStatus.getValue());
+        if (candidatToEdit == null) {
+            // ADD
+            Candidat c = new Candidat();
+            c.setFirstName(tfFirstName.getText());
+            c.setLastName(tfLastName.getText());
+            c.setEmail(tfEmail.getText());
+            c.setPhone(phone);
+            c.setEducationLevel(tfEducation.getText());
+            c.setSkills(taSkills.getText());
+            c.setStatus(cbStatus.getValue());
 
-        JobPosition selectedJob = cbJob.getSelectionModel().getSelectedItem();
-        c.setJobPosition(selectedJob); // objet avec idJob (pas de join)
+            service.create(c);
+        } else {
+            // EDIT
+            candidatToEdit.setFirstName(tfFirstName.getText());
+            candidatToEdit.setLastName(tfLastName.getText());
+            candidatToEdit.setEmail(tfEmail.getText());
+            candidatToEdit.setPhone(phone);
+            candidatToEdit.setEducationLevel(tfEducation.getText());
+            candidatToEdit.setSkills(taSkills.getText());
+            candidatToEdit.setStatus(cbStatus.getValue());
 
-        candidatService.create(c);
+            service.update(candidatToEdit);
+        }
+
         close();
     }
 
@@ -91,9 +91,8 @@ public class candidatForm {
         stage.close();
     }
 
-    private void showAlert(String msg) {
+    private void alert(String msg) {
         Alert a = new Alert(Alert.AlertType.WARNING);
-        a.setTitle("Validation");
         a.setHeaderText(null);
         a.setContentText(msg);
         a.showAndWait();

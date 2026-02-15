@@ -1,6 +1,5 @@
 package Controllers;
 
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
@@ -18,49 +17,111 @@ public class jobForm {
     @FXML private ComboBox<String> cbStatus;
     @FXML private DatePicker dpPostedAt;
 
+    @FXML private Button btnSave;
+    @FXML private Button btnCancel;
+
     private final JobPositionService jobService = new JobPositionService();
+
+    // si != null => EDIT
+    private JobPosition jobToEdit;
 
     @FXML
     public void initialize() {
-        cbStatus.setItems(FXCollections.observableArrayList("Open", "On Hold", "Closed"));
+        cbStatus.getItems().addAll("Open", "Closed", "Paused");
         cbStatus.getSelectionModel().select("Open");
+
+        // date par défaut
         dpPostedAt.setValue(LocalDate.now());
+    }
+
+    // Appelé depuis manageRecruitment quand on veut modifier
+    public void setJobToEdit(JobPosition job) {
+        this.jobToEdit = job;
+
+        tfTitle.setText(job.getTitle());
+        tfDepartement.setText(job.getDepartement());
+        tfEmployeeType.setText(job.getEmployeeType());
+        taDescription.setText(job.getDescription());
+        cbStatus.getSelectionModel().select(job.getStatus() != null ? job.getStatus() : "Open");
+        dpPostedAt.setValue(job.getPostedAt() != null ? job.getPostedAt() : LocalDate.now());
     }
 
     @FXML
     private void onSave() {
-        if (tfTitle.getText().isBlank()) {
-            showAlert("Title is required.");
+        System.out.println("=== onSave called ===");
+        System.out.println("jobToEdit is null? " + (jobToEdit == null));
+
+        // petites validations
+        if (tfTitle.getText().trim().isEmpty()
+                || tfDepartement.getText().trim().isEmpty()
+                || tfEmployeeType.getText().trim().isEmpty()) {
+
+            Alert a = new Alert(Alert.AlertType.WARNING);
+            a.setTitle("Champs obligatoires");
+            a.setHeaderText(null);
+            a.setContentText("Title / Departement / EmployeeType sont obligatoires.");
+            a.showAndWait();
             return;
         }
 
-        JobPosition job = new JobPosition();
-        job.setTitle(tfTitle.getText().trim());
-        job.setDepartement(tfDepartement.getText().trim());
-        job.setEmployeeType(tfEmployeeType.getText().trim());
-        job.setDescription(taDescription.getText().trim());
-        job.setStatus(cbStatus.getValue());
-        job.setPostedAt(dpPostedAt.getValue());
+        try {
+            if (jobToEdit == null) {
+                // ADD
+                System.out.println("Mode ADD - Création d'un nouveau job");
+                JobPosition j = new JobPosition(
+                        tfTitle.getText().trim(),
+                        tfDepartement.getText().trim(),
+                        tfEmployeeType.getText().trim(),
+                        taDescription.getText() != null ? taDescription.getText().trim() : "",
+                        cbStatus.getValue(),
+                        dpPostedAt.getValue()
+                );
 
-        jobService.create(job);
-        close();
+                System.out.println("Job avant création: " + j);
+                jobService.create(j);
+                System.out.println("Job après création, ID: " + j.getIdJob());
+
+            } else {
+                // EDIT
+                System.out.println("Mode EDIT - Mise à jour du job ID: " + jobToEdit.getIdJob());
+                jobToEdit.setTitle(tfTitle.getText().trim());
+                jobToEdit.setDepartement(tfDepartement.getText().trim());
+                jobToEdit.setEmployeeType(tfEmployeeType.getText().trim());
+                jobToEdit.setDescription(taDescription.getText() != null ? taDescription.getText().trim() : "");
+                jobToEdit.setStatus(cbStatus.getValue());
+                jobToEdit.setPostedAt(dpPostedAt.getValue());
+
+                jobService.update(jobToEdit);
+                System.out.println("Job mis à jour: " + jobToEdit);
+            }
+
+            close();
+
+        } catch (RuntimeException ex) {
+            System.out.println("EXCEPTION: " + ex.getMessage());
+            ex.printStackTrace();
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setTitle("Erreur SQL");
+            a.setHeaderText("Insertion / Modification impossible");
+            a.setContentText(ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage());
+            a.showAndWait();
+        }
     }
-
     @FXML
     private void onCancel() {
         close();
     }
 
     private void close() {
-        Stage stage = (Stage) tfTitle.getScene().getWindow();
+        Stage stage = (Stage) btnCancel.getScene().getWindow();
         stage.close();
     }
-
-    private void showAlert(String msg) {
-        Alert a = new Alert(Alert.AlertType.WARNING);
-        a.setTitle("Validation");
-        a.setHeaderText(null);
-        a.setContentText(msg);
-        a.showAndWait();
-    }
 }
+
+
+
+
+
+
+
+

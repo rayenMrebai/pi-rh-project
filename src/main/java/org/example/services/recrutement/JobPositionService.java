@@ -17,29 +17,7 @@ public class JobPositionService implements GlobalInterface<JobPosition> {
         cnx = DatabaseConnection.getInstance().getConnection();
     }
 
-    @Override
-    public void create(JobPosition j) {
-        String sql = "INSERT INTO jobposition (title, departement, employeeType, description, status, postedAt) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setString(1, j.getTitle());
-            ps.setString(2, j.getDepartement());
-            ps.setString(3, j.getEmployeeType());
-            ps.setString(4, j.getDescription());
-            ps.setString(5, j.getStatus());
-
-            if (j.getPostedAt() != null) {
-                ps.setDate(6, Date.valueOf(j.getPostedAt()));
-            } else {
-                ps.setNull(6, Types.DATE);
-            }
-
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     public List<JobPosition> getAll() {
@@ -74,9 +52,43 @@ public class JobPositionService implements GlobalInterface<JobPosition> {
     }
 
     @Override
+    public void create(JobPosition j) {
+        String sql = "INSERT INTO jobposition (title, departement, employeeType, description, status, postedAt) VALUES (?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, j.getTitle());
+            ps.setString(2, j.getDepartement());
+            ps.setString(3, j.getEmployeeType());
+            ps.setString(4, j.getDescription());
+            ps.setString(5, j.getStatus());
+
+            if (j.getPostedAt() != null) {
+                ps.setDate(6, Date.valueOf(j.getPostedAt()));
+            } else {
+                ps.setDate(6, Date.valueOf(LocalDate.now()));
+            }
+
+            int rows = ps.executeUpdate();
+            System.out.println("INSERT jobposition rows=" + rows);
+
+            // Récupérer l'ID généré automatiquement
+            if (rows > 0) {
+                ResultSet generatedKeys = ps.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    j.setIdJob(generatedKeys.getInt(1));
+                    System.out.println("ID généré: " + j.getIdJob());
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("ERROR INSERT jobposition: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+    @Override
     public void update(JobPosition j) {
-        String sql = "UPDATE jobposition SET title=?, departement=?, employeeType=?, description=?, status=?, postedAt=? " +
-                "WHERE idJob=?";
+        String sql = "UPDATE jobposition SET title=?, departement=?, employeeType=?, description=?, status=?, postedAt=? WHERE idJob=?";
 
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setString(1, j.getTitle());
@@ -88,16 +100,21 @@ public class JobPositionService implements GlobalInterface<JobPosition> {
             if (j.getPostedAt() != null) {
                 ps.setDate(6, Date.valueOf(j.getPostedAt()));
             } else {
-                ps.setNull(6, Types.DATE);
+                ps.setDate(6, Date.valueOf(java.time.LocalDate.now()));
             }
 
             ps.setInt(7, j.getIdJob());
 
-            ps.executeUpdate();
+            int rows = ps.executeUpdate();
+            System.out.println("UPDATE jobposition rows=" + rows);
+
         } catch (SQLException e) {
+            System.out.println("ERROR UPDATE jobposition: " + e.getMessage());
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
+
 
     @Override
     public void delete(int id) {

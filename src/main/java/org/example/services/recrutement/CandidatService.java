@@ -53,7 +53,7 @@ public class CandidatService implements GlobalInterface<Candidat> {
 
             while (rs.next()) {
 
-                Integer idJob = (Integer) rs.getObject("idJob"); // null si NULL
+                Integer idJob = (Integer) rs.getObject("idJob"); // peut être null
 
                 JobPosition jp = null;
                 if (idJob != null) {
@@ -72,11 +72,12 @@ public class CandidatService implements GlobalInterface<Candidat> {
                         jp
                 );
 
-                // ✅ FIX IMPORTANT: remplir l'id du candidat
+                // ✅ TRÈS IMPORTANT
                 c.setId(rs.getInt("id"));
 
                 list.add(c);
             }
+
 
         } catch (SQLException e) {
             e.printStackTrace();
