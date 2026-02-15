@@ -22,7 +22,7 @@ public class CandidatService implements GlobalInterface<Candidat> {
         String sql = "INSERT INTO candidat (firstName, lastName, email, phone, educationLevel, skills, status, idJob) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+        try (PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, c.getFirstName());
             ps.setString(2, c.getLastName());
             ps.setString(3, c.getEmail());
@@ -37,9 +37,25 @@ public class CandidatService implements GlobalInterface<Candidat> {
                 ps.setNull(8, Types.INTEGER);
             }
 
-            ps.executeUpdate();
+            int affectedRows = ps.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new SQLException("Creating candidat failed, no rows affected.");
+            }
+
+            // Récupérer l'ID généré automatiquement
+            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    c.setId(generatedKeys.getInt(1));
+                    System.out.println("ID généré pour le candidat: " + c.getId());
+                } else {
+                    throw new SQLException("Creating candidat failed, no ID obtained.");
+                }
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
