@@ -56,13 +56,13 @@ public class AddFormBonusRuleController {
             return change;
         }));
 
-        txtCondition.setTextFormatter(new TextFormatter<>(change -> {
-            String newText = change.getControlNewText();
-            if (newText.length() > 500) {
-                return null;
+        // ⭐ Validation de la condition en temps réel (VERSION INVERSÉE)
+        txtCondition.textProperty().addListener((obs, oldValue, newValue) -> {
+            // Bloquer UNIQUEMENT les caractères vraiment interdits
+            if (newValue.matches(".*[@#$&*\\[\\]{}\\\\|`~^].*")) {
+                txtCondition.setText(oldValue);
             }
-            return change;
-        }));
+        });
     }
 
     public void setSalaire(Salaire salaire) {

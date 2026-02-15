@@ -1,7 +1,4 @@
-package org.example.util;
-
 import org.example.enums.BonusRuleStatus;
-import org.example.enums.SalaireStatus;
 import org.example.model.salaire.BonusRule;
 import org.example.model.salaire.Salaire;
 import org.example.services.salaire.BonusRuleService;
@@ -9,7 +6,6 @@ import org.example.services.salaire.SalaireService;
 import org.junit.jupiter.api.*;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
