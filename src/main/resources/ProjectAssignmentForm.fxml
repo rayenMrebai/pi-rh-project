@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="15"
+      xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="Controllers.ProjectAssignmentFormController">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Assign Employee to Project" styleClass="section-title"/>
+
+    <!-- Projects Table -->
+    <Label text="Select Project:" styleClass="details-label"/>
+
+    <TableView fx:id="projectsTable" prefHeight="150">
+        <columns>
+            <TableColumn fx:id="projIdCol" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="projNameCol" text="Project Name" prefWidth="200"/>
+            <TableColumn fx:id="projStatusCol" text="Status" prefWidth="100"/>
+        </columns>
+    </TableView>
+
+    <!-- Assignment Fields -->
+    <GridPane hgap="10" vgap="10">
+
+        <columnConstraints>
+            <ColumnConstraints minWidth="120"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label text="Employee:*"
+               GridPane.rowIndex="0"
+               GridPane.columnIndex="0"
+               styleClass="details-label"/>
+
+        <!-- IMPORTANT: NO GENERICS IN FXML -->
+        <ComboBox fx:id="employeeCombo"
+                  GridPane.rowIndex="0"
+                  GridPane.columnIndex="1"
+                  promptText="Select employee"/>
+
+        <Label text="Role:*"
+               GridPane.rowIndex="1"
+               GridPane.columnIndex="0"
+               styleClass="details-label"/>
+
+        <TextField fx:id="roleField"
+                   GridPane.rowIndex="1"
+                   GridPane.columnIndex="1"
+                   promptText="e.g. Developer"/>
+
+        <Label text="Allocation %:*"
+               GridPane.rowIndex="2"
+               GridPane.columnIndex="0"
+               styleClass="details-label"/>
+
+        <!-- FIXED SPINNER -->
+        <Spinner fx:id="allocationSpinner"
+                 GridPane.rowIndex="2"
+                 GridPane.columnIndex="1"
+                 editable="true"/>
+
+        <Label text="Assignment Start:*"
+               GridPane.rowIndex="3"
+               GridPane.columnIndex="0"
+               styleClass="details-label"/>
+
+        <DatePicker fx:id="startDatePicker"
+                    GridPane.rowIndex="3"
+                    GridPane.columnIndex="1"/>
+
+        <Label text="Assignment End:*"
+               GridPane.rowIndex="4"
+               GridPane.columnIndex="0"
+               styleClass="details-label"/>
+
+        <DatePicker fx:id="endDatePicker"
+                    GridPane.rowIndex="4"
+                    GridPane.columnIndex="1"/>
+
+    </GridPane>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cancel"
+                fx:id="cancelButton"
+                styleClass="secondary"/>
+
+        <Button text="Assign"
+                fx:id="assignButton"/>
+    </HBox>
+
+</VBox>
+

@@ -103,4 +103,35 @@ public class ProjectAssignmentService implements GlobalInterface<ProjectAssignme
             e.printStackTrace();
         }
     }
+
+    // Inside ProjectAssignmentService.java
+    public List<ProjectAssignment> getByProjectId(int projectId) {
+        List<ProjectAssignment> list = new ArrayList<>();
+        String sql = "SELECT pa.*, p.name as projectName FROM projectassignment pa " +
+                "LEFT JOIN project p ON pa.projectId = p.projectId " +
+                "WHERE pa.projectId = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, projectId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Project p = new Project();
+                p.setProjectId(rs.getInt("projectId"));
+                p.setName(rs.getString("projectName"));
+
+                ProjectAssignment a = new ProjectAssignment();
+                a.setIdAssignment(rs.getInt("idAssignment"));
+                a.setProject(p);
+                a.setEmployeeId(rs.getInt("employeeId"));
+                a.setRole(rs.getString("role"));
+                a.setAllocationRate(rs.getInt("allocationRate"));
+                a.setAssignedFrom(rs.getDate("assignedFrom") != null ? rs.getDate("assignedFrom").toLocalDate() : null);
+                a.setAssignedTo(rs.getDate("assignedTo") != null ? rs.getDate("assignedTo").toLocalDate() : null);
+
+                list.add(a);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 }
