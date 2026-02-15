@@ -8,67 +8,124 @@
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="Controllers.jobForm"
-            prefWidth="520" prefHeight="420"
-            style="-fx-background-color: #ffffff;">
+            prefWidth="560" prefHeight="640"
+            style="-fx-background-color: #f5f7fb;">
 
+    <!-- HEADER -->
     <top>
-        <HBox style="-fx-background-color: #f3f6ff;">
+        <VBox spacing="6"
+              style="-fx-background-color: linear-gradient(to right, #0B63CE, #0FA36B);">
             <padding>
-                <Insets top="14" right="14" bottom="14" left="14"/>
+                <Insets top="18" right="18" bottom="18" left="18"/>
             </padding>
-            <Label text="Job Form" style="-fx-font-weight: bold; -fx-font-size: 16;">
-                <font>
-                    <Font size="16"/>
-                </font>
-            </Label>
-        </HBox>
+
+            <Label text="Job Position"
+                   textFill="WHITE"
+                   style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+            <Label text="Add / Edit a position"
+                   textFill="WHITE"
+                   style="-fx-opacity: 0.85; -fx-font-size: 12;"/>
+        </VBox>
     </top>
 
+    <!-- CONTENT -->
     <center>
-        <VBox spacing="10">
+        <VBox spacing="16">
             <padding>
-                <Insets top="14" right="14" bottom="14" left="14"/>
+                <Insets top="18" right="18" bottom="18" left="18"/>
             </padding>
 
-            <GridPane hgap="10" vgap="10">
-                <columnConstraints>
-                    <ColumnConstraints percentWidth="30"/>
-                    <ColumnConstraints percentWidth="70"/>
-                </columnConstraints>
+            <VBox spacing="16"
+                  style="-fx-background-color: white; -fx-background-radius: 16; -fx-border-radius: 16; -fx-border-color: #e6e9f0;">
+                <padding>
+                    <Insets top="18" right="18" bottom="18" left="18"/>
+                </padding>
 
-                <Label text="Title:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                <TextField fx:id="tfTitle" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <!-- SECTION: BASIC INFO -->
+                <VBox spacing="10">
+                    <Label text="Basic Information"
+                           style="-fx-font-weight: bold; -fx-text-fill: #111827; -fx-font-size: 13;"/>
 
-                <Label text="Departement:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                <TextField fx:id="tfDepartement" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <GridPane hgap="12" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
 
-                <Label text="Employee Type:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <TextField fx:id="tfEmployeeType" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                        <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                            <Label text="Title" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                            <TextField fx:id="tfTitle"
+                                       promptText="e.g. Java Developer"
+                                       style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+                        </VBox>
 
-                <Label text="Status:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <ComboBox fx:id="cbStatus" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                        <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                            <Label text="Department" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                            <TextField fx:id="tfDepartement"
+                                       promptText="e.g. IT"
+                                       style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+                        </VBox>
 
-                <Label text="Posted At:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-                <DatePicker fx:id="dpPostedAt" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-            </GridPane>
+                        <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                            <Label text="Employee Type" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                            <TextField fx:id="tfEmployeeType"
+                                       promptText="e.g. Full-time"
+                                       style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+                        </VBox>
 
-            <Label text="Description:"/>
-            <TextArea fx:id="taDescription" prefRowCount="4" wrapText="true"/>
+                        <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <Label text="Status" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                            <ComboBox fx:id="cbStatus"
+                                      prefHeight="40"
+                                      style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 4 8 4 8;"/>
+                        </VBox>
+                    </GridPane>
+                </VBox>
+
+                <Separator style="-fx-opacity: 0.25;"/>
+
+                <!-- SECTION: DETAILS -->
+                <VBox spacing="10">
+                    <Label text="Details"
+                           style="-fx-font-weight: bold; -fx-text-fill: #111827; -fx-font-size: 13;"/>
+
+                    <VBox spacing="6">
+                        <Label text="Description" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                        <TextArea fx:id="taDescription"
+                                  promptText="Write a short description..."
+                                  prefRowCount="5"
+                                  wrapText="true"
+                                  style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+                    </VBox>
+
+                    <VBox spacing="6">
+                        <Label text="Posted At" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                        <DatePicker fx:id="dpPostedAt"
+                                    prefHeight="40"
+                                    style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 4 8 4 8;"/>
+                    </VBox>
+                </VBox>
+
+                <!-- BUTTONS -->
+                <HBox spacing="12">
+                    <Button fx:id="btnCancel"
+                            text="Cancel"
+                            onAction="#onCancel"
+                            HBox.hgrow="ALWAYS"
+                            maxWidth="Infinity"
+                            style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 10;"/>
+
+                    <Button fx:id="btnSave"
+                            text="Save"
+                            onAction="#onSave"
+                            HBox.hgrow="ALWAYS"
+                            maxWidth="Infinity"
+                            style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 10;"/>
+                </HBox>
+            </VBox>
 
         </VBox>
     </center>
-
-    <bottom>
-        <HBox spacing="10" alignment="CENTER_RIGHT">
-            <padding>
-                <Insets top="0" right="14" bottom="14" left="14"/>
-            </padding>
-
-            <Button fx:id="btnCancel" text="Cancel" onAction="#onCancel"
-                    style="-fx-background-color: #e5e7eb; -fx-font-weight: bold; -fx-background-radius: 10;"/>
-            <Button fx:id="btnSave" text="Save" onAction="#onSave"
-                    style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;"/>
-        </HBox>
-    </bottom>
 
 </BorderPane>

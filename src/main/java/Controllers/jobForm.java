@@ -5,6 +5,8 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.model.recrutement.JobPosition;
 import org.example.services.recrutement.JobPositionService;
+import javafx.scene.control.TextFormatter;
+
 
 import java.time.LocalDate;
 
@@ -33,7 +35,33 @@ public class jobForm {
 
         // date par défaut
         dpPostedAt.setValue(LocalDate.now());
+
+            cbStatus.getItems().addAll("Open", "Closed", "Paused");
+            cbStatus.getSelectionModel().select("Open");
+            dpPostedAt.setValue(LocalDate.now());
+
+            // ====== CONTROLES SAISIE ======
+            onlyLettersAndSpaces(tfTitle);
+            onlyLettersAndSpaces(tfDepartement);
+            onlyLettersSpacesAndDash(tfEmployeeType); // ex: "Full-time", "Part time"
+        }
+
+    private void onlyLettersAndSpaces(TextField tf) {
+        if (tf == null) return;
+        tf.setTextFormatter(new TextFormatter<String>(change -> {
+            String t = change.getControlNewText();
+            return t.matches("[a-zA-ZÀ-ÿ ]*") ? change : null;
+        }));
     }
+
+    private void onlyLettersSpacesAndDash(TextField tf) {
+        if (tf == null) return;
+        tf.setTextFormatter(new TextFormatter<String>(change -> {
+            String t = change.getControlNewText();
+            return t.matches("[a-zA-ZÀ-ÿ \\-]*") ? change : null;
+        }));
+    }
+
 
     // Appelé depuis manageRecruitment quand on veut modifier
     public void setJobToEdit(JobPosition job) {

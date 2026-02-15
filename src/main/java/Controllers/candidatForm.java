@@ -5,6 +5,9 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.model.recrutement.Candidat;
 import org.example.services.recrutement.CandidatService;
+import javafx.fxml.FXML;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 
 public class candidatForm {
 
@@ -12,7 +15,7 @@ public class candidatForm {
     @FXML private TextField tfLastName;
     @FXML private TextField tfEmail;
     @FXML private TextField tfPhone;
-    @FXML private TextField tfEducation;
+    @FXML private TextField tfEducationLevel;
     @FXML private TextArea taSkills;
     @FXML private ComboBox<String> cbStatus;
 
@@ -23,6 +26,31 @@ public class candidatForm {
     public void initialize() {
         cbStatus.getItems().addAll("NEW", "IN_REVIEW", "ACCEPTED", "REJECTED");
         cbStatus.getSelectionModel().selectFirst();
+        // 1) Phone : chiffres uniquement
+        tfPhone.setTextFormatter(new TextFormatter<String>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.matches("\\d*")) return change;
+            return null;
+        }));
+
+        // 2) First/Last name : lettres + espaces uniquement
+        onlyLetters(tfFirstName);
+        onlyLetters(tfLastName);
+
+        // 3) Education : lettres + chiffres + espaces + - + / (ex: "3ème année", "Bac+3")
+        tfEducationLevel.setTextFormatter(new TextFormatter<String>(change -> {
+            String t = change.getControlNewText();
+            if (t.matches("[a-zA-ZÀ-ÿ0-9 \\-+/]*")) return change;
+            return null;
+        }));
+
+    }
+    private void onlyLetters(TextField tf) {
+        tf.setTextFormatter(new TextFormatter<String>(change -> {
+            String t = change.getControlNewText();
+            if (t.matches("[a-zA-ZÀ-ÿ ]*")) return change;
+            return null;
+        }));
     }
 
     // appelé depuis manageRecruitment
@@ -33,7 +61,7 @@ public class candidatForm {
         tfLastName.setText(c.getLastName());
         tfEmail.setText(c.getEmail());
         tfPhone.setText(String.valueOf(c.getPhone()));
-        tfEducation.setText(c.getEducationLevel());
+        tfEducationLevel.setText(c.getEducationLevel());
         taSkills.setText(c.getSkills());
         cbStatus.setValue(c.getStatus());
     }
@@ -60,7 +88,7 @@ public class candidatForm {
             c.setLastName(tfLastName.getText());
             c.setEmail(tfEmail.getText());
             c.setPhone(phone);
-            c.setEducationLevel(tfEducation.getText());
+            c.setEducationLevel(tfEducationLevel.getText());
             c.setSkills(taSkills.getText());
             c.setStatus(cbStatus.getValue());
 
@@ -71,7 +99,7 @@ public class candidatForm {
             candidatToEdit.setLastName(tfLastName.getText());
             candidatToEdit.setEmail(tfEmail.getText());
             candidatToEdit.setPhone(phone);
-            candidatToEdit.setEducationLevel(tfEducation.getText());
+            candidatToEdit.setEducationLevel(tfEducationLevel.getText());
             candidatToEdit.setSkills(taSkills.getText());
             candidatToEdit.setStatus(cbStatus.getValue());
 
