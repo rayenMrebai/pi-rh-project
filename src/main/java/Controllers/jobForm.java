@@ -24,6 +24,7 @@ public class jobForm {
 
     // si != null => EDIT
     private JobPosition jobToEdit;
+    private Runnable onSaveCallback;
 
     @FXML
     public void initialize() {
@@ -96,6 +97,7 @@ public class jobForm {
             }
 
             close();
+            if (onSaveCallback != null) onSaveCallback.run();
 
         } catch (RuntimeException ex) {
             System.out.println("EXCEPTION: " + ex.getMessage());
@@ -106,6 +108,11 @@ public class jobForm {
             a.setContentText(ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage());
             a.showAndWait();
         }
+    }
+
+
+    public void setOnSaveCallback(Runnable callback) {
+        this.onSaveCallback = callback;
     }
     @FXML
     private void onCancel() {

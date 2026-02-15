@@ -116,25 +116,51 @@ public class manageRecruitment {
 
     @FXML
     private void onAddJob() {
-        openPopup("/job_form.fxml", "Add Job");
-        loadJobs();
+        openJobForm(null);   // ADD
     }
 
     @FXML
     private void onEditJob() {
         JobPosition selected = jobTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showAlert("Select a job first.");
+            showAlert("Sélectionne un Job d'abord.");
             return;
         }
+        openJobForm(selected); // EDIT
+    }
 
-        openPopupWithData("/job_form.fxml", "Edit Job", controller -> {
-            if (controller instanceof jobForm j) {
-                j.setJobToEdit(selected);
+    private void openJobForm(JobPosition job) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/job_form.fxml"));
+
+            // IMPORTANT: si ça renvoie null, ton chemin est faux
+            if (loader.getLocation() == null) {
+                showAlert("ERREUR: job_form.fxml introuvable. Mets-le dans src/main/resources !");
+                return;
             }
-        });
 
-        loadJobs();
+            Parent root = loader.load();
+
+            jobForm controller = loader.getController();
+            if (controller == null) {
+                showAlert("ERREUR: Controller jobForm non trouvé. Vérifie fx:controller dans job_form.fxml");
+                return;
+            }
+
+            if (job != null) controller.setJobToEdit(job);
+
+            Stage stage = new Stage();
+            stage.setTitle(job == null ? "Add Job" : "Edit Job");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+            loadJobs();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur ouverture form job: " + e.getMessage());
+        }
     }
 
 
