@@ -8,14 +8,14 @@
 <?import javafx.scene.Cursor?>
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.Controllers.AddFormSkillController"
-            prefHeight="600.0" prefWidth="900.0"
+            fx:controller="org.example.Controllers.AddFormTrainingProgramController"
+            prefHeight="700.0" prefWidth="900.0"
             style="-fx-background-color: #ffffff;">
 
     <!-- BARRE DE NAVIGATION SUPÉRIEURE -->
     <top>
         <HBox style="-fx-background-color: #2c3e50; -fx-padding: 15;" spacing="20" alignment="CENTER_LEFT">
-            <Label text="Gestion des Compétences" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;">
+            <Label text="Gestion des Formations" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;">
                 <font>
                     <Font name="System Bold" size="18.0"/>
                 </font>
@@ -39,7 +39,7 @@
             </padding>
 
             <!-- Titre du formulaire -->
-            <Label text="Ajouter une nouvelle compétence"
+            <Label text="Ajouter un nouveau programme de formation"
                    GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2"
                    style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
                 <font>
@@ -51,13 +51,13 @@
             <Separator GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2"
                        style="-fx-background-color: #bdc3c7;"/>
 
-            <!-- Champ Nom -->
-            <Label text="Nom de la compétence *"
+            <!-- Champ Titre -->
+            <Label text="Titre de la formation *"
                    GridPane.columnIndex="0" GridPane.rowIndex="2"
                    style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-            <TextField fx:id="nomField"
+            <TextField fx:id="titleField"
                        GridPane.columnIndex="1" GridPane.rowIndex="2"
-                       promptText="Ex: Java, Python, Leadership..."
+                       promptText="Ex: Formation Spring Boot, Leadership Avancé..."
                        prefWidth="400"
                        style="-fx-font-size: 14px; -fx-pref-height: 40;"/>
 
@@ -72,36 +72,54 @@
             </Label>
             <TextArea fx:id="descriptionField"
                       GridPane.columnIndex="1" GridPane.rowIndex="3"
-                      promptText="Décrivez la compétence de manière détaillée..."
+                      promptText="Décrivez le programme de formation en détail..."
                       prefHeight="120.0"
                       prefWidth="400"
                       wrapText="true"
                       style="-fx-font-size: 14px;"/>
 
-            <!-- Champ Catégorie -->
-            <Label text="Catégorie *"
+            <!-- Champ Durée -->
+            <Label text="Durée (en heures) *"
                    GridPane.columnIndex="0" GridPane.rowIndex="4"
                    style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-            <ComboBox fx:id="categorieCombo"
-                      GridPane.columnIndex="1" GridPane.rowIndex="4"
-                      promptText="Sélectionnez une catégorie"
+            <Spinner fx:id="durationSpinner"
+                     GridPane.columnIndex="1" GridPane.rowIndex="4"
+                     prefWidth="150"
+                     editable="true"
+                     style="-fx-pref-height: 40;"/>
+
+            <!-- Champ Date de début -->
+            <Label text="Date de début *"
+                   GridPane.columnIndex="0" GridPane.rowIndex="5"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+            <DatePicker fx:id="startDatePicker"
+                        GridPane.columnIndex="1" GridPane.rowIndex="5"
+                        prefWidth="400"
+                        promptText="Sélectionnez la date de début"
+                        style="-fx-pref-height: 40;"/>
+
+            <!-- Champ Date de fin -->
+            <Label text="Date de fin *"
+                   GridPane.columnIndex="0" GridPane.rowIndex="6"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+            <DatePicker fx:id="endDatePicker"
+                        GridPane.columnIndex="1" GridPane.rowIndex="6"
+                        prefWidth="400"
+                        promptText="Sélectionnez la date de fin"
+                        style="-fx-pref-height: 40;"/>
+
+            <!-- Champ Type -->
+            <Label text="Type de formation *"
+                   GridPane.columnIndex="0" GridPane.rowIndex="7"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+            <ComboBox fx:id="typeCombo"
+                      GridPane.columnIndex="1" GridPane.rowIndex="7"
+                      promptText="Sélectionnez le type"
                       prefWidth="400"
                       style="-fx-font-size: 14px; -fx-pref-height: 40;"/>
 
-            <!-- Champ Niveau requis -->
-            <Label text="Niveau requis *"
-                   GridPane.columnIndex="0" GridPane.rowIndex="5"
-                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
-            <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="5" alignment="CENTER_LEFT">
-                <Spinner fx:id="levelSpinner"
-                         prefWidth="150"
-                         editable="true"
-                         style="-fx-pref-height: 40;"/>
-                <Label text="(de 0 à 5)" style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"/>
-            </HBox>
-
             <!-- Séparateur -->
-            <Separator GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2"
+            <Separator GridPane.columnIndex="0" GridPane.rowIndex="8" GridPane.columnSpan="2"
                        style="-fx-background-color: #bdc3c7;">
                 <GridPane.margin>
                     <Insets top="10" bottom="10"/>
@@ -110,17 +128,17 @@
 
             <!-- Message de statut -->
             <Label fx:id="statusLabel"
-                   GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.columnSpan="2"
+                   GridPane.columnIndex="0" GridPane.rowIndex="9" GridPane.columnSpan="2"
                    style="-fx-font-size: 14px; -fx-font-weight: bold;"
                    wrapText="true"
                    alignment="CENTER"/>
 
             <!-- Bouton Ajouter -->
-            <HBox spacing="15" GridPane.columnIndex="1" GridPane.rowIndex="8" alignment="CENTER_RIGHT">
+            <HBox spacing="15" GridPane.columnIndex="1" GridPane.rowIndex="10" alignment="CENTER_RIGHT">
                 <Button fx:id="ajouterBtn"
-                        text="Ajouter la compétence"
+                        text="Ajouter la formation"
                         onAction="#handleAjouter"
-                        prefWidth="200"
+                        prefWidth="250"
                         prefHeight="45"
                         style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 5;">
                     <cursor>

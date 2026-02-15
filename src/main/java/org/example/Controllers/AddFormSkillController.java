@@ -14,7 +14,7 @@ import org.example.services.SkillService;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class AddFormSkill implements Initializable {
+public class AddFormSkillController implements Initializable {
 
     @FXML private TextField nomField;
     @FXML private TextArea descriptionField;

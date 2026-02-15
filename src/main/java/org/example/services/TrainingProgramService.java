@@ -3,7 +3,6 @@ package org.example.services;
 import org.example.interfaces.GlobalInterface;
 import org.example.model.formation.TrainingProgram;
 import org.example.util.DatabaseConnection;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

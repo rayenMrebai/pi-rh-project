@@ -13,7 +13,7 @@
 
     <BorderPane xmlns="http://javafx.com/javafx"
                 xmlns:fx="http://javafx.com/fxml"
-                fx:controller="org.example.Controllers.UpdateFormSkill"
+                fx:controller="org.example.Controllers.UpdateFormSkillController"
                 prefHeight="600.0" prefWidth="900.0"
                 style="-fx-background-color: #ffffff;">
 

@@ -8,7 +8,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="org.example.Controllers.ListSkillsController"
+            fx:controller="org.example.Controllers.ListTrainingProgramsController"
             prefHeight="700.0" prefWidth="1200.0"
             style="-fx-background-color: #ffffff;">
 
@@ -25,7 +25,7 @@
                     </cursor>
                 </Button>
 
-                <Label text="Gestion des Compétences"
+                <Label text="Gestion des Formations"
                        style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;">
                     <font>
                         <Font name="System Bold" size="22.0"/>
@@ -33,13 +33,13 @@
                 </Label>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="countLabel"
-                       text="0 compétence(s)"
+                       text="0 formation(s)"
                        style="-fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold;"/>
             </HBox>
 
             <!-- Barre d'outils -->
             <HBox style="-fx-background-color: #34495e; -fx-padding: 15;" spacing="15" alignment="CENTER_LEFT">
-                <Button text="➕ Nouvelle Compétence"
+                <Button text="➕ Nouvelle Formation"
                         onAction="#handleGoToAdd"
                         prefWidth="180"
                         prefHeight="40"
@@ -52,12 +52,12 @@
                 <Separator orientation="VERTICAL"/>
 
                 <TextField fx:id="searchField"
-                           promptText="🔍 Rechercher par nom ou description..."
+                           promptText="🔍 Rechercher par titre ou description..."
                            prefWidth="350"
                            style="-fx-pref-height: 35; -fx-font-size: 13px;"/>
 
-                <ComboBox fx:id="filterCategorie"
-                          promptText="Filtrer par catégorie"
+                <ComboBox fx:id="filterType"
+                          promptText="Filtrer par type"
                           prefWidth="180"
                           style="-fx-pref-height: 35; -fx-font-size: 13px;"/>
 
@@ -84,13 +84,13 @@
             </padding>
 
             <!-- ListView -->
-            <ListView fx:id="skillListView" VBox.vgrow="ALWAYS">
+            <ListView fx:id="trainingListView" VBox.vgrow="ALWAYS">
                 <placeholder>
                     <VBox alignment="CENTER" spacing="10">
-                        <Label text="📋" style="-fx-font-size: 48px;"/>
-                        <Label text="Aucune compétence disponible"
+                        <Label text="📚" style="-fx-font-size: 48px;"/>
+                        <Label text="Aucune formation disponible"
                                style="-fx-text-fill: #95a5a6; -fx-font-size: 16px;"/>
-                        <Label text="Cliquez sur 'Nouvelle Compétence' pour en ajouter une"
+                        <Label text="Cliquez sur 'Nouvelle Formation' pour en ajouter une"
                                style="-fx-text-fill: #bdc3c7; -fx-font-size: 13px;"/>
                     </VBox>
                 </placeholder>
@@ -130,7 +130,7 @@
 
             <!-- Footer -->
             <HBox style="-fx-background-color: #2c3e50; -fx-padding: 10;" alignment="CENTER">
-                <Label text="© 2026 Système de Gestion RH - Module Compétences"
+                <Label text="© 2026 Système de Gestion RH - Module Formations"
                        style="-fx-text-fill: #95a5a6; -fx-font-size: 11px;"/>
             </HBox>
         </VBox>

@@ -11,7 +11,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -24,7 +23,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class ListSkills implements Initializable {
+public class ListSkillsController implements Initializable {
 
     @FXML private ListView<Skill> skillListView;
     @FXML private Label countLabel;
@@ -67,6 +66,19 @@ public class ListSkills implements Initializable {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void handleGoToHome() {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/Home.fxml"));
+            Stage stage = (Stage) skillListView.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Accueil - Système de Gestion RH");
+            stage.setMaximized(false);
+        } catch (Exception e) {
+            System.err.println("Erreur lors du retour à l'accueil : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     @FXML
     private void handleRafraichir() {
@@ -88,7 +100,7 @@ public class ListSkills implements Initializable {
             Parent root = loader.load();
 
             // IMPORTANT : Récupérer le controller APRÈS avoir chargé le FXML
-            UpdateFormSkill controller = loader.getController();
+            UpdateFormSkillController controller = loader.getController();
 
             // Passer le skill au controller pour pré-remplir les champs
             controller.setSkill(selectedSkill);

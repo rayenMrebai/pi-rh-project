@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<?import javafx.scene.Cursor?>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.Controllers.UpdateFormTrainingProgramController"
+            prefHeight="700.0" prefWidth="900.0"
+            style="-fx-background-color: #ffffff;">
+
+    <!-- BARRE DE NAVIGATION SUPÉRIEURE -->
+    <top>
+        <HBox style="-fx-background-color: #2c3e50; -fx-padding: 15;" spacing="20" alignment="CENTER_LEFT">
+            <Label text="Gestion des Formations" style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;">
+                <font>
+                    <Font name="System Bold" size="18.0"/>
+                </font>
+            </Label>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="← Retour à la liste"
+                    onAction="#handleRetourListe"
+                    style="-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 10 20;">
+                <cursor>
+                    <Cursor fx:constant="HAND"/>
+                </cursor>
+            </Button>
+        </HBox>
+    </top>
+
+    <!-- CONTENU PRINCIPAL -->
+    <center>
+        <GridPane hgap="30" vgap="20" alignment="CENTER">
+            <padding>
+                <Insets top="40" right="150" bottom="40" left="150"/>
+            </padding>
+
+            <!-- Titre du formulaire -->
+            <Label text="Modifier le programme de formation"
+                   GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2"
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;">
+                <font>
+                    <Font name="System Bold" size="24.0"/>
+                </font>
+            </Label>
+
+            <!-- ID (lecture seule) -->
+            <Label text="ID"
+                   GridPane.columnIndex="0" GridPane.rowIndex="1"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+            <TextField fx:id="idField"
+                       GridPane.columnIndex="1" GridPane.rowIndex="1"
+                       editable="false"
+                       prefWidth="400"
+                       style="-fx-font-size: 14px; -fx-pref-height: 40; -fx-background-color: #ecf0f1;"/>
+
+            <!-- Séparateur -->
+            <Separator GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.columnSpan="2"
+                       style="-fx-background-color: #bdc3c7;"/>
+
+            <!-- Champ Titre -->
+            <Label text="Titre de la formation *"
+                   GridPane.columnIndex="0" GridPane.rowIndex="3"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+            <TextField fx:id="titleField"
+                       GridPane.columnIndex="1" GridPane.rowIndex="3"
+                       promptText="Ex: Formation Spring Boot, Leadership Avancé..."
+                       prefWidth="400"
+                       style="-fx-font-size: 14px; -fx-pref-height: 40;"/>
+
+            <!-- Champ Description -->
+            <Label text="Description *"
+                   GridPane.columnIndex="0" GridPane.rowIndex="4"
+                   GridPane.valignment="TOP"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;">
+                <padding>
+                    <Insets top="10"/>
+                </padding>
+            </Label>
+            <TextArea fx:id="descriptionField"
+                      GridPane.columnIndex="1" GridPane.rowIndex="4"
+                      promptText="Décrivez le programme de formation en détail..."
+                      prefHeight="120.0"
+                      prefWidth="400"
+                      wrapText="true"
+                      style="-fx-font-size: 14px;"/>
+
+            <!-- Champ Durée -->
+            <Label text="Durée (en heures) *"
+                   GridPane.columnIndex="0" GridPane.rowIndex="5"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+            <Spinner fx:id="durationSpinner"
+                     GridPane.columnIndex="1" GridPane.rowIndex="5"
+                     prefWidth="150"
+                     editable="true"
+                     style="-fx-pref-height: 40;"/>
+
+            <!-- Champ Date de début -->
+            <Label text="Date de début *"
+                   GridPane.columnIndex="0" GridPane.rowIndex="6"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+            <DatePicker fx:id="startDatePicker"
+                        GridPane.columnIndex="1" GridPane.rowIndex="6"
+                        prefWidth="400"
+                        style="-fx-pref-height: 40;"/>
+
+            <!-- Champ Date de fin -->
+            <Label text="Date de fin *"
+                   GridPane.columnIndex="0" GridPane.rowIndex="7"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+            <DatePicker fx:id="endDatePicker"
+                        GridPane.columnIndex="1" GridPane.rowIndex="7"
+                        prefWidth="400"
+                        style="-fx-pref-height: 40;"/>
+
+            <!-- Champ Type -->
+            <Label text="Type de formation *"
+                   GridPane.columnIndex="0" GridPane.rowIndex="8"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+            <ComboBox fx:id="typeCombo"
+                      GridPane.columnIndex="1" GridPane.rowIndex="8"
+                      prefWidth="400"
+                      style="-fx-font-size: 14px; -fx-pref-height: 40;"/>
+
+            <!-- Séparateur -->
+            <Separator GridPane.columnIndex="0" GridPane.rowIndex="9" GridPane.columnSpan="2"
+                       style="-fx-background-color: #bdc3c7;">
+                <GridPane.margin>
+                    <Insets top="10" bottom="10"/>
+                </GridPane.margin>
+            </Separator>
+
+            <!-- Message de statut -->
+            <Label fx:id="statusLabel"
+                   GridPane.columnIndex="0" GridPane.rowIndex="10" GridPane.columnSpan="2"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold;"
+                   wrapText="true"
+                   alignment="CENTER"/>
+
+            <!-- Boutons -->
+            <HBox spacing="15" GridPane.columnIndex="1" GridPane.rowIndex="11" alignment="CENTER_RIGHT">
+                <Button fx:id="annulerBtn"
+                        text="Annuler"
+                        onAction="#handleRetourListe"
+                        prefWidth="150"
+                        prefHeight="45"
+                        style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 5;">
+                    <cursor>
+                        <Cursor fx:constant="HAND"/>
+                    </cursor>
+                </Button>
+
+                <Button fx:id="modifierBtn"
+                        text="Enregistrer les modifications"
+                        onAction="#handleModifier"
+                        prefWidth="250"
+                        prefHeight="45"
+                        style="-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 5;">
+                    <cursor>
+                        <Cursor fx:constant="HAND"/>
+                    </cursor>
+                    <font>
+                        <Font name="System Bold" size="15.0"/>
+                    </font>
+                </Button>
+            </HBox>
+
+        </GridPane>
+    </center>
+
+    <!-- PIED DE PAGE -->
+    <bottom>
+        <HBox style="-fx-background-color: #ecf0f1; -fx-padding: 15;" alignment="CENTER">
+            <Label text="© 2026 Système de Gestion RH - Tous droits réservés"
+                   style="-fx-text-fill: #7f8c8d; -fx-font-size: 12px;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
