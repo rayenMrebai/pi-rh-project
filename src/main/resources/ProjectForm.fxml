@@ -4,46 +4,83 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox spacing="15" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.ProjectFormController">
+<VBox spacing="20" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="Controllers.ProjectFormController"
+      style="-fx-background-color: #f8fafc; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
 
     <padding>
-        <Insets top="20" right="20" bottom="20" left="20" />
+        <Insets top="25" right="25" bottom="25" left="25" />
     </padding>
 
-    <Label text="Project Details" styleClass="section-title" />
+    <!-- Header inspiré du dashboard -->
+    <HBox alignment="CENTER_LEFT" spacing="10"
+          style="-fx-background-color: linear-gradient(to right, #0b1e33, #1e3a5f); -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 3); -fx-padding: 15 20;">
+        <Label text="📁 Project Details"
+               style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: white; -fx-font-family: 'Segoe UI Semibold';"/>
+    </HBox>
 
-    <GridPane hgap="10" vgap="10">
-        <columnConstraints>
-            <ColumnConstraints minWidth="100" />
-            <ColumnConstraints hgrow="ALWAYS" />
-        </columnConstraints>
+    <!-- Formulaire dans une carte -->
+    <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,50,100,0.1), 10, 0, 0, 5); -fx-padding: 20;">
 
-        <Label text="Project ID:" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="details-label" />
-        <TextField fx:id="idField" GridPane.rowIndex="0" GridPane.columnIndex="1" editable="false" />
+        <GridPane hgap="15" vgap="12">
+            <columnConstraints>
+                <ColumnConstraints minWidth="120" />
+                <ColumnConstraints hgrow="ALWAYS" />
+            </columnConstraints>
 
-        <Label text="Project Name:*" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="details-label" />
-        <TextField fx:id="nameField" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+            <!-- Project ID (read-only) -->
+            <Label text="🆔 Project ID:" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                   style="-fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            <TextField fx:id="idField" GridPane.rowIndex="0" GridPane.columnIndex="1" editable="false"
+                       style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #d1d5db; -fx-background-color: #f1f5f9; -fx-padding: 8;"/>
 
-        <Label text="Description:" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="details-label" />
-        <TextArea fx:id="descriptionField" GridPane.rowIndex="2" GridPane.columnIndex="1" prefRowCount="3" wrapText="true" />
+            <!-- Project Name -->
+            <Label text="📛 Project Name:*" GridPane.rowIndex="1" GridPane.columnIndex="0"
+                   style="-fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            <TextField fx:id="nameField" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                       promptText="Enter project name"
+                       style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #d1d5db; -fx-background-color: white; -fx-padding: 8;"/>
 
-        <Label text="Start Date:*" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="details-label" />
-        <DatePicker fx:id="startDatePicker" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+            <!-- Description -->
+            <Label text="📝 Description:" GridPane.rowIndex="2" GridPane.columnIndex="0"
+                   style="-fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            <TextArea fx:id="descriptionField" GridPane.rowIndex="2" GridPane.columnIndex="1"
+                      prefRowCount="3" wrapText="true" promptText="Enter project description"
+                      style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #d1d5db; -fx-background-color: white; -fx-padding: 8;"/>
 
-        <Label text="End Date:*" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="details-label" />
-        <DatePicker fx:id="endDatePicker" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+            <!-- Start Date -->
+            <Label text="📅 Start Date:*" GridPane.rowIndex="3" GridPane.columnIndex="0"
+                   style="-fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            <DatePicker fx:id="startDatePicker" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                        style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #d1d5db; -fx-background-color: white;"/>
 
-        <Label text="Status:*" GridPane.rowIndex="5" GridPane.columnIndex="0" styleClass="details-label" />
-        <ComboBox fx:id="statusCombo" GridPane.rowIndex="5" GridPane.columnIndex="1" promptText="Select status" />
+            <!-- End Date -->
+            <Label text="📆 End Date:*" GridPane.rowIndex="4" GridPane.columnIndex="0"
+                   style="-fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            <DatePicker fx:id="endDatePicker" GridPane.rowIndex="4" GridPane.columnIndex="1"
+                        style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #d1d5db; -fx-background-color: white;"/>
 
-        <Label text="Budget:*" GridPane.rowIndex="6" GridPane.columnIndex="0" styleClass="details-label" />
-        <TextField fx:id="budgetField" GridPane.rowIndex="6" GridPane.columnIndex="1" promptText="0.00" />
-    </GridPane>
+            <!-- Status -->
+            <Label text="⚙️ Status:*" GridPane.rowIndex="5" GridPane.columnIndex="0"
+                   style="-fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            <ComboBox fx:id="statusCombo" GridPane.rowIndex="5" GridPane.columnIndex="1"
+                      promptText="Select status"
+                      style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #d1d5db; -fx-background-color: white; -fx-padding: 5;"/>
 
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button text="Cancel" fx:id="cancelButton" styleClass="secondary" />
-        <Button text="Save Project" fx:id="saveButton" />
+            <!-- Budget -->
+            <Label text="💰 Budget:*" GridPane.rowIndex="6" GridPane.columnIndex="0"
+                   style="-fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-font-size: 13;"/>
+            <TextField fx:id="budgetField" GridPane.rowIndex="6" GridPane.columnIndex="1"
+                       promptText="0.00"
+                       style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #d1d5db; -fx-background-color: white; -fx-padding: 8;"/>
+        </GridPane>
+    </VBox>
+
+    <!-- Boutons d'action -->
+    <HBox spacing="15" alignment="CENTER_RIGHT">
+        <Button text="Cancel" fx:id="cancelButton"
+                style="-fx-background-color: #e2e8f0; -fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-font-size: 14; -fx-background-radius: 30; -fx-padding: 10 25; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 2);"/>
+        <Button text="Save Project" fx:id="saveButton"
+                style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14; -fx-background-radius: 30; -fx-padding: 10 30; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 2);"/>
     </HBox>
 </VBox>
-
-

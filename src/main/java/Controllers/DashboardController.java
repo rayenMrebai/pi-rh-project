@@ -50,6 +50,8 @@ public class DashboardController implements Initializable {
     @FXML private Label statusLabel;
 
     @FXML private Button addProjectButton;
+    @FXML private Button editProjectButton;          // NOUVEAU
+    @FXML private Button deleteProjectButton;        // NOUVEAU
     @FXML private Button assignEmployeeButton;
     @FXML private Button updateAssignmentButton;
     @FXML private Button removeAssignmentButton;
@@ -132,6 +134,16 @@ public class DashboardController implements Initializable {
         });
 
         addProjectButton.setOnAction(e -> openProjectForm(null));
+        editProjectButton.setOnAction(e -> {
+            Project selected = projectsTable.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                openProjectForm(selected);   // Ouvre le formulaire pré-rempli
+            } else {
+                showAlert("No selection", "Please select a project to edit.");
+            }
+        });
+        deleteProjectButton.setOnAction(e -> deleteSelectedProject());
+
         assignEmployeeButton.setOnAction(e -> openAssignmentForm(projectsTable.getSelectionModel().getSelectedItem(), null));
         updateAssignmentButton.setOnAction(e -> {
             ProjectAssignment selected = assignmentsTable.getSelectionModel().getSelectedItem();
@@ -167,6 +179,34 @@ public class DashboardController implements Initializable {
         } else {
             showAlert("No selection", "Please select an assignment to remove.");
         }
+    }
+
+    // Nouvelle méthode : suppression d'un projet avec ses affectations
+    private void deleteSelectedProject() {
+        Project selected = projectsTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("No selection", "Please select a project to delete.");
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Delete project '" + selected.getName() + "'?\nThis will also delete all its assignments.",
+                ButtonType.YES, ButtonType.NO);
+        confirm.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.YES) {
+                // Supprimer toutes les affectations de ce projet
+                List<ProjectAssignment> assignments = assignmentService.getByProjectId(selected.getProjectId());
+                for (ProjectAssignment a : assignments) {
+                    assignmentService.delete(a.getIdAssignment());
+                }
+                // Supprimer le projet
+                projectService.delete(selected.getProjectId());
+
+                // Rafraîchir la vue
+                refreshAfterSave();
+                updateStatus("Project and its assignments deleted.");
+            }
+        });
     }
 
     private void openProjectForm(Project project) {
