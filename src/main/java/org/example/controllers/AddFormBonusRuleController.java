@@ -103,7 +103,7 @@ public class AddFormBonusRuleController {
     }
 
     /**
-     * ⭐ VALIDATION COMPLÈTE
+     * ⭐ VALIDATION COMPLÈTE avec contrôle des caractères spéciaux
      */
     private boolean validateInputs() {
         StringBuilder errors = new StringBuilder();
@@ -113,7 +113,11 @@ public class AddFormBonusRuleController {
             errors.append("• Le nom de la règle est obligatoire\n");
         } else {
             String nomRegle = txtNomRegle.getText().trim();
-            if (nomRegle.length() < 3) {
+
+            // ⭐ Vérifier les caractères valides (lettres, chiffres, espaces, tirets)
+            if (!nomRegle.matches("^[a-zA-ZÀ-ÿ0-9\\s-]+$")) {
+                errors.append("• Le nom ne peut contenir que des lettres, chiffres, espaces et tirets\n");
+            } else if (nomRegle.length() < 3) {
                 errors.append("• Le nom doit contenir au moins 3 caractères\n");
             } else if (nomRegle.length() > 100) {
                 errors.append("• Le nom ne peut pas dépasser 100 caractères\n");
@@ -141,7 +145,11 @@ public class AddFormBonusRuleController {
             errors.append("• La condition est obligatoire\n");
         } else {
             String condition = txtCondition.getText().trim();
-            if (condition.length() < 5) {
+
+            // ⭐ Vérifier les caractères valides (lettres, chiffres, espaces, ponctuation de base)
+            if (!condition.matches("^[a-zA-ZÀ-ÿ0-9\\s.,;:!?'\"()\\->=<%]+$")) {
+                errors.append("• La condition contient des caractères non autorisés\n");
+            } else if (condition.length() < 5) {
                 errors.append("• La condition doit contenir au moins 5 caractères\n");
             } else if (condition.length() > 500) {
                 errors.append("• La condition ne peut pas dépasser 500 caractères\n");
