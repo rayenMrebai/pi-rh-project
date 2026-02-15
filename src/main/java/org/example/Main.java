@@ -25,11 +25,11 @@ public class Main {
 
         // CREATE (2 exemples)
         System.out.println("--- CREATE ---");
-        Skill skill1 = new Skill("symfony", "tech web", "technique");
+        Skill skill1 = new Skill("symfony", "tech web", "technique",2);
         skill1.setLevelRequired(3);
         skillService.create(skill1);
 
-        Skill skill2 = new Skill("Communication", "Compétence relationnelle", "soft");
+        Skill skill2 = new Skill("Communication", "Compétence relationnelle", "soft",3);
         skill2.setLevelRequired(2);
         skillService.create(skill2);
 

@@ -73,16 +73,35 @@ public class ListSkills implements Initializable {
         chargerSkills();
         afficherMessage("Liste rafraîchie avec succès", "info");
     }
-
     @FXML
     private void handleModifier() {
         Skill selectedSkill = skillListView.getSelectionModel().getSelectedItem();
+
         if (selectedSkill == null) {
-            afficherMessage("Veuillez sélectionner une compétence à modifier", "warning");
+            afficherMessage("⚠️ Veuillez sélectionner une compétence à modifier", "warning");
             return;
         }
 
-        afficherMessage("Fonctionnalité de modification en cours de développement", "info");
+        try {
+            // Charger le FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/UpdateFormSkill.fxml"));
+            Parent root = loader.load();
+
+            // IMPORTANT : Récupérer le controller APRÈS avoir chargé le FXML
+            UpdateFormSkill controller = loader.getController();
+
+            // Passer le skill au controller pour pré-remplir les champs
+            controller.setSkill(selectedSkill);
+
+            // Changer de scène
+            Stage stage = (Stage) skillListView.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Modifier une Compétence - " + selectedSkill.getNom());
+
+        } catch (Exception e) {
+            afficherMessage("❌ Erreur lors de l'ouverture du formulaire", "error");
+            e.printStackTrace();
+        }
     }
 
     @FXML
