@@ -31,7 +31,6 @@ public class CandidatService implements GlobalInterface<Candidat> {
             ps.setString(6, c.getSkills());
             ps.setString(7, c.getStatus());
 
-            // FK : on stocke seulement l'idJob (pas de jointure)
             if (c.getJobPosition() != null && c.getJobPosition().getIdJob() > 0) {
                 ps.setInt(8, c.getJobPosition().getIdJob());
             } else {
@@ -47,18 +46,14 @@ public class CandidatService implements GlobalInterface<Candidat> {
     @Override
     public List<Candidat> getAll() {
         List<Candidat> list = new ArrayList<>();
-        String sql = "SELECT * FROM candidat";
+        String sql = "SELECT id, firstName, lastName, email, phone, educationLevel, skills, status, idJob FROM candidat";
 
         try (Statement st = cnx.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
 
-                Integer idJob = null;
-                Object raw = rs.getObject("idJob"); // null si la colonne est NULL
-                if (raw != null) {
-                    idJob = (Integer) raw;
-                }
+                Integer idJob = (Integer) rs.getObject("idJob"); // null si NULL
 
                 JobPosition jp = null;
                 if (idJob != null) {
@@ -67,7 +62,6 @@ public class CandidatService implements GlobalInterface<Candidat> {
                 }
 
                 Candidat c = new Candidat(
-
                         rs.getString("firstName"),
                         rs.getString("lastName"),
                         rs.getString("email"),
@@ -77,6 +71,9 @@ public class CandidatService implements GlobalInterface<Candidat> {
                         rs.getString("status"),
                         jp
                 );
+
+                // ✅ FIX IMPORTANT: remplir l'id du candidat
+                c.setId(rs.getInt("id"));
 
                 list.add(c);
             }

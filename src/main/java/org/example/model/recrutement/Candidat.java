@@ -35,6 +35,10 @@ public class Candidat {
     public int getId() {
         return id;
     }
+    public String getFullName() {
+        return (firstName == null ? "" : firstName) + " " + (lastName == null ? "" : lastName);
+    }
+
 
     public void setId(int id) {
         this.id = id;

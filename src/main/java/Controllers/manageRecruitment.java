@@ -108,13 +108,21 @@ public class manageRecruitment {
     }
 
     @FXML
+
     private void onDeleteCandidat() {
         Candidat selected = candidatTable.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            candidatService.delete(selected.getId());
-            loadCandidats();
+
+        if (selected == null) {
+            System.out.println("Aucun candidat sélectionné !");
+            return;
         }
+
+        System.out.println("ID candidat sélectionné = " + selected.getId());
+
+        candidatService.delete(selected.getId());
+        loadCandidats();
     }
+
 
     @FXML
     private void onEditCandidat() {
