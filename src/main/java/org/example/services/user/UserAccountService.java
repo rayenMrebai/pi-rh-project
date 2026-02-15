@@ -34,6 +34,31 @@ public class UserAccountService implements GlobalInterface<UserAccount> {
         return users;
     }
 
+    /**
+     * ⭐ Récupère un utilisateur par son ID
+     */
+    public UserAccount getById(int id) {
+        String sql = "SELECT id, name, email FROM useraccount WHERE id = ?";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return new UserAccount(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getString("email")
+                );
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Erreur getById user: " + e.getMessage());
+        }
+
+        return null;
+    }
+
     @Override
     public void create(UserAccount user) {
         // À implémenter si nécessaire
