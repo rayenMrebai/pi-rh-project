@@ -1,4 +1,8 @@
 package org.example.model.formation;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class Skill {
     //Attributs
     private int id;
@@ -6,6 +10,7 @@ public class Skill {
     private String description;
     private  String categorie ;
     private int levelRequired;
+    private Integer trainingProgramId;
     //constructeurs
     public Skill() {}
     public Skill(String nom, String description, String categorie, int levelRequired) {
@@ -41,6 +46,9 @@ public class Skill {
     public int getLevelRequired() {
         return levelRequired;
     }
+    public Integer getTrainingProgramId() {
+        return trainingProgramId;
+    }
     //setters
 
     public void setId(int id) {
@@ -62,16 +70,20 @@ public class Skill {
     public void setLevelRequired(int levelRequired) {
         this.levelRequired = levelRequired;
     }
+    public void setTrainingProgramId(Integer trainingProgramId) {
+        this.trainingProgramId = trainingProgramId;
+    }
     //toString
 
     @Override
     public String toString() {
         return "Skill{" +
                 "id=" + id +
-                ", name='" + nom + '\'' +
+                ", nom='" + nom + '\'' +
                 ", description='" + description + '\'' +
                 ", categorie='" + categorie + '\'' +
                 ", levelRequired=" + levelRequired +
+                ", trainingProgramId=" + trainingProgramId +
                 '}';
     }
 }

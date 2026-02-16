@@ -16,13 +16,14 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import org.example.model.formation.Skill;
+import org.example.model.formation.TrainingProgram;
 import org.example.services.SkillService;
+import org.example.services.TrainingProgramService;
 
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
-
 public class ListSkillsController implements Initializable {
 
     @FXML private ListView<Skill> skillListView;
@@ -62,10 +63,11 @@ public class ListSkillsController implements Initializable {
             stage.setScene(new Scene(root));
             stage.setTitle("Ajouter une Compétence");
         } catch (Exception e) {
-            afficherMessage("Erreur lors de l'ouverture du formulaire", "error");
+            afficherMessage("❌ Erreur lors de l'ouverture du formulaire", "error");
             e.printStackTrace();
         }
     }
+
     @FXML
     private void handleGoToHome() {
         try {
@@ -83,8 +85,9 @@ public class ListSkillsController implements Initializable {
     @FXML
     private void handleRafraichir() {
         chargerSkills();
-        afficherMessage("Liste rafraîchie avec succès", "info");
+        afficherMessage("🔄 Liste rafraîchie avec succès", "info");
     }
+
     @FXML
     private void handleModifier() {
         Skill selectedSkill = skillListView.getSelectionModel().getSelectedItem();
@@ -99,7 +102,7 @@ public class ListSkillsController implements Initializable {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/UpdateFormSkill.fxml"));
             Parent root = loader.load();
 
-            // IMPORTANT : Récupérer le controller APRÈS avoir chargé le FXML
+            // Récupérer le controller
             UpdateFormSkillController controller = loader.getController();
 
             // Passer le skill au controller pour pré-remplir les champs
@@ -121,7 +124,7 @@ public class ListSkillsController implements Initializable {
         Skill selectedSkill = skillListView.getSelectionModel().getSelectedItem();
 
         if (selectedSkill == null) {
-            afficherMessage("Veuillez sélectionner une compétence à supprimer", "warning");
+            afficherMessage("⚠️ Veuillez sélectionner une compétence à supprimer", "warning");
             return;
         }
 
@@ -149,7 +152,7 @@ public class ListSkillsController implements Initializable {
             searchField.clear();
             filterCategorie.setValue("Toutes");
         } catch (Exception e) {
-            afficherMessage(" Erreur lors du chargement des données", "error");
+            afficherMessage("❌ Erreur lors du chargement des données", "error");
             e.printStackTrace();
         }
     }
@@ -194,6 +197,8 @@ public class ListSkillsController implements Initializable {
 
     // ========== CLASSE INTERNE POUR PERSONNALISER L'AFFICHAGE ==========
     static class SkillListCell extends ListCell<Skill> {
+        private TrainingProgramService trainingService = new TrainingProgramService();
+
         @Override
         protected void updateItem(Skill skill, boolean empty) {
             super.updateItem(skill, empty);
@@ -225,10 +230,11 @@ public class ListSkillsController implements Initializable {
                 descriptionLabel.setStyle("-fx-text-fill: #7f8c8d; -fx-font-size: 13px;");
                 descriptionLabel.setMaxWidth(1000);
 
-                // Ligne 3 : Catégorie et Niveau
+                // Ligne 3 : Catégorie, Niveau et Formation associée
                 HBox ligne3 = new HBox(15);
                 ligne3.setAlignment(Pos.CENTER_LEFT);
 
+                // Catégorie
                 Label categorieLabel = new Label(skill.getCategorie());
                 if (skill.getCategorie().equals("technique")) {
                     categorieLabel.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-padding: 4 10; -fx-background-radius: 3; -fx-font-size: 12px; -fx-font-weight: bold;");
@@ -236,7 +242,8 @@ public class ListSkillsController implements Initializable {
                     categorieLabel.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-padding: 4 10; -fx-background-radius: 3; -fx-font-size: 12px; -fx-font-weight: bold;");
                 }
 
-                Label levelLabel = new Label("Niveau requis: " + skill.getLevelRequired() + "/5");
+                // Niveau
+                Label levelLabel = new Label("Niveau: " + skill.getLevelRequired() + "/5");
                 levelLabel.setStyle("-fx-text-fill: #95a5a6; -fx-font-size: 12px; -fx-font-weight: bold;");
 
                 // Barres de niveau
@@ -254,6 +261,28 @@ public class ListSkillsController implements Initializable {
                 }
 
                 ligne3.getChildren().addAll(categorieLabel, levelLabel, levelBars);
+
+                // ✅ NOUVEAU : Afficher la formation associée
+                if (skill.getTrainingProgramId() != null) {
+                    try {
+                        TrainingProgram training = trainingService.getById(skill.getTrainingProgramId());
+                        if (training != null) {
+                            Label trainingLabel = new Label("🎓 " + training.getTitle());
+                            trainingLabel.setStyle("-fx-background-color: #9b59b6; -fx-text-fill: white; -fx-padding: 4 10; -fx-background-radius: 3; -fx-font-size: 12px; -fx-font-weight: bold;");
+                            ligne3.getChildren().add(trainingLabel);
+                        } else {
+                            Label noTrainingLabel = new Label("⚠️ Formation introuvable");
+                            noTrainingLabel.setStyle("-fx-text-fill: #e67e22; -fx-font-size: 11px; -fx-font-style: italic;");
+                            ligne3.getChildren().add(noTrainingLabel);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Erreur lors de la récupération de la formation : " + e.getMessage());
+                    }
+                } else {
+                    Label noTrainingLabel = new Label("❌ Non assignée");
+                    noTrainingLabel.setStyle("-fx-text-fill: #95a5a6; -fx-font-size: 11px; -fx-font-style: italic;");
+                    ligne3.getChildren().add(noTrainingLabel);
+                }
 
                 container.getChildren().addAll(ligne1, descriptionLabel, ligne3);
 
