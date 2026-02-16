@@ -10,18 +10,17 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // Charger la vue principale (Liste des compétences)
-        Parent root = FXMLLoader.load(getClass().getResource("/ListSkills.fxml"));
+        // ✅ Charger la page d'accueil (Home.fxml) en premier
+        Parent root = FXMLLoader.load(getClass().getResource("/Home.fxml"));
 
         Scene scene = new Scene(root);
-        primaryStage.setTitle("Système de Gestion RH - Compétences");
+        primaryStage.setTitle("Système de Gestion RH - Accueil");
         primaryStage.setScene(scene);
-        primaryStage.setMaximized(true);
-        primaryStage.show();
+        primaryStage.show();  // Fenêtre normale
+        // primaryStage.setMaximized(true);  // Décommentez pour ouvrir en plein écran
     }
 
     public static void main(String[] args) {
         launch(args);
     }
-
 }
