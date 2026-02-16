@@ -168,7 +168,7 @@
 
                     <Button fx:id="btnAddRule" text="+ Add Bonus Rule"
                             prefWidth="160" prefHeight="35"
-                            style="-fx-background-color: #9f7aea; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8;"
+                            style="-fx-background-color: #48bb78; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8;"
                             onAction="#handleAddRule"/>
                 </HBox>
 

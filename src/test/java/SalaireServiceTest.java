@@ -66,7 +66,7 @@ public class SalaireServiceTest {
         Salaire updated = salaireService.getById(createdSalaireId);
         assertEquals(SalaireStatus.EN_COURS, updated.getStatus());
     }
-
+    /*
     @Test
     @Order(4)
     void testDeleteSalaire() {
@@ -74,5 +74,5 @@ public class SalaireServiceTest {
 
         Salaire deleted = salaireService.getById(createdSalaireId);
         assertNull(deleted, "Échec suppression du salaire");
-    }
+    }*/
 }

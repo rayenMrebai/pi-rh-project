@@ -16,7 +16,6 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
     private final Connection conn = DatabaseConnection.getInstance().getConnection();
 
-    // ❌ NE PAS FAIRE : private final BonusRuleService bonusRuleService = new BonusRuleService();
 
     @Override
     public void create(Salaire salaire) {
@@ -136,9 +135,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
         );
     }
 
-    /**
-     * ⭐ Créer BonusRuleService UNIQUEMENT quand nécessaire
-     */
+
     public Salaire getById(int id) {
         String sql = """
                     SELECT 
@@ -158,7 +155,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
             if (rs.next()) {
                 Salaire salaire = mapResultSetToSalaire(rs);
 
-                // ⭐ Créer le service UNIQUEMENT ici (pas dans le constructeur)
+                // Créer le service
                 BonusRuleService bonusRuleService = new BonusRuleService();
                 List<BonusRule> rules = bonusRuleService.getRulesBySalaire(id);
                 salaire.setBonusRules(rules);
