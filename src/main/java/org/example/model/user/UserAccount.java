@@ -1,5 +1,9 @@
 package org.example.model.user;
 import org.example.enums.UserRole;
+import org.example.model.salaire.Salaire;
+
+import java.util.List;
+import java.util.ArrayList;
 
 public class UserAccount {
 
@@ -7,6 +11,19 @@ public class UserAccount {
     private String name;
     private String email;
     private UserRole role;
+
+
+    // Constructeur user
+    public UserAccount(int id, String name, String email) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+    }
+    public UserAccount() {}
+    // association avec salaire
+    private List<Salaire> salaires = new ArrayList<>();
+
+
 
     // Getters
     public int getId() {
@@ -24,6 +41,10 @@ public class UserAccount {
         return role;
     }
 
+    public List<Salaire> getSalaires() {
+        return salaires;
+    }
+
     // Setters
     public void setId(int id) {
         this.id = id;
@@ -38,5 +59,10 @@ public class UserAccount {
     }
     public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    // methode d ajout
+    public void addSalaire(Salaire salaire) {
+        this.salaires.add(salaire);
     }
 }
