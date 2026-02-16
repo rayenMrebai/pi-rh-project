@@ -129,26 +129,77 @@ public class UpdateFormSkillController implements Initializable {
     }
 
     private boolean validerChamps() {
-        if (nomField.getText().trim().isEmpty()) {
+        // 1. Validation du nom
+        if (nomField.getText() == null || nomField.getText().trim().isEmpty()) {
             afficherMessage("⚠️ Le nom de la compétence est obligatoire", "warning");
             nomField.requestFocus();
+            nomField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
             return false;
         }
+        nomField.setStyle("");
 
-        if (descriptionField.getText().trim().isEmpty()) {
+        if (nomField.getText().trim().length() < 2) {
+            afficherMessage("⚠️ Le nom doit contenir au moins 2 caractères", "warning");
+            nomField.requestFocus();
+            nomField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            return false;
+        }
+        nomField.setStyle("");
+
+        if (nomField.getText().trim().length() > 100) {
+            afficherMessage("⚠️ Le nom ne doit pas dépasser 100 caractères", "warning");
+            nomField.requestFocus();
+            nomField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            return false;
+        }
+        nomField.setStyle("");
+
+        // 2. Validation de la description
+        if (descriptionField.getText() == null || descriptionField.getText().trim().isEmpty()) {
             afficherMessage("⚠️ La description est obligatoire", "warning");
             descriptionField.requestFocus();
+            descriptionField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
             return false;
         }
+        descriptionField.setStyle("");
 
+        if (descriptionField.getText().trim().length() < 10) {
+            afficherMessage("⚠️ La description doit contenir au moins 10 caractères", "warning");
+            descriptionField.requestFocus();
+            descriptionField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            return false;
+        }
+        descriptionField.setStyle("");
+
+        if (descriptionField.getText().trim().length() > 500) {
+            afficherMessage("⚠️ La description ne doit pas dépasser 500 caractères", "warning");
+            descriptionField.requestFocus();
+            descriptionField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            return false;
+        }
+        descriptionField.setStyle("");
+
+        // 3. Validation de la catégorie
         if (categorieCombo.getValue() == null) {
             afficherMessage("⚠️ Veuillez sélectionner une catégorie", "warning");
             categorieCombo.requestFocus();
+            categorieCombo.setStyle("-fx-border-color: red; -fx-border-width: 2;");
             return false;
         }
+        categorieCombo.setStyle("");
+
+        // 4. Validation du niveau
+        if (levelSpinner.getValue() < 0 || levelSpinner.getValue() > 5) {
+            afficherMessage("⚠️ Le niveau doit être entre 0 et 5", "warning");
+            levelSpinner.requestFocus();
+            levelSpinner.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            return false;
+        }
+        levelSpinner.setStyle("");
 
         return true;
     }
+
 
     private void naviguerVersListe() throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/ListSkills.fxml"));
