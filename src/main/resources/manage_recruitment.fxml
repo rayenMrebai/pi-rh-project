@@ -5,6 +5,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="Controllers.manageRecruitment"
@@ -18,7 +20,11 @@
             <padding>
                 <Insets top="14" right="14" bottom="14" left="14"/>
             </padding>
-
+            <ImageView fx:id="logoImage" fitHeight="50" fitWidth="50" pickOnBounds="true" preserveRatio="true">
+                <image>
+                    <Image url="@images/logo.png"/>
+                </image>
+            </ImageView>
             <VBox spacing="2">
                 <Label text="INTEGRA – Manage Recruitment" textFill="WHITE">
                     <font>
