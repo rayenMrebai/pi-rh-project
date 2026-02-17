@@ -99,4 +99,16 @@ public class JobPosition {
                 ", postedAt=" + postedAt +
                 '}';
     }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JobPosition)) return false;
+        return idJob == ((JobPosition) o).idJob;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(idJob);
+    }
+
 }

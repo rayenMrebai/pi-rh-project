@@ -14,6 +14,10 @@ import org.example.model.recrutement.Candidat;
 import org.example.model.recrutement.JobPosition;
 import org.example.services.recrutement.CandidatService;
 import org.example.services.recrutement.JobPositionService;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -28,6 +32,8 @@ public class manageRecruitment {
     @FXML private TableColumn<JobPosition, String> colJobType;
     @FXML private TableColumn<JobPosition, String> colJobStatus;
     @FXML private TableColumn<JobPosition, Object> colJobPostedAt;
+    @FXML private TextField tfSearchCand;
+
 
     // ====== CANDIDAT TABLE ======
     @FXML private TableView<Candidat> candidatTable;
@@ -46,6 +52,9 @@ public class manageRecruitment {
 
     private final JobPositionService jobService = new JobPositionService();
     private final CandidatService candidatService = new CandidatService();
+    private ObservableList<Candidat> candidatMaster;
+    private FilteredList<Candidat> candidatFiltered;
+
 
     @FXML
     public void initialize() {
@@ -109,8 +118,40 @@ public class manageRecruitment {
 
     private void loadCandidats() {
         List<Candidat> candidats = candidatService.getAll();
-        candidatTable.setItems(FXCollections.observableArrayList(candidats));
+        candidatMaster = FXCollections.observableArrayList(candidats);
+
+        candidatFiltered = new FilteredList<>(candidatMaster, p -> true);
+
+        // SortedList pour garder le tri des colonnes TableView
+        SortedList<Candidat> sorted = new SortedList<>(candidatFiltered);
+        sorted.comparatorProperty().bind(candidatTable.comparatorProperty());
+
+        candidatTable.setItems(sorted);
+
+        setupSearch();
     }
+    private void setupSearch() {
+        if (tfSearchCand == null) return; // sécurité
+
+        tfSearchCand.textProperty().addListener((obs, oldV, newV) -> {
+            String key = (newV == null) ? "" : newV.trim().toLowerCase();
+
+            candidatFiltered.setPredicate(c -> {
+                if (key.isEmpty()) return true;
+
+                String fn = (c.getFirstName() == null) ? "" : c.getFirstName().toLowerCase();
+                String ln = (c.getLastName() == null) ? "" : c.getLastName().toLowerCase();
+                String full = (fn + " " + ln).trim();
+
+                return fn.contains(key) || ln.contains(key) || full.contains(key);
+            });
+        });
+    }
+    @FXML
+    private void onClearSearch() {
+        tfSearchCand.clear();
+    }
+
 
     // ================= JOB =================
 

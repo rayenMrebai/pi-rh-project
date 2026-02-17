@@ -118,6 +118,20 @@
                     <Button fx:id="btnDeleteCand" text="Delete" onAction="#onDeleteCandidat"
                             style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 10;"/>
                 </HBox>
+                <HBox spacing="10">
+                    <padding>
+                        <Insets top="0" right="12" bottom="0" left="12"/>
+                    </padding>
+
+                    <TextField fx:id="tfSearchCand"
+                               promptText="Search by name..."
+                               HBox.hgrow="ALWAYS"
+                               style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+
+                    <Button text="Clear"
+                            onAction="#onClearSearch"
+                            style="-fx-background-color: #e5e7eb; -fx-text-fill: #111827; -fx-font-weight: bold; -fx-background-radius: 10;"/>
+                </HBox>
 
                 <TableView fx:id="candidatTable" VBox.vgrow="ALWAYS">
                     <columns>
