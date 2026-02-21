@@ -219,44 +219,6 @@ public class EmailTemplate {
                 "</body></html>";
     }
 
-    /**
-     * 4️⃣ Template : Salaire modifié
-     */
-    public static String salaryModifiedTemplate(Salaire salaire) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        return "<!DOCTYPE html><html><head>" + BASE_STYLE + "</head><body>" +
-                "<div class='header' style='background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);'>" +
-                "<h1>ℹ️ Votre salaire a été modifié</h1>" +
-                "</div>" +
-                "<div class='content'>" +
-                "<p>Bonjour <strong>" + salaire.getUser().getName() + "</strong>,</p>" +
-                "<p>Votre salaire a été mis à jour par le service RH.</p>" +
 
-                "<div class='detail-box'>" +
-                "<h3 style='margin-top: 0;'>🔄 Informations mises à jour</h3>" +
-                "<div class='info-row'>" +
-                "<span class='label'>Nouveau statut:</span>" +
-                "<span class='value'><strong>" + salaire.getStatus() + "</strong></span>" +
-                "</div>" +
-                "<div class='info-row'>" +
-                "<span class='label'>Date de paiement:</span>" +
-                "<span class='value'>" + salaire.getDatePaiement().format(formatter) + "</span>" +
-                "</div>" +
-                "<div class='info-row' style='border-bottom: none;'>" +
-                "<span class='label'>Montant total:</span>" +
-                "<span class='value' style='font-weight: bold;'>" +
-                String.format("%.2f", salaire.getTotalAmount()) + " DT</span>" +
-                "</div>" +
-                "</div>" +
-
-                "<p>Si vous avez des questions concernant cette modification, " +
-                "n'hésitez pas à contacter le service RH.</p>" +
-                "</div>" +
-                "<div class='footer'>" +
-                "INTEGRA - Système de gestion RH<br>" +
-                "Cet email a été envoyé automatiquement, merci de ne pas y répondre." +
-                "</div>" +
-                "</body></html>";
-    }
 }

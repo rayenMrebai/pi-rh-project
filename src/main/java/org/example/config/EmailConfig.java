@@ -14,7 +14,6 @@ public class EmailConfig {
 
             if (input == null) {
                 System.err.println("❌ Fichier email.properties introuvable !");
-                return;
             }
 
             properties.load(input);

@@ -121,6 +121,7 @@ public class UpdateFormBonusRuleController {
 
                 // ⭐ ENVOI EMAIL SI PASSAGE À ACTIVE
                 if (oldStatus != BonusRuleStatus.ACTIVE && newStatus == BonusRuleStatus.ACTIVE) {
+                    SalaireService salaireService = new SalaireService();
                     Salaire updatedSalaire = salaireService.getById(currentBonusRule.getSalaire().getId());
                     String employeeEmail = updatedSalaire.getUser().getEmail();
                     String subject = "⭐ Règle de bonus activée !";
@@ -257,9 +258,6 @@ public class UpdateFormBonusRuleController {
 
     private void showAlert(String title, String content, Alert.AlertType type) {
         Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
