@@ -5,6 +5,8 @@ import org.example.enums.SalaireStatus;
 import org.example.interfaces.GlobalInterface;
 import org.example.model.salaire.BonusRule;
 import org.example.model.salaire.Salaire;
+import org.example.services.email.EmailService;
+import org.example.services.email.EmailTemplate;
 import org.example.util.DatabaseConnection;
 
 import java.sql.*;
@@ -15,7 +17,7 @@ import java.util.List;
 public class SalaireService implements GlobalInterface<Salaire> {
 
     private final Connection conn = DatabaseConnection.getInstance().getConnection();
-
+    private final EmailService emailService = new EmailService();
 
     @Override
     public void create(Salaire salaire) {
@@ -32,6 +34,13 @@ public class SalaireService implements GlobalInterface<Salaire> {
             ps.setString(5, salaire.getStatus().name());
             ps.setDate(6, Date.valueOf(salaire.getDatePaiement()));
             ps.executeUpdate();
+
+            // ⭐ ENVOI EMAIL AUTOMATIQUE
+            String employeeEmail = salaire.getUser().getEmail();
+            String subject = "🎉 Votre salaire a été créé";
+            String htmlContent = EmailTemplate.salaryCreatedTemplate(salaire);
+
+            emailService.sendEmail(employeeEmail, subject, htmlContent);
         } catch (SQLException e) {
             System.out.println("Erreur create: " + e.getMessage());
         }
@@ -68,6 +77,11 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
     @Override
     public void update(Salaire salaire) {
+
+        // ⭐ Récupérer l'ancien statut AVANT la mise à jour
+        Salaire oldSalaire = getById(salaire.getId());
+        SalaireStatus oldStatus = (oldSalaire != null) ? oldSalaire.getStatus() : null;
+
         String sql = """
             UPDATE salaire 
             SET status = ?, datePaiement = ?, updatedAt = ?
@@ -80,6 +94,18 @@ public class SalaireService implements GlobalInterface<Salaire> {
             ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
             ps.setInt(4, salaire.getId());
             ps.executeUpdate();
+
+            // ⭐ ENVOI EMAIL SI STATUT CHANGE
+            SalaireStatus newStatus = salaire.getStatus();
+            String employeeEmail = salaire.getUser().getEmail();
+
+            // Si passage à PAYÉ
+            if (oldStatus != SalaireStatus.PAYÉ && newStatus == SalaireStatus.PAYÉ) {
+                String subject = "✅ Votre salaire a été payé";
+                String htmlContent = EmailTemplate.salaryPaidTemplate(salaire);
+                emailService.sendEmail(employeeEmail, subject, htmlContent);
+            }
+
         } catch (SQLException e) {
             System.out.println("Erreur update: " + e.getMessage());
         }

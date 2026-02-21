@@ -7,6 +7,8 @@ import javafx.stage.Stage;
 import org.example.enums.BonusRuleStatus;
 import org.example.model.salaire.BonusRule;
 import org.example.model.salaire.Salaire;
+import org.example.services.email.EmailService;
+import org.example.services.email.EmailTemplate;
 import org.example.services.salaire.BonusRuleService;
 import org.example.services.salaire.SalaireService;
 
@@ -28,6 +30,8 @@ public class UpdateFormBonusRuleController {
 
     private BonusRuleService bonusRuleService;
     private BonusRule currentBonusRule;
+
+    private EmailService emailService = new EmailService();
 
     @FXML
     public void initialize() {
@@ -114,6 +118,19 @@ public class UpdateFormBonusRuleController {
             BonusRuleStatus newStatus = cmbStatus.getValue();
             if (oldStatus != newStatus) {
                 recalculateSalaryBonus(currentBonusRule.getSalaire().getId());
+
+                // ⭐ ENVOI EMAIL SI PASSAGE À ACTIVE
+                if (oldStatus != BonusRuleStatus.ACTIVE && newStatus == BonusRuleStatus.ACTIVE) {
+                    Salaire updatedSalaire = salaireService.getById(currentBonusRule.getSalaire().getId());
+                    String employeeEmail = updatedSalaire.getUser().getEmail();
+                    String subject = "⭐ Règle de bonus activée !";
+                    String htmlContent = EmailTemplate.bonusRuleActivatedTemplate(
+                            currentBonusRule,
+                            updatedSalaire
+                    );
+
+                    emailService.sendEmail(employeeEmail, subject, htmlContent);
+                }
             }
 
             showAlert("Succès", "Règle de bonus mise à jour avec succès !", Alert.AlertType.INFORMATION);
