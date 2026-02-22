@@ -99,6 +99,11 @@
 
                 <Region HBox.hgrow="ALWAYS"/>
 
+                <!-- ⭐ AJOUTER CE BOUTON ICI -->
+                <Button fx:id="btnGeneratePDF" text="📄 Générer PDF"
+                        prefWidth="140" prefHeight="38"
+                        style="-fx-background-color: #9f7aea; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8;"
+                        onAction="#handleGeneratePDF"/>
                 <Button fx:id="btnUpdateSalary" text="Update"
                         prefWidth="110" prefHeight="38"
                         style="-fx-background-color: #4299e1; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8;"

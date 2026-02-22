@@ -26,6 +26,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import org.example.enums.BonusRuleStatus;
 
+import org.example.services.pdf.PDFService;
+import javafx.application.HostServices;
+
 public class SalaireManagementController {
 
     @FXML private TextField searchField;
@@ -52,11 +55,16 @@ public class SalaireManagementController {
     private ObservableList<Salaire> salaryList;
     private Salaire selectedSalaire;
 
+    @FXML private Button btnGeneratePDF;
+    private PDFService pdfService;
+
     @FXML
     public void initialize() {
         salaireService = new SalaireService();
         bonusRuleService = new BonusRuleService();
         salaryList = FXCollections.observableArrayList();
+
+        pdfService = new PDFService();
 
         // Configuration ListView des salaires
         salaryListView.setCellFactory(lv -> new ListCell<Salaire>() {
@@ -279,14 +287,20 @@ public class SalaireManagementController {
         // ⭐ Désactiver le bouton Add Bonus Rule
         btnAddRule.setDisable(isPaid);
 
+        // ⭐ Désactiver le bouton PDF si salaire PAYÉ
+        btnGeneratePDF.setDisable(isPaid);
+
+
         if (isPaid) {
             btnUpdateSalary.setStyle("-fx-background-color: #cbd5e0; -fx-text-fill: #718096; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-opacity: 0.6;");
             btnDeleteSalary.setStyle("-fx-background-color: #cbd5e0; -fx-text-fill: #718096; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-opacity: 0.6;");
             btnAddRule.setStyle("-fx-background-color: #cbd5e0; -fx-text-fill: #718096; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-opacity: 0.6;");
+            btnGeneratePDF.setStyle("-fx-background-color: #cbd5e0; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8; -fx-opacity: 0.6;");
         } else {
             btnUpdateSalary.setStyle("-fx-background-color: #4299e1; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8;");
             btnDeleteSalary.setStyle("-fx-background-color: #f56565; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8;");
             btnAddRule.setStyle("-fx-background-color: #9f7aea; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8;");
+            btnGeneratePDF.setStyle("-fx-background-color: #9f7aea; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8;");
         }
     }
 
@@ -404,6 +418,45 @@ public class SalaireManagementController {
             });
         } else {
             showAlert("Attention", "Veuillez d'abord sélectionner un salaire", Alert.AlertType.WARNING);
+        }
+    }
+
+
+    /**
+     * Gère le clic sur le bouton "Générer PDF"
+     */
+    @FXML
+    private void handleGeneratePDF() {
+        if (selectedSalaire == null) {
+            showAlert("Erreur", "Veuillez sélectionner un salaire", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            // Générer le PDF
+            String pdfPath = pdfService.generatePayslip(selectedSalaire);
+
+            if (pdfPath != null) {
+                showAlert(
+                        "Succès",
+                        "Fiche de paie générée avec succès !\n\nFichier : " + pdfPath,
+                        Alert.AlertType.INFORMATION
+                );
+            } else {
+                showAlert(
+                        "Erreur",
+                        "Erreur lors de la génération du PDF",
+                        Alert.AlertType.ERROR
+                );
+            }
+
+        } catch (Exception e) {
+            showAlert(
+                    "Erreur",
+                    "Erreur lors de la génération du PDF : " + e.getMessage(),
+                    Alert.AlertType.ERROR
+            );
+            e.printStackTrace();
         }
     }
 
