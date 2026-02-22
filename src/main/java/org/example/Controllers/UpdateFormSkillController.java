@@ -2,10 +2,7 @@ package org.example.Controllers;
 
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.model.formation.Skill;
@@ -16,212 +13,66 @@ import java.util.ResourceBundle;
 
 public class UpdateFormSkillController implements Initializable {
 
-    @FXML private TextField idField;
+    @FXML private Label idLabel;
     @FXML private TextField nomField;
     @FXML private TextArea descriptionField;
-    @FXML private ComboBox<String> categorieCombo;
-    @FXML private Spinner<Integer> levelSpinner;
-    @FXML private Button modifierBtn;
-    @FXML private Label statusLabel;
+    @FXML private ComboBox<String> levelCombo;
+    @FXML private ComboBox<String> categoryCombo;
+    @FXML private Label errorLabel;
 
     private SkillService skillService;
-    private Skill skillToUpdate;
+    private Skill currentSkill;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         skillService = new SkillService();
-
-        // Configurer le ComboBox
-        categorieCombo.setItems(FXCollections.observableArrayList("technique", "soft"));
-
-        // Configurer le Spinner
-        SpinnerValueFactory<Integer> valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 5, 1);
-        levelSpinner.setValueFactory(valueFactory);
-
-        System.out.println("✅ Formulaire de modification initialisé");
+        levelCombo.setItems(FXCollections.observableArrayList(
+                "1 - BASE", "2 - DÉBUTANT", "3 - INTERMÉDIAIRE", "4 - AVANCÉ", "5 - EXPERT"));
+        categoryCombo.setItems(FXCollections.observableArrayList("technique", "soft"));
     }
 
-    /**
-     * MÉTHODE CRUCIALE : Pré-remplir le formulaire avec les données du skill
-     */
     public void setSkill(Skill skill) {
-        if (skill == null) {
-            System.err.println("❌ ERREUR : Le skill passé est null !");
-            return;
-        }
-
-        this.skillToUpdate = skill;
-
-        System.out.println("📝 Pré-remplissage du formulaire avec : " + skill);
-
-        // Remplir chaque champ
-        idField.setText(String.valueOf(skill.getId()));
+        this.currentSkill = skill;
+        idLabel.setText(String.valueOf(skill.getId()));
         nomField.setText(skill.getNom());
         descriptionField.setText(skill.getDescription());
-        categorieCombo.setValue(skill.getCategorie());
-        levelSpinner.getValueFactory().setValue(skill.getLevelRequired());
-
-        System.out.println("✅ Formulaire pré-rempli avec succès :");
-        System.out.println("   - ID: " + skill.getId());
-        System.out.println("   - Nom: " + skill.getNom());
-        System.out.println("   - Description: " + skill.getDescription());
-        System.out.println("   - Catégorie: " + skill.getCategorie());
-        System.out.println("   - Niveau: " + skill.getLevelRequired());
-    }
-
-    @FXML
-    private void handleModifier() {
-        try {
-            System.out.println("🔄 Début de la modification...");
-
-            // Validation
-            if (!validerChamps()) {
-                return;
-            }
-
-            // Afficher les anciennes et nouvelles valeurs
-            System.out.println("📊 Modifications :");
-            System.out.println("   Ancien nom: " + skillToUpdate.getNom() + " → Nouveau: " + nomField.getText().trim());
-
-            // Mettre à jour les données
-            skillToUpdate.setNom(nomField.getText().trim());
-            skillToUpdate.setDescription(descriptionField.getText().trim());
-            skillToUpdate.setCategorie(categorieCombo.getValue());
-            skillToUpdate.setLevelRequired(levelSpinner.getValue());
-
-            // Enregistrer en base
-            skillService.update(skillToUpdate);
-
-            // Message de succès
-            afficherMessage("✅ Compétence modifiée avec succès ! Redirection...", "success");
-
-            // Redirection après 1.5 seconde
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1500);
-                    javafx.application.Platform.runLater(() -> {
-                        try {
-                            naviguerVersListe();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-
-        } catch (Exception e) {
-            afficherMessage("❌ Erreur lors de la modification : " + e.getMessage(), "error");
-            e.printStackTrace();
+        categoryCombo.setValue(skill.getCategorie());
+        switch (skill.getLevelRequired()) {
+            case 5: levelCombo.setValue("5 - EXPERT"); break;
+            case 4: levelCombo.setValue("4 - AVANCÉ"); break;
+            case 3: levelCombo.setValue("3 - INTERMÉDIAIRE"); break;
+            case 2: levelCombo.setValue("2 - DÉBUTANT"); break;
+            default: levelCombo.setValue("1 - BASE");
         }
     }
 
     @FXML
-    private void handleRetourListe() {
+    private void handleUpdate() {
+        errorLabel.setText("");
+        String nom = nomField.getText().trim();
+        String desc = descriptionField.getText().trim();
+        String lvl = levelCombo.getValue();
+        String cat = categoryCombo.getValue();
+
+        if (nom.isEmpty() || desc.isEmpty() || lvl == null || cat == null) {
+            errorLabel.setText("⚠️ Veuillez remplir tous les champs obligatoires.");
+            return;
+        }
         try {
-            naviguerVersListe();
+            currentSkill.setNom(nom);
+            currentSkill.setDescription(desc);
+            currentSkill.setLevelRequired(Integer.parseInt(lvl.substring(0, 1)));
+            currentSkill.setCategorie(cat);
+            skillService.update(currentSkill);
+            new Alert(Alert.AlertType.INFORMATION, "✅ Compétence mise à jour !").showAndWait();
+            ((Stage) nomField.getScene().getWindow()).close();
         } catch (Exception e) {
-            afficherMessage("❌ Erreur de navigation", "error");
-            e.printStackTrace();
+            errorLabel.setText("❌ Erreur : " + e.getMessage());
         }
     }
 
-    private boolean validerChamps() {
-        // 1. Validation du nom
-        if (nomField.getText() == null || nomField.getText().trim().isEmpty()) {
-            afficherMessage("⚠️ Le nom de la compétence est obligatoire", "warning");
-            nomField.requestFocus();
-            nomField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
-            return false;
-        }
-        nomField.setStyle("");
-
-        if (nomField.getText().trim().length() < 2) {
-            afficherMessage("⚠️ Le nom doit contenir au moins 2 caractères", "warning");
-            nomField.requestFocus();
-            nomField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
-            return false;
-        }
-        nomField.setStyle("");
-
-        if (nomField.getText().trim().length() > 100) {
-            afficherMessage("⚠️ Le nom ne doit pas dépasser 100 caractères", "warning");
-            nomField.requestFocus();
-            nomField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
-            return false;
-        }
-        nomField.setStyle("");
-
-        // 2. Validation de la description
-        if (descriptionField.getText() == null || descriptionField.getText().trim().isEmpty()) {
-            afficherMessage("⚠️ La description est obligatoire", "warning");
-            descriptionField.requestFocus();
-            descriptionField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
-            return false;
-        }
-        descriptionField.setStyle("");
-
-        if (descriptionField.getText().trim().length() < 10) {
-            afficherMessage("⚠️ La description doit contenir au moins 10 caractères", "warning");
-            descriptionField.requestFocus();
-            descriptionField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
-            return false;
-        }
-        descriptionField.setStyle("");
-
-        if (descriptionField.getText().trim().length() > 500) {
-            afficherMessage("⚠️ La description ne doit pas dépasser 500 caractères", "warning");
-            descriptionField.requestFocus();
-            descriptionField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
-            return false;
-        }
-        descriptionField.setStyle("");
-
-        // 3. Validation de la catégorie
-        if (categorieCombo.getValue() == null) {
-            afficherMessage("⚠️ Veuillez sélectionner une catégorie", "warning");
-            categorieCombo.requestFocus();
-            categorieCombo.setStyle("-fx-border-color: red; -fx-border-width: 2;");
-            return false;
-        }
-        categorieCombo.setStyle("");
-
-        // 4. Validation du niveau
-        if (levelSpinner.getValue() < 0 || levelSpinner.getValue() > 5) {
-            afficherMessage("⚠️ Le niveau doit être entre 0 et 5", "warning");
-            levelSpinner.requestFocus();
-            levelSpinner.setStyle("-fx-border-color: red; -fx-border-width: 2;");
-            return false;
-        }
-        levelSpinner.setStyle("");
-
-        return true;
-    }
-
-
-    private void naviguerVersListe() throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/ListSkills.fxml"));
-        Stage stage = (Stage) modifierBtn.getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.setTitle("Liste des Compétences");
-        stage.setMaximized(true);
-    }
-
-    private void afficherMessage(String message, String type) {
-        statusLabel.setText(message);
-
-        switch (type) {
-            case "success":
-                statusLabel.setStyle("-fx-text-fill: #27ae60; -fx-font-weight: bold; -fx-font-size: 14px;");
-                break;
-            case "error":
-                statusLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold; -fx-font-size: 14px;");
-                break;
-            case "warning":
-                statusLabel.setStyle("-fx-text-fill: #f39c12; -fx-font-weight: bold; -fx-font-size: 14px;");
-                break;
-        }
+    @FXML
+    private void handleCancel() {
+        ((Stage) nomField.getScene().getWindow()).close();
     }
 }

@@ -10,14 +10,16 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        // ✅ Charger la page d'accueil (Home.fxml) en premier
-        Parent root = FXMLLoader.load(getClass().getResource("/Home.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/ManageTraining.fxml"));
 
         Scene scene = new Scene(root);
-        primaryStage.setTitle("Système de Gestion RH - Accueil");
+
+        primaryStage.setTitle("INTEGRA – HR Management System");
         primaryStage.setScene(scene);
-        primaryStage.show();  // Fenêtre normale
-        // primaryStage.setMaximized(true);  // Décommentez pour ouvrir en plein écran
+        primaryStage.setMinWidth(1100);
+        primaryStage.setMinHeight(650);
+        primaryStage.centerOnScreen();
+        primaryStage.show();
     }
 
     public static void main(String[] args) {

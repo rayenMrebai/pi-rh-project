@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.Controllers.ManageTrainingController"
+            prefWidth="1100" prefHeight="650"
+            style="-fx-background-color: #f0f2f5;">
+
+    <!-- HEADER -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="12"
+              style="-fx-background-color: linear-gradient(to right, #0d47a1, #1976d2); -fx-padding: 12 20;">
+            <Label text="👤" style="-fx-font-size: 28px; -fx-background-color: rgba(255,255,255,0.2); -fx-padding: 6 10; -fx-background-radius: 50;"/>
+            <VBox spacing="1">
+                <Label text="INTEGRA – Manage Training"
+                       style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;"/>
+                <Label text="Administrator / RH Module"
+                       style="-fx-text-fill: #90caf9; -fx-font-size: 11px;"/>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <VBox alignment="CENTER_RIGHT" spacing="1">
+                <Label text="Admin User" style="-fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                <Label text="ADMIN" style="-fx-text-fill: #90caf9; -fx-font-size: 10px;"/>
+            </VBox>
+            <Button text="⎋  Logout" onAction="#handleLogout"
+                    style="-fx-background-color: #e53935; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 16; -fx-background-radius: 6; -fx-cursor: hand;"/>
+        </HBox>
+    </top>
+
+    <!-- MAIN -->
+    <center>
+        <HBox spacing="14" style="-fx-padding: 14;">
+
+            <!-- LEFT: SKILLS -->
+            <VBox spacing="10" prefWidth="340" minWidth="300">
+
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 12 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0, 0, 2);">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="🎯" style="-fx-font-size: 20px;"/>
+                        <VBox spacing="1">
+                            <Label text="Skills" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+                            <Label text="Available skills for training" style="-fx-font-size: 10px; -fx-text-fill: #90a4ae;"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0, 0, 2);" spacing="8">
+                    <TextField fx:id="searchSkillField" promptText="🔍  Rechercher une compétence..."
+                               style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-padding: 8; -fx-font-size: 12px;"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Catégorie :" style="-fx-font-size: 12px; -fx-text-fill: #546e7a;"/>
+                        <ComboBox fx:id="filterCategoryCombo" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                                  style="-fx-background-radius: 6; -fx-font-size: 12px;"/>
+                    </HBox>
+                </VBox>
+
+                <HBox spacing="8">
+                    <Button text="＋  Add Skill" onAction="#handleAddSkill"
+                            style="-fx-background-color: #43a047; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 9 18; -fx-background-radius: 6; -fx-cursor: hand;"
+                            HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <Button text="✏  Edit Skill" onAction="#handleEditSkill"
+                            style="-fx-background-color: #1976d2; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 9 18; -fx-background-radius: 6; -fx-cursor: hand;"
+                            HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                </HBox>
+
+                <TableView fx:id="skillsTable" VBox.vgrow="ALWAYS"
+                           style="-fx-background-radius: 8; -fx-border-color: transparent; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0, 0, 2);">
+                    <columns>
+                        <TableColumn fx:id="skillIdColumn" text="Skill ID" prefWidth="65"/>
+                        <TableColumn fx:id="skillNameColumn" text="Skill Name" prefWidth="110"/>
+                        <TableColumn fx:id="skillLevelColumn" text="Level" prefWidth="95"/>
+                        <TableColumn fx:id="skillCategoryColumn" text="Category" prefWidth="100"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="Aucune compétence trouvée" style="-fx-text-fill: #90a4ae; -fx-font-style: italic;"/>
+                    </placeholder>
+                </TableView>
+            </VBox>
+
+            <!-- RIGHT: TRAININGS + DETAILS -->
+            <VBox spacing="10" HBox.hgrow="ALWAYS">
+
+                <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 12 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0, 0, 2);">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="🎓" style="-fx-font-size: 20px;"/>
+                        <VBox spacing="1">
+                            <Label text="Training Programs" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+                            <Label text="Available training programs" style="-fx-font-size: 10px; -fx-text-fill: #90a4ae;"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <Label fx:id="selectionLabel" text="← Sélectionnez une compétence pour voir les formations"
+                       style="-fx-text-fill: #90a4ae; -fx-font-style: italic; -fx-font-size: 12px; -fx-padding: 0 4;"/>
+
+                <TableView fx:id="trainingsTable" prefHeight="200"
+                           style="-fx-background-radius: 8; -fx-border-color: transparent; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0, 0, 2);">
+                    <columns>
+                        <TableColumn fx:id="trainingIdColumn" text="Training ID" prefWidth="90"/>
+                        <TableColumn fx:id="trainingNameColumn" text="Program Name" prefWidth="200"/>
+                        <TableColumn fx:id="trainingDurationColumn" text="Duration" prefWidth="75"/>
+                        <TableColumn fx:id="trainingSkillColumn" text="Skill Covered" prefWidth="130"/>
+                        <TableColumn fx:id="trainingTypeColumn" text="Type" prefWidth="90"/>
+                        <TableColumn fx:id="trainingStatusColumn" text="Status" prefWidth="95"/>
+                    </columns>
+                    <placeholder>
+                        <Label text="Sélectionnez une compétence pour afficher les formations" style="-fx-text-fill: #90a4ae; -fx-font-style: italic;"/>
+                    </placeholder>
+                </TableView>
+
+                <!-- DETAILS -->
+                <VBox spacing="10" VBox.vgrow="ALWAYS">
+                    <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 12 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0, 0, 2);">
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <Label text="📋" style="-fx-font-size: 20px;"/>
+                            <VBox spacing="1">
+                                <Label text="Training Details" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+                                <Label text="Complete program information" style="-fx-font-size: 10px; -fx-text-fill: #90a4ae;"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+
+                    <HBox spacing="10" VBox.vgrow="ALWAYS">
+                        <!-- Program Info Card -->
+                        <VBox spacing="12" HBox.hgrow="ALWAYS"
+                              style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0, 0, 2);">
+                            <Label text="Program Information" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                            <Separator/>
+                            <VBox spacing="3">
+                                <Label text="Program Name" style="-fx-font-size: 10px; -fx-text-fill: #90a4ae;"/>
+                                <Label fx:id="detailNameLabel" text="—" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1a237e;"/>
+                            </VBox>
+                            <VBox spacing="3">
+                                <Label text="Description" style="-fx-font-size: 10px; -fx-text-fill: #90a4ae;"/>
+                                <Label fx:id="detailDescriptionLabel" text="—" wrapText="true" style="-fx-font-size: 12px; -fx-text-fill: #546e7a;"/>
+                            </VBox>
+                            <HBox spacing="30">
+                                <VBox spacing="3">
+                                    <Label text="Duration" style="-fx-font-size: 10px; -fx-text-fill: #90a4ae;"/>
+                                    <Label fx:id="detailDurationLabel" text="—" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #37474f;"/>
+                                </VBox>
+                                <VBox spacing="3">
+                                    <Label text="Trainer Name" style="-fx-font-size: 10px; -fx-text-fill: #90a4ae;"/>
+                                    <Label fx:id="detailTrainerLabel" text="—" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #37474f;"/>
+                                </VBox>
+                            </HBox>
+                            <HBox spacing="30" alignment="CENTER_LEFT">
+                                <VBox spacing="3">
+                                    <Label text="Skill Targeted" style="-fx-font-size: 10px; -fx-text-fill: #90a4ae;"/>
+                                    <Label fx:id="detailSkillLabel" text="—"
+                                           style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-padding: 4 10; -fx-background-radius: 4; -fx-font-weight: bold; -fx-font-size: 12px;"/>
+                                </VBox>
+                                <VBox spacing="3">
+                                    <Label text="Status" style="-fx-font-size: 10px; -fx-text-fill: #90a4ae;"/>
+                                    <Label fx:id="detailStatusLabel" text="—" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #90a4ae;"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
+                        <!-- Actions Card -->
+                        <VBox spacing="12" prefWidth="210"
+                              style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 16; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 4, 0, 0, 2);">
+                            <Label text="Actions" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                            <Separator/>
+                            <Button text="＋  Add Training Program" onAction="#handleAddTraining" maxWidth="Infinity"
+                                    style="-fx-background-color: #1976d2; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-size: 12px;"/>
+                            <Button text="🔄  Update Training Program" onAction="#handleUpdateTraining" maxWidth="Infinity"
+                                    style="-fx-background-color: #f57c00; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-size: 12px;"/>
+                            <Button text="🔗  Assign Skill" onAction="#handleAssignSkill" maxWidth="Infinity"
+                                    style="-fx-background-color: #43a047; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-size: 12px;"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </HBox>
+    </center>
+
+    <!-- FOOTER -->
+    <bottom>
+        <HBox style="-fx-background-color: #263238; -fx-padding: 6 16;" alignment="CENTER_LEFT">
+            <Label fx:id="footerLabel" text="Connecté • Base de données : INTEGRA_DB"
+                   style="-fx-text-fill: #90a4ae; -fx-font-size: 10px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="INTEGRA HR Management System © 2026" style="-fx-text-fill: #546e7a; -fx-font-size: 10px;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
