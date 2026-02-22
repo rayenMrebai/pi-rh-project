@@ -7,7 +7,7 @@ public class TestEmail {
         EmailService emailService = new EmailService();
 
         // ⚠️ REMPLACEZ PAR VOTRE VRAI EMAIL
-        String testEmail = "VOTRE_EMAIL@gmail.com";
+        String testEmail = "rayenmribai1@gmail.com";
 
         System.out.println("📧 Test d'envoi d'email...");
         emailService.sendTestEmail(testEmail);
