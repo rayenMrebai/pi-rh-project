@@ -9,11 +9,14 @@ import org.example.enums.BonusRuleStatus;
 import org.example.model.salaire.BonusRule;
 import org.example.model.salaire.Salaire;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class PDFService {
@@ -22,14 +25,63 @@ public class PDFService {
     private static final float PAGE_WIDTH = PDRectangle.A4.getWidth();
     private static final float PAGE_HEIGHT = PDRectangle.A4.getHeight();
 
+    // =========================================================================
+    // GÉNÉRATION DU CODE UNIQUE
+    // =========================================================================
+
     /**
-     * Génère une fiche de paie PDF pour un salaire donné
+     * Génère un code unique pour la fiche de paie
+     * Format : FP-NOM-AAAAMMJJ-XXXXXXXX
+     */
+    private String generatePayslipCode(Salaire salaire) {
+        String datePart = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
+        String fullName = salaire.getUser().getName().replaceAll("\\s+", "");
+        String namePart = fullName.toUpperCase()
+                .substring(0, fullName.length());
+
+        String uniquePart = UUID.randomUUID().toString()
+                .substring(0, 8)
+                .toUpperCase();
+
+        return "FP-" + namePart + "-" + datePart + "-" + uniquePart;
+    }
+
+    // =========================================================================
+    // MÉTHODE PRINCIPALE
+    // =========================================================================
+
+    /**
+     * Génère une fiche de paie PDF pour un salaire donné.
+     * Affiche une boîte de dialogue "Enregistrer sous" pour choisir l'emplacement.
+     * Si l'utilisateur annule, sauvegarde dans C:\Users\MSI\Downloads par défaut.
+     *
      * @param salaire Le salaire pour lequel générer la fiche
-     * @return Le chemin du fichier PDF généré
+     * @return Le chemin du fichier PDF généré, ou null en cas d'erreur
      */
     public String generatePayslip(Salaire salaire) {
         String fileName = generateFileName(salaire);
-        String outputPath = "/mnt/user-data/outputs/" + fileName;
+
+        // Afficher la boîte de dialogue de sauvegarde
+        String outputPath = showSaveDialog(fileName);
+
+        // Si l'utilisateur a annulé → chemin par défaut
+        if (outputPath == null) {
+            outputPath = "C:\\Users\\MSI\\Downloads\\" + fileName;
+            System.out.println("⚠️ Aucun chemin sélectionné, utilisation du chemin par défaut : " + outputPath);
+        }
+
+        // Créer les dossiers parents si nécessaire
+        File outputFile = new File(outputPath);
+        if (outputFile.getParentFile() != null && !outputFile.getParentFile().exists()) {
+            boolean created = outputFile.getParentFile().mkdirs();
+            if (!created) {
+                System.err.println("❌ Impossible de créer le dossier : " + outputFile.getParentFile());
+            }
+        }
+
+        // Générer le code unique de la fiche
+        String payslipCode = generatePayslipCode(salaire);
 
         try {
             PDDocument document = new PDDocument();
@@ -40,9 +92,13 @@ public class PDFService {
 
             float yPosition = PAGE_HEIGHT - MARGIN;
 
-            // En-tête
+            // En-tête principal
             yPosition = drawHeader(content, yPosition);
-            yPosition -= 30;
+            yPosition -= 10;
+
+            // Code unique de la fiche (sous l'en-tête)
+            yPosition = drawPayslipCode(content, payslipCode, yPosition);
+            yPosition -= 20;
 
             // Informations employé
             yPosition = drawEmployeeInfo(content, salaire, yPosition);
@@ -52,13 +108,13 @@ public class PDFService {
             yPosition = drawSalaryDetails(content, salaire, yPosition);
             yPosition -= 20;
 
-            // Règles de bonus
+            // Règles de bonus (si présentes)
             if (salaire.getBonusRules() != null && !salaire.getBonusRules().isEmpty()) {
                 yPosition = drawBonusRules(content, salaire, yPosition);
                 yPosition -= 20;
             }
 
-            // Total
+            // Total net à payer
             yPosition = drawTotal(content, salaire, yPosition);
             yPosition -= 30;
 
@@ -73,14 +129,123 @@ public class PDFService {
             document.close();
 
             System.out.println("✅ Fiche de paie générée : " + outputPath);
+            System.out.println("📋 Code de la fiche : " + payslipCode);
+
+            // Message de confirmation à l'utilisateur
+            JOptionPane.showMessageDialog(
+                    null,
+                    "✅ Fiche de paie enregistrée avec succès !\n\n" +
+                            "📁 Emplacement : " + outputPath + "\n" +
+                            "📋 Code fiche  : " + payslipCode,
+                    "Fiche de paie générée",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
             return outputPath;
 
         } catch (IOException e) {
             System.err.println("❌ Erreur génération PDF : " + e.getMessage());
             e.printStackTrace();
+
+            JOptionPane.showMessageDialog(
+                    null,
+                    "❌ Erreur lors de la génération de la fiche de paie :\n" + e.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE
+            );
             return null;
         }
     }
+
+    // =========================================================================
+    // BOÎTE DE DIALOGUE "ENREGISTRER SOUS"
+    // =========================================================================
+
+    /**
+     * Affiche une boîte de dialogue native "Enregistrer sous"
+     * avec C:\Users\MSI\Downloads comme dossier par défaut.
+     *
+     * @param defaultFileName Nom de fichier proposé par défaut
+     * @return Le chemin complet choisi par l'utilisateur, ou null si annulé
+     */
+    private String showSaveDialog(String defaultFileName) {
+        // Appliquer le look & feel natif du système d'exploitation
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {}
+
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Enregistrer la fiche de paie");
+
+        // Dossier par défaut : C:\Users\MSI\Downloads
+        File defaultDir = new File("C:\\Users\\MSI\\Downloads");
+
+        // Fallback si le dossier n'existe pas sur cette machine
+        if (!defaultDir.exists()) {
+            defaultDir = new File(System.getProperty("user.home") + File.separator + "Downloads");
+        }
+        if (!defaultDir.exists()) {
+            defaultDir = new File(System.getProperty("user.home"));
+        }
+
+        fileChooser.setCurrentDirectory(defaultDir);
+        fileChooser.setSelectedFile(new File(defaultDir, defaultFileName));
+
+        // Filtre : fichiers PDF uniquement
+        FileNameExtensionFilter pdfFilter = new FileNameExtensionFilter("Fichiers PDF (*.pdf)", "pdf");
+        fileChooser.setFileFilter(pdfFilter);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
+        // Afficher la boîte de dialogue
+        int result = fileChooser.showSaveDialog(null);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            String path = fileChooser.getSelectedFile().getAbsolutePath();
+            // Ajouter l'extension .pdf si l'utilisateur ne l'a pas tapée
+            if (!path.toLowerCase().endsWith(".pdf")) {
+                path += ".pdf";
+            }
+            return path;
+        }
+
+        // L'utilisateur a cliqué "Annuler"
+        return null;
+    }
+
+    // =========================================================================
+    // DESSIN DU CODE UNIQUE EN HAUT DE LA FICHE
+    // =========================================================================
+
+    /**
+     * Dessine le code unique de la fiche en haut du document,
+     * avec la date de génération alignée à droite.
+     */
+    private float drawPayslipCode(PDPageContentStream content, String code, float yPosition) throws IOException {
+        content.setFont(PDType1Font.HELVETICA_BOLD, 9);
+
+        // Code à gauche
+        content.beginText();
+        content.newLineAtOffset(MARGIN, yPosition);
+        content.showText("Code fiche : " + code);
+        content.endText();
+
+        // Date de génération à droite
+        String genDate = "Generee le : " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        float dateWidth = PDType1Font.HELVETICA_BOLD.getStringWidth(genDate) / 1000 * 9;
+        content.beginText();
+        content.newLineAtOffset(PAGE_WIDTH - MARGIN - dateWidth, yPosition);
+        content.showText(genDate);
+        content.endText();
+
+        yPosition -= 8;
+        drawLine(content, MARGIN, yPosition, PAGE_WIDTH - MARGIN, yPosition);
+
+        return yPosition - 8;
+    }
+
+    // =========================================================================
+    // EN-TÊTE DU DOCUMENT
+    // =========================================================================
 
     /**
      * Dessine l'en-tête du document
@@ -104,6 +269,10 @@ public class PDFService {
 
         return yPosition - 10;
     }
+
+    // =========================================================================
+    // INFORMATIONS EMPLOYÉ
+    // =========================================================================
 
     /**
      * Dessine les informations de l'employé
@@ -166,6 +335,10 @@ public class PDFService {
         return yPosition - 10;
     }
 
+    // =========================================================================
+    // DÉTAILS DU SALAIRE
+    // =========================================================================
+
     /**
      * Dessine les détails du salaire
      */
@@ -195,8 +368,12 @@ public class PDFService {
         return yPosition - 15;
     }
 
+    // =========================================================================
+    // RÈGLES DE BONUS
+    // =========================================================================
+
     /**
-     * Dessine les règles de bonus
+     * Dessine les règles de bonus actives
      */
     private float drawBonusRules(PDPageContentStream content, Salaire salaire, float yPosition) throws IOException {
         List<BonusRule> activeRules = salaire.getBonusRules().stream()
@@ -221,13 +398,13 @@ public class PDFService {
         content.setFont(PDType1Font.HELVETICA, 9);
 
         for (BonusRule rule : activeRules) {
-            // Nom de la règle avec symbole check
+            // Nom et pourcentage de la règle
             content.beginText();
             content.newLineAtOffset(MARGIN + 10, yPosition);
-            content.showText("\u2713 " + rule.getNomRegle() + " (" + String.format("%.0f", rule.getPercentage()) + "%)");
+            content.showText("* " + rule.getNomRegle() + " (" + String.format("%.0f", rule.getPercentage()) + "%)");
             content.endText();
 
-            // Montant
+            // Montant du bonus aligné à droite
             String bonusStr = String.format("%.2f DT", rule.getBonus());
             float bonusWidth = PDType1Font.HELVETICA.getStringWidth(bonusStr) / 1000 * 9;
             content.beginText();
@@ -237,7 +414,7 @@ public class PDFService {
 
             yPosition -= 12;
 
-            // Condition
+            // Condition de la règle (tronquée si trop longue)
             content.setFont(PDType1Font.HELVETICA, 8);
             content.beginText();
             content.newLineAtOffset(MARGIN + 20, yPosition);
@@ -273,8 +450,12 @@ public class PDFService {
         return yPosition - 15;
     }
 
+    // =========================================================================
+    // TOTAL NET À PAYER
+    // =========================================================================
+
     /**
-     * Dessine le total
+     * Dessine le total net à payer
      */
     private float drawTotal(PDPageContentStream content, Salaire salaire, float yPosition) throws IOException {
         drawLine(content, MARGIN, yPosition, PAGE_WIDTH - MARGIN, yPosition);
@@ -298,6 +479,10 @@ public class PDFService {
 
         return yPosition - 10;
     }
+
+    // =========================================================================
+    // INFORMATIONS DE PAIEMENT
+    // =========================================================================
 
     /**
      * Dessine les informations de paiement
@@ -327,12 +512,16 @@ public class PDFService {
         content.setFont(PDType1Font.HELVETICA_BOLD, 9);
         content.beginText();
         content.newLineAtOffset(MARGIN, yPosition);
-        String statusText = "Statut: " + (salaire.getStatus().name().equals("PAYÉ") ? "\u2713 PAYE" : salaire.getStatus().name());
+        String statusText = "Statut: " + (salaire.getStatus().name().equals("PAYÉ") ? "[X] PAYE" : salaire.getStatus().name());
         content.showText(statusText);
         content.endText();
 
         return yPosition - 15;
     }
+
+    // =========================================================================
+    // PIED DE PAGE
+    // =========================================================================
 
     /**
      * Dessine le pied de page
@@ -349,9 +538,13 @@ public class PDFService {
         yPosition -= 12;
         content.beginText();
         content.newLineAtOffset(MARGIN, yPosition);
-        content.showText("INTEGRA - 2024");
+        content.showText("INTEGRA - 2026");
         content.endText();
     }
+
+    // =========================================================================
+    // UTILITAIRES
+    // =========================================================================
 
     /**
      * Dessine une ligne horizontale
@@ -364,6 +557,7 @@ public class PDFService {
 
     /**
      * Génère le nom du fichier PDF
+     * Format : fiche_paie_NOM_PRENOM_YYYY-MM-DD.pdf
      */
     private String generateFileName(Salaire salaire) {
         String employeeName = salaire.getUser().getName().replaceAll("\\s+", "_");

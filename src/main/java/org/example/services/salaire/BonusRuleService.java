@@ -16,7 +16,7 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
 
     private final Connection conn = DatabaseConnection.getInstance().getConnection();
 
-    // ❌ NE PAS FAIRE : private final SalaireService salaireService = new SalaireService();
+
 
     @Override
     public void create(BonusRule rule) {
