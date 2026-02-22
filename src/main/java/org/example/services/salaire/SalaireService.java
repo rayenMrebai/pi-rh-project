@@ -8,6 +8,7 @@ import org.example.model.salaire.Salaire;
 import org.example.services.email.EmailService;
 import org.example.services.email.EmailTemplate;
 import org.example.util.DatabaseConnection;
+import org.example.services.pdf.PDFService;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
     private final Connection conn = DatabaseConnection.getInstance().getConnection();
     private final EmailService emailService = new EmailService();
+    private final PDFService pdfService = new PDFService();
 
     @Override
     public void create(Salaire salaire) {
@@ -95,15 +97,27 @@ public class SalaireService implements GlobalInterface<Salaire> {
             ps.setInt(4, salaire.getId());
             ps.executeUpdate();
 
-            // ⭐ ENVOI EMAIL SI STATUT CHANGE
+            // ⭐ ENVOI EMAIL + PDF SI STATUT CHANGE À PAYÉ
             SalaireStatus newStatus = salaire.getStatus();
             String employeeEmail = salaire.getUser().getEmail();
 
-            // Si passage à PAYÉ
             if (oldStatus != SalaireStatus.PAYÉ && newStatus == SalaireStatus.PAYÉ) {
+                // 1. Générer la fiche de paie PDF
+                String pdfPath = pdfService.generatePayslip(salaire);
+
+                // 2. Préparer l'email
                 String subject = "✅ Votre salaire a été payé";
                 String htmlContent = EmailTemplate.salaryPaidTemplate(salaire);
-                emailService.sendEmail(employeeEmail, subject, htmlContent);
+
+                // 3. Envoyer l'email avec le PDF en pièce jointe
+                if (pdfPath != null) {
+                    emailService.sendEmailWithAttachment(employeeEmail, subject, htmlContent, pdfPath);
+                    System.out.println("✅ Email avec fiche de paie envoyé à: " + employeeEmail);
+                } else {
+                    // Si PDF échoue, envoyer email sans pièce jointe
+                    emailService.sendEmail(employeeEmail, subject, htmlContent);
+                    System.out.println("⚠️ Email envoyé sans fiche de paie (erreur PDF)");
+                }
             }
 
         } catch (SQLException e) {
