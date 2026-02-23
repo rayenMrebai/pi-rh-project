@@ -64,6 +64,13 @@
                 <TextField fx:id="searchField" promptText="Search employee"
                            prefWidth="400" prefHeight="40"
                            style="-fx-background-color: #f7fafc; -fx-border-color: #e2e8f0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-size: 14px; -fx-padding: 0 15;"/>
+
+                <!-- ⭐ NOUVEAU BOUTON EXPORT EXCEL -->
+                <Button fx:id="btnExportExcel" text="📊 Export Excel"
+                        prefHeight="40" prefWidth="160"
+                        style="-fx-background-color: #38a169; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"
+                        onAction="#handleExportExcel"/>
+
                 <Button fx:id="btnAddSalary" text="+ Add Salary"
                         prefHeight="40" prefWidth="180"
                         style="-fx-background-color: #48bb78; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"

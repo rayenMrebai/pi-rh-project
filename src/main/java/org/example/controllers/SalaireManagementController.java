@@ -58,6 +58,8 @@ public class SalaireManagementController {
     @FXML private Button btnGeneratePDF;
     private PDFService pdfService;
 
+    @FXML private Button btnExportExcel;
+
     @FXML
     public void initialize() {
         salaireService = new SalaireService();
@@ -301,6 +303,28 @@ public class SalaireManagementController {
             btnDeleteSalary.setStyle("-fx-background-color: #f56565; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8;");
             btnAddRule.setStyle("-fx-background-color: #9f7aea; -fx-text-fill: white; -fx-font-size: 12px; -fx-font-weight: bold; -fx-background-radius: 8;");
             btnGeneratePDF.setStyle("-fx-background-color: #9f7aea; -fx-text-fill: white; -fx-font-size: 13px; -fx-font-weight: bold; -fx-background-radius: 8;");
+        }
+    }
+
+
+    /**
+     * Ouvre la fenêtre de dialogue d'export Excel
+     */
+    @FXML
+    private void handleExportExcel() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ExportExcelDialog.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Export Excel - Configuration");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            showAlert("Erreur", "Impossible d'ouvrir la fenêtre d'export: " + e.getMessage(), Alert.AlertType.ERROR);
+            e.printStackTrace();
         }
     }
 
