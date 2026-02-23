@@ -1,14 +1,114 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.example.controllers.ExportExcelDialogController"
-            prefHeight="400.0" prefWidth="600.0">
+            prefHeight="650.0" prefWidth="600.0"
+            style="-fx-background-color: #f7fafc;">
+
+    <VBox spacing="20" AnchorPane.topAnchor="20" AnchorPane.leftAnchor="20"
+          AnchorPane.rightAnchor="20" AnchorPane.bottomAnchor="20">
+
+        <!-- HEADER -->
+        <HBox alignment="CENTER" style="-fx-background-color: linear-gradient(to right, #667eea 0%, #764ba2 100%); -fx-background-radius: 10; -fx-padding: 20;">
+            <VBox alignment="CENTER">
+                <Label text="📊 EXPORT EXCEL" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                <Label text="Configuration de l'export" style="-fx-font-size: 12px; -fx-text-fill: white;"/>
+            </VBox>
+        </HBox>
+
+        <!-- SECTION 1: PÉRIODE -->
+        <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20;">
+            <Label text="1️⃣ PÉRIODE D'EXPORT" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d3748;"/>
+            <Separator/>
+
+            <RadioButton fx:id="rbTous" text="Tous les salaires" selected="true"
+                         style="-fx-font-size: 13px;">
+                <toggleGroup>
+                    <ToggleGroup fx:id="periodeGroup"/>
+                </toggleGroup>
+            </RadioButton>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <RadioButton fx:id="rbMois" text="Par mois :" toggleGroup="$periodeGroup"
+                             style="-fx-font-size: 13px;"/>
+                <ComboBox fx:id="cmbMois" prefWidth="120" promptText="Mois" disable="true"/>
+                <ComboBox fx:id="cmbAnneeMois" prefWidth="100" promptText="Année" disable="true"/>
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <RadioButton fx:id="rbAnnee" text="Par année :" toggleGroup="$periodeGroup"
+                             style="-fx-font-size: 13px;"/>
+                <ComboBox fx:id="cmbAnnee" prefWidth="120" promptText="Année" disable="true"/>
+            </HBox>
+
+            <VBox spacing="5">
+                <RadioButton fx:id="rbPersonnalisee" text="Période personnalisée :" toggleGroup="$periodeGroup"
+                             style="-fx-font-size: 13px;"/>
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 0 0 0 30;">
+                    <Label text="Du" style="-fx-font-size: 12px;"/>
+                    <DatePicker fx:id="dpDebut" prefWidth="150" disable="true"/>
+                    <Label text="Au" style="-fx-font-size: 12px;"/>
+                    <DatePicker fx:id="dpFin" prefWidth="150" disable="true"/>
+                </HBox>
+            </VBox>
+        </VBox>
+
+        <!-- SECTION 2: FILTRES -->
+        <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20;">
+            <Label text="2️⃣ FILTRES OPTIONNELS" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d3748;"/>
+            <Separator/>
+
+            <VBox spacing="5">
+                <Label text="Filtrer par statut :" style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
+                <HBox spacing="15">
+                    <CheckBox fx:id="chkPaye" text="PAYÉ" selected="true" style="-fx-font-size: 12px;"/>
+                    <CheckBox fx:id="chkEnCours" text="EN_COURS" selected="true" style="-fx-font-size: 12px;"/>
+                    <CheckBox fx:id="chkCree" text="CRÉÉ" selected="true" style="-fx-font-size: 12px;"/>
+                </HBox>
+            </VBox>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <CheckBox fx:id="chkFilterMontant" text="Montant minimum :" style="-fx-font-size: 13px;"/>
+                <TextField fx:id="txtMontantMin" prefWidth="120" promptText="Ex: 30000" disable="true"/>
+                <Label text="DT" style="-fx-font-size: 12px;"/>
+            </HBox>
+        </VBox>
+
+        <!-- SECTION 3: OPTIONS -->
+        <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 20;">
+            <Label text="3️⃣ OPTIONS D'EXPORT" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2d3748;"/>
+            <Separator/>
+
+            <CheckBox fx:id="chkStatistiques" text="Inclure feuille Statistiques" selected="true"
+                      style="-fx-font-size: 13px;"/>
+            <CheckBox fx:id="chkBonus" text="Inclure détails règles de bonus"
+                      style="-fx-font-size: 13px;"/>
+            <CheckBox fx:id="chkFormatage" text="Appliquer formatage couleurs" selected="true"
+                      style="-fx-font-size: 13px;"/>
+        </VBox>
+
+        <!-- SECTION 4: NOM FICHIER -->
+        <VBox spacing="8" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15;">
+            <Label text="📁 Nom du fichier" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #2d3748;"/>
+            <TextField fx:id="txtFilename" promptText="salaires_export.xlsx"
+                       style="-fx-font-size: 12px; -fx-padding: 8;"/>
+        </VBox>
+
+        <!-- BOUTONS -->
+        <HBox spacing="15" alignment="CENTER">
+            <Button fx:id="btnAnnuler" text="Annuler" prefWidth="120" prefHeight="40"
+                    style="-fx-background-color: #cbd5e0; -fx-text-fill: #2d3748; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"
+                    onAction="#handleAnnuler"/>
+            <Button fx:id="btnExporter" text="📊 Exporter" prefWidth="150" prefHeight="40"
+                    style="-fx-background-color: #48bb78; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-background-radius: 8;"
+                    onAction="#handleExporter"/>
+        </HBox>
+
+    </VBox>
 
 </AnchorPane>
