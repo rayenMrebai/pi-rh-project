@@ -105,10 +105,12 @@ public class Salaire {
 
     // get et set list
     public List<BonusRule> getBonusRules() {
+
         return bonusRules;
     }
 
     public void setBonusRules(List<BonusRule> bonusRules) {
+
         this.bonusRules = bonusRules;
     }
 

@@ -79,16 +79,15 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
     @Override
     public void update(Salaire salaire) {
-
-        // ⭐ Récupérer l'ancien statut AVANT la mise à jour
+        // Récupérer l'ancien statut AVANT la mise à jour
         Salaire oldSalaire = getById(salaire.getId());
         SalaireStatus oldStatus = (oldSalaire != null) ? oldSalaire.getStatus() : null;
 
         String sql = """
-            UPDATE salaire 
-            SET status = ?, datePaiement = ?, updatedAt = ?
-            WHERE id = ?
-        """;
+        UPDATE salaire 
+        SET status = ?, datePaiement = ?, updatedAt = ?
+        WHERE id = ?
+    """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, salaire.getStatus().name());
@@ -97,26 +96,31 @@ public class SalaireService implements GlobalInterface<Salaire> {
             ps.setInt(4, salaire.getId());
             ps.executeUpdate();
 
-            // ⭐ ENVOI EMAIL + PDF SI STATUT CHANGE À PAYÉ
+            // ENVOI EMAIL + PDF SI STATUT CHANGE À PAYÉ
             SalaireStatus newStatus = salaire.getStatus();
             String employeeEmail = salaire.getUser().getEmail();
 
             if (oldStatus != SalaireStatus.PAYÉ && newStatus == SalaireStatus.PAYÉ) {
-                // 1. Générer la fiche de paie PDF
-                String pdfPath = pdfService.generatePayslip(salaire);
+                // ⭐ CORRECTION : Charger le salaire COMPLET
+                Salaire salaireComplet = getById(salaire.getId());
 
-                // 2. Préparer l'email
-                String subject = "✅ Votre salaire a été payé";
-                String htmlContent = EmailTemplate.salaryPaidTemplate(salaire);
+                if (salaireComplet != null) {
+                    // 1. Générer la fiche de paie PDF
+                    String pdfPath = pdfService.generatePayslip(salaireComplet);
 
-                // 3. Envoyer l'email avec le PDF en pièce jointe
-                if (pdfPath != null) {
-                    emailService.sendEmailWithAttachment(employeeEmail, subject, htmlContent, pdfPath);
-                    System.out.println("✅ Email avec fiche de paie envoyé à: " + employeeEmail);
-                } else {
-                    // Si PDF échoue, envoyer email sans pièce jointe
-                    emailService.sendEmail(employeeEmail, subject, htmlContent);
-                    System.out.println("⚠️ Email envoyé sans fiche de paie (erreur PDF)");
+                    // 2. Préparer l'email
+                    String subject = "✅ Votre salaire a été payé";
+                    String htmlContent = EmailTemplate.salaryPaidTemplate(salaireComplet);
+
+                    // 3. Envoyer l'email avec le PDF en pièce jointe
+                    if (pdfPath != null) {
+                        emailService.sendEmailWithAttachment(employeeEmail, subject, htmlContent, pdfPath);
+                        System.out.println("✅ Email avec fiche de paie envoyé à: " + employeeEmail);
+                    } else {
+                        // Si PDF échoue, envoyer email sans pièce jointe
+                        emailService.sendEmail(employeeEmail, subject, htmlContent);
+                        System.out.println("⚠️ Email envoyé sans fiche de paie (erreur PDF)");
+                    }
                 }
             }
 

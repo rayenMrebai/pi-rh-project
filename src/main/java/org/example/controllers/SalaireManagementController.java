@@ -433,8 +433,16 @@ public class SalaireManagementController {
         }
 
         try {
-            // Générer le PDF
-            String pdfPath = pdfService.generatePayslip(selectedSalaire);
+            // ⭐ CORRECTION : Recharger le salaire complet avec les règles
+            Salaire salaireComplet = salaireService.getById(selectedSalaire.getId());
+
+            if (salaireComplet == null) {
+                showAlert("Erreur", "Impossible de charger les données du salaire", Alert.AlertType.ERROR);
+                return;
+            }
+
+            // Générer le PDF avec le salaire complet
+            String pdfPath = pdfService.generatePayslip(salaireComplet);
 
             if (pdfPath != null) {
                 showAlert(
