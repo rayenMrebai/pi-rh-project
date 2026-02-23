@@ -17,7 +17,7 @@ public class TrainingProgramService implements GlobalInterface<TrainingProgram> 
     @Override
     public void create(TrainingProgram training) {
         String sql = """
-            INSERT INTO TrainingProgram(title, description, duration, startDate, endDate, type)
+            INSERT INTO training_program(title, description, duration, start_date, end_date, type)
             VALUES (?, ?, ?, ?, ?, ?)
         """;
 
@@ -49,8 +49,8 @@ public class TrainingProgramService implements GlobalInterface<TrainingProgram> 
         List<TrainingProgram> trainings = new ArrayList<>();
 
         String sql = """
-            SELECT id, title, description, duration, startDate, endDate, type
-            FROM TrainingProgram
+            SELECT id, title, description, duration, start_date, end_date, type
+            FROM training_program
         """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -72,8 +72,8 @@ public class TrainingProgramService implements GlobalInterface<TrainingProgram> 
     @Override
     public void update(TrainingProgram training) {
         String sql = """
-            UPDATE TrainingProgram 
-            SET title = ?, description = ?, duration = ?, startDate = ?, endDate = ?, type = ?
+            UPDATE training_program 
+            SET title = ?, description = ?, duration = ?, start_date = ?, end_date = ?, type = ?
             WHERE id = ?
         """;
 
@@ -102,7 +102,7 @@ public class TrainingProgramService implements GlobalInterface<TrainingProgram> 
     // DELETE
     @Override
     public void delete(int id) {
-        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM TrainingProgram WHERE id = ?")) {
+        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM training_program WHERE id = ?")) {
             ps.setInt(1, id);
 
             int rowsAffected = ps.executeUpdate();
@@ -128,8 +128,8 @@ public class TrainingProgramService implements GlobalInterface<TrainingProgram> 
         training.setTitle(rs.getString("title"));
         training.setDescription(rs.getString("description"));
         training.setDuration(rs.getInt("duration"));
-        training.setStartDate(rs.getDate("startDate"));
-        training.setEndDate(rs.getDate("endDate"));
+        training.setStartDate(rs.getDate("start_date"));   // ✅ corrigé
+        training.setEndDate(rs.getDate("end_date"));       // ✅ corrigé
         training.setType(rs.getString("type"));
 
         return training;
@@ -140,8 +140,8 @@ public class TrainingProgramService implements GlobalInterface<TrainingProgram> 
     // GET BY ID
     public TrainingProgram getById(int id) {
         String sql = """
-            SELECT id, title, description, duration, startDate, endDate, type
-            FROM TrainingProgram
+            SELECT id, title, description, duration, start_date, end_date, type
+            FROM training_program
             WHERE id = ?
         """;
 
@@ -165,8 +165,8 @@ public class TrainingProgramService implements GlobalInterface<TrainingProgram> 
         List<TrainingProgram> trainings = new ArrayList<>();
 
         String sql = """
-            SELECT id, title, description, duration, startDate, endDate, type
-            FROM TrainingProgram
+            SELECT id, title, description, duration, start_date, end_date, type
+            FROM training_program
             WHERE type = ?
         """;
 
@@ -191,8 +191,8 @@ public class TrainingProgramService implements GlobalInterface<TrainingProgram> 
         List<TrainingProgram> trainings = new ArrayList<>();
 
         String sql = """
-            SELECT id, title, description, duration, startDate, endDate, type
-            FROM TrainingProgram
+            SELECT id, title, description, duration, start_date, end_date, type
+            FROM training_program
             WHERE title LIKE ?
         """;
 
@@ -217,8 +217,8 @@ public class TrainingProgramService implements GlobalInterface<TrainingProgram> 
         List<TrainingProgram> trainings = new ArrayList<>();
 
         String sql = """
-            SELECT id, title, description, duration, startDate, endDate, type
-            FROM TrainingProgram
+            SELECT id, title, description, duration, start_date, end_date, type
+            FROM training_program
             WHERE CURDATE() BETWEEN startDate AND endDate
         """;
 
@@ -242,8 +242,8 @@ public class TrainingProgramService implements GlobalInterface<TrainingProgram> 
         List<TrainingProgram> trainings = new ArrayList<>();
 
         String sql = """
-            SELECT id, title, description, duration, startDate, endDate, type
-            FROM TrainingProgram
+            SELECT id, title, description, duration, start_date, end_date, type
+            FROM training_program
             WHERE startDate > CURDATE()
             ORDER BY startDate ASC
         """;

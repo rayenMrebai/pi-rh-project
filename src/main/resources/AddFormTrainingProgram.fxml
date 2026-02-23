@@ -13,33 +13,39 @@
           style="-fx-background-color: linear-gradient(to right, #0d47a1, #1976d2); -fx-padding: 16 20;">
         <Label text="🎓" style="-fx-font-size: 22px;"/>
         <VBox spacing="2">
-            <Label text="Ajouter un Programme de Formation" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
-            <Label text="Remplissez les informations du programme" style="-fx-text-fill: #90caf9; -fx-font-size: 11px;"/>
+            <Label text="Ajouter un Programme de Formation"
+                   style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <Label text="Remplissez les informations du programme"
+                   style="-fx-text-fill: #90caf9; -fx-font-size: 11px;"/>
         </VBox>
     </HBox>
 
     <VBox spacing="14" style="-fx-background-color: white; -fx-padding: 24;">
 
         <VBox spacing="5">
-            <Label text="Titre du programme *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <Label text="Titre du programme *"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
             <TextField fx:id="titleField" promptText="Ex: Advanced Java Development"
                        style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-padding: 9 12; -fx-font-size: 13px;"/>
         </VBox>
 
         <VBox spacing="5">
-            <Label text="Description *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <Label text="Description *"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
             <TextArea fx:id="descriptionField" promptText="Décrivez le programme..." prefRowCount="3"
                       style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-padding: 9 12; -fx-font-size: 13px;"/>
         </VBox>
 
         <HBox spacing="14">
             <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="Durée (semaines) *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                <Label text="Durée (semaines) *"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
                 <Spinner fx:id="durationSpinner" min="1" max="52" initialValue="4"
                          style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;"/>
             </VBox>
             <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="Type *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                <Label text="Type *"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
                 <ComboBox fx:id="typeCombo" maxWidth="Infinity" promptText="Sélectionner..."
                           style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
             </VBox>
@@ -47,19 +53,23 @@
 
         <HBox spacing="14">
             <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="Date de début *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                <Label text="Date de début *"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
                 <DatePicker fx:id="startDatePicker" maxWidth="Infinity"/>
             </VBox>
             <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="Date de fin *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                <Label text="Date de fin *"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
                 <DatePicker fx:id="endDatePicker" maxWidth="Infinity"/>
             </VBox>
         </HBox>
 
+        <!-- ✅ NOUVEAU : Sélectionner un skill à associer -->
         <VBox spacing="5">
-            <Label text="Capacité maximale (participants)" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
-            <Spinner fx:id="capacitySpinner" min="1" max="500" initialValue="20" maxWidth="Infinity"
-                     style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;"/>
+            <Label text="Compétence associée (optionnel)"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <ComboBox fx:id="skillCombo" maxWidth="Infinity" promptText="Sélectionner une compétence..."
+                      style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
         </VBox>
 
         <Label fx:id="errorLabel" text="" wrapText="true"

@@ -13,34 +13,48 @@
           style="-fx-background-color: linear-gradient(to right, #0d47a1, #1976d2); -fx-padding: 16 20;">
         <Label text="🎯" style="-fx-font-size: 22px;"/>
         <VBox spacing="2">
-            <Label text="Ajouter une Compétence" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
-            <Label text="Remplissez les informations de la compétence" style="-fx-text-fill: #90caf9; -fx-font-size: 11px;"/>
+            <Label text="Ajouter une Compétence"
+                   style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <Label text="Remplissez les informations de la compétence"
+                   style="-fx-text-fill: #90caf9; -fx-font-size: 11px;"/>
         </VBox>
     </HBox>
 
     <VBox spacing="16" style="-fx-background-color: white; -fx-padding: 24;">
 
         <VBox spacing="5">
-            <Label text="Nom de la compétence *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <Label text="Nom de la compétence *"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
             <TextField fx:id="nomField" promptText="Ex: Java Programming"
                        style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-padding: 9 12; -fx-font-size: 13px;"/>
         </VBox>
 
         <VBox spacing="5">
-            <Label text="Description *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <Label text="Description *"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
             <TextArea fx:id="descriptionField" promptText="Décrivez cette compétence..." prefRowCount="3"
                       style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-padding: 9 12; -fx-font-size: 13px;"/>
         </VBox>
 
         <VBox spacing="5">
-            <Label text="Niveau requis *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <Label text="Niveau requis *"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
             <ComboBox fx:id="levelCombo" maxWidth="Infinity" promptText="Sélectionner un niveau..."
                       style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
         </VBox>
 
         <VBox spacing="5">
-            <Label text="Catégorie *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <Label text="Catégorie *"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
             <ComboBox fx:id="categoryCombo" maxWidth="Infinity" promptText="Sélectionner une catégorie..."
+                      style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
+        </VBox>
+
+        <!-- ✅ NOUVEAU : Associer à une formation directement -->
+        <VBox spacing="5">
+            <Label text="Formation associée (optionnel)"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <ComboBox fx:id="trainingCombo" maxWidth="Infinity" promptText="Sélectionner une formation..."
                       style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
         </VBox>
 
