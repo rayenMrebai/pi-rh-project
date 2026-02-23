@@ -6,22 +6,48 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.Controllers.AddFormSkillController"
-      prefWidth="480" spacing="0"
+      prefWidth="540" spacing="0"
       style="-fx-background-color: #f0f2f5;">
 
+    <!-- Header -->
     <HBox alignment="CENTER_LEFT" spacing="12"
           style="-fx-background-color: linear-gradient(to right, #0d47a1, #1976d2); -fx-padding: 16 20;">
         <Label text="🎯" style="-fx-font-size: 22px;"/>
         <VBox spacing="2">
             <Label text="Ajouter une Compétence"
                    style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
-            <Label text="Remplissez les informations de la compétence"
+            <Label text="Remplissez ou importez depuis ESCO"
                    style="-fx-text-fill: #90caf9; -fx-font-size: 11px;"/>
         </VBox>
     </HBox>
 
-    <VBox spacing="16" style="-fx-background-color: white; -fx-padding: 24;">
+    <VBox spacing="14" style="-fx-background-color: white; -fx-padding: 24;">
 
+        <!-- ✅ ESCO SEARCH SECTION -->
+        <VBox spacing="6"
+              style="-fx-background-color: #e8f4fd; -fx-background-radius: 8; -fx-padding: 12; -fx-border-color: #90caf9; -fx-border-radius: 8; -fx-border-width: 1;">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="🌐" style="-fx-font-size: 16px;"/>
+                <Label text="Recherche intelligente ESCO (EU Skills API)"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #0d47a1;"/>
+            </HBox>
+            <HBox spacing="8">
+                <TextField fx:id="escoSearchField"
+                           promptText="Ex: Java, machine learning, gestion de projet..."
+                           HBox.hgrow="ALWAYS"
+                           style="-fx-background-radius: 6; -fx-border-color: #90caf9; -fx-border-radius: 6; -fx-padding: 8; -fx-font-size: 12px;"/>
+                <Button text="🔍 Rechercher" onAction="#handleEscoSearch"
+                        style="-fx-background-color: #1976d2; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 14; -fx-background-radius: 6; -fx-cursor: hand;"/>
+            </HBox>
+            <Label text="Sélectionnez un résultat pour remplir le formulaire automatiquement :"
+                   style="-fx-font-size: 10px; -fx-text-fill: #546e7a;"/>
+            <ListView fx:id="escoResultsList" prefHeight="110"
+                      style="-fx-background-radius: 6; -fx-border-color: #90caf9; -fx-border-radius: 6;"/>
+            <Label fx:id="escoStatusLabel" text=""
+                   style="-fx-font-size: 10px; -fx-text-fill: #546e7a; -fx-font-style: italic;"/>
+        </VBox>
+
+        <!-- Nom -->
         <VBox spacing="5">
             <Label text="Nom de la compétence *"
                    style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
@@ -29,6 +55,7 @@
                        style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-padding: 9 12; -fx-font-size: 13px;"/>
         </VBox>
 
+        <!-- Description -->
         <VBox spacing="5">
             <Label text="Description *"
                    style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
@@ -36,31 +63,38 @@
                       style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-padding: 9 12; -fx-font-size: 13px;"/>
         </VBox>
 
-        <VBox spacing="5">
-            <Label text="Niveau requis *"
-                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
-            <ComboBox fx:id="levelCombo" maxWidth="Infinity" promptText="Sélectionner un niveau..."
-                      style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
-        </VBox>
+        <!-- Niveau + Catégorie -->
+        <HBox spacing="14">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Niveau requis *"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                <ComboBox fx:id="levelCombo" maxWidth="Infinity"
+                          promptText="Sélectionner un niveau..."
+                          style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
+            </VBox>
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Catégorie *"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                <ComboBox fx:id="categoryCombo" maxWidth="Infinity"
+                          promptText="Sélectionner..."
+                          style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
+            </VBox>
+        </HBox>
 
-        <VBox spacing="5">
-            <Label text="Catégorie *"
-                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
-            <ComboBox fx:id="categoryCombo" maxWidth="Infinity" promptText="Sélectionner une catégorie..."
-                      style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
-        </VBox>
-
-        <!-- ✅ NOUVEAU : Associer à une formation directement -->
+        <!-- Formation associée -->
         <VBox spacing="5">
             <Label text="Formation associée (optionnel)"
                    style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
-            <ComboBox fx:id="trainingCombo" maxWidth="Infinity" promptText="Sélectionner une formation..."
+            <ComboBox fx:id="trainingCombo" maxWidth="Infinity"
+                      promptText="Sélectionner une formation..."
                       style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
         </VBox>
 
+        <!-- Error -->
         <Label fx:id="errorLabel" text="" wrapText="true"
                style="-fx-text-fill: #e53935; -fx-font-size: 12px;"/>
 
+        <!-- Buttons -->
         <HBox spacing="12" alignment="CENTER_RIGHT">
             <Button text="Annuler" onAction="#handleCancel"
                     style="-fx-background-color: #eceff1; -fx-text-fill: #546e7a; -fx-font-weight: bold; -fx-padding: 10 24; -fx-background-radius: 6; -fx-cursor: hand;"/>

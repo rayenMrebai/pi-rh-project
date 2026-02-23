@@ -6,22 +6,48 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.Controllers.AddFormTrainingProgramController"
-      prefWidth="520" spacing="0"
+      prefWidth="560" spacing="0"
       style="-fx-background-color: #f0f2f5;">
 
+    <!-- Header -->
     <HBox alignment="CENTER_LEFT" spacing="12"
           style="-fx-background-color: linear-gradient(to right, #0d47a1, #1976d2); -fx-padding: 16 20;">
         <Label text="🎓" style="-fx-font-size: 22px;"/>
         <VBox spacing="2">
             <Label text="Ajouter un Programme de Formation"
                    style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
-            <Label text="Remplissez les informations du programme"
+            <Label text="Remplissez ou importez depuis Coursera"
                    style="-fx-text-fill: #90caf9; -fx-font-size: 11px;"/>
         </VBox>
     </HBox>
 
     <VBox spacing="14" style="-fx-background-color: white; -fx-padding: 24;">
 
+        <!-- ✅ SECTION COURSERA -->
+        <VBox spacing="6"
+              style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-padding: 12; -fx-border-color: #a5d6a7; -fx-border-radius: 8; -fx-border-width: 1;">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="🎓" style="-fx-font-size: 16px;"/>
+                <Label text="Recherche Coursera (catalogue réel de formations)"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #1b5e20;"/>
+            </HBox>
+            <HBox spacing="8">
+                <TextField fx:id="courseraSearchField"
+                           promptText="Ex: Java, Machine Learning, Project Management..."
+                           HBox.hgrow="ALWAYS"
+                           style="-fx-background-radius: 6; -fx-border-color: #a5d6a7; -fx-border-radius: 6; -fx-padding: 8; -fx-font-size: 12px;"/>
+                <Button text="🔍 Rechercher" onAction="#handleCourseraSearch"
+                        style="-fx-background-color: #2e7d32; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 14; -fx-background-radius: 6; -fx-cursor: hand;"/>
+            </HBox>
+            <Label text="Cliquez sur un résultat pour remplir le formulaire automatiquement :"
+                   style="-fx-font-size: 10px; -fx-text-fill: #546e7a;"/>
+            <ListView fx:id="courseraResultsList" prefHeight="120"
+                      style="-fx-background-radius: 6; -fx-border-color: #a5d6a7; -fx-border-radius: 6;"/>
+            <Label fx:id="courseraStatusLabel" text=""
+                   style="-fx-font-size: 10px; -fx-text-fill: #546e7a; -fx-font-style: italic;"/>
+        </VBox>
+
+        <!-- Titre -->
         <VBox spacing="5">
             <Label text="Titre du programme *"
                    style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
@@ -29,6 +55,7 @@
                        style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-padding: 9 12; -fx-font-size: 13px;"/>
         </VBox>
 
+        <!-- Description -->
         <VBox spacing="5">
             <Label text="Description *"
                    style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
@@ -36,6 +63,7 @@
                       style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-padding: 9 12; -fx-font-size: 13px;"/>
         </VBox>
 
+        <!-- Durée + Type -->
         <HBox spacing="14">
             <VBox spacing="5" HBox.hgrow="ALWAYS">
                 <Label text="Durée (semaines) *"
@@ -51,6 +79,7 @@
             </VBox>
         </HBox>
 
+        <!-- Dates -->
         <HBox spacing="14">
             <VBox spacing="5" HBox.hgrow="ALWAYS">
                 <Label text="Date de début *"
@@ -64,7 +93,7 @@
             </VBox>
         </HBox>
 
-        <!-- ✅ NOUVEAU : Sélectionner un skill à associer -->
+        <!-- Skill associé -->
         <VBox spacing="5">
             <Label text="Compétence associée (optionnel)"
                    style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
@@ -72,9 +101,11 @@
                       style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
         </VBox>
 
+        <!-- Error -->
         <Label fx:id="errorLabel" text="" wrapText="true"
                style="-fx-text-fill: #e53935; -fx-font-size: 12px;"/>
 
+        <!-- Buttons -->
         <HBox spacing="12" alignment="CENTER_RIGHT">
             <Button text="Annuler" onAction="#handleCancel"
                     style="-fx-background-color: #eceff1; -fx-text-fill: #546e7a; -fx-font-weight: bold; -fx-padding: 10 24; -fx-background-radius: 6; -fx-cursor: hand;"/>
