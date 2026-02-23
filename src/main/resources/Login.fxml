@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane styleClass="theme-light" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginController">
+    <center>
+        <VBox alignment="CENTER" spacing="30" styleClass="login-card" maxWidth="450" maxHeight="500">
+            <padding>
+                <Insets top="40" right="40" bottom="40" left="40"/>
+            </padding>
+            <children>
+                <Label text="INTEGRA" styleClass="login-logo" />
+                <Label text="Connectez-vous à votre espace" styleClass="login-subtitle" />
+
+                <GridPane hgap="10" vgap="15">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="100"/>
+                    </columnConstraints>
+                    <padding><Insets top="10"/></padding>
+
+                    <Label text="Nom d'utilisateur" GridPane.rowIndex="0" styleClass="login-label"/>
+                    <TextField fx:id="usernameField" GridPane.rowIndex="1" styleClass="login-field"/>
+
+                    <Label text="Mot de passe" GridPane.rowIndex="2" styleClass="login-label"/>
+                    <PasswordField fx:id="passwordField" GridPane.rowIndex="3" styleClass="login-field"/>
+
+                    <Button fx:id="loginButton" text="Se connecter" GridPane.rowIndex="4" styleClass="login-button" maxWidth="Infinity"/>
+                </GridPane>
+
+                <Hyperlink fx:id="signUpLink" text="Pas encore de compte ? S'inscrire" styleClass="login-link"/>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

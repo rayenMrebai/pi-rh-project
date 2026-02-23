@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<GridPane styleClass="theme-light" stylesheets="@style.css" alignment="CENTER" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.UserSettingsController">
+    <padding><Insets bottom="20" left="20" right="20" top="20" /></padding>
+
+    <Label text="Thème" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+    <ComboBox fx:id="themeCombo" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="200.0" />
+
+    <Label text="Langue" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+    <ComboBox fx:id="languageCombo" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="200.0" />
+
+    <Label text="Module par défaut" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+    <TextField fx:id="defaultModuleField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+    <Label text="Notifications" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+    <CheckBox fx:id="notificationsCheck" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+    <Label text="Disposition dashboard" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+    <TextArea fx:id="dashboardLayoutArea" GridPane.columnIndex="1" GridPane.rowIndex="4" prefRowCount="3" prefWidth="300.0" />
+
+    <Label text="Préférences accès" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+    <TextArea fx:id="accessPreferencesArea" GridPane.columnIndex="1" GridPane.rowIndex="5" prefRowCount="3" prefWidth="300.0" />
+
+    <Button fx:id="saveButton" text="Enregistrer" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+    <Button fx:id="cancelButton" text="Annuler" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+</GridPane>
