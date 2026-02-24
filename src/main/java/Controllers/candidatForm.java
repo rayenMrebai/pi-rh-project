@@ -4,10 +4,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.model.recrutement.Candidat;
+import org.example.model.recrutement.JobPosition;
 import org.example.services.recrutement.CandidatService;
-import javafx.fxml.FXML;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
 
 public class candidatForm {
 
@@ -18,33 +16,34 @@ public class candidatForm {
     @FXML private TextField tfEducationLevel;
     @FXML private TextArea taSkills;
     @FXML private ComboBox<String> cbStatus;
+    @FXML private Label lblJobInfo; // Nouveau label pour afficher le job
 
     private final CandidatService service = new CandidatService();
-    private Candidat candidatToEdit = null; // null => ADD
+    private Candidat candidatToEdit = null;
+    private JobPosition selectedJob = null;
 
     @FXML
     public void initialize() {
         cbStatus.getItems().addAll("NEW", "IN_REVIEW", "ACCEPTED", "REJECTED");
         cbStatus.getSelectionModel().selectFirst();
-        // 1) Phone : chiffres uniquement
+
+        // Validations de saisie
         tfPhone.setTextFormatter(new TextFormatter<String>(change -> {
             String newText = change.getControlNewText();
             if (newText.matches("\\d*")) return change;
             return null;
         }));
 
-        // 2) First/Last name : lettres + espaces uniquement
         onlyLetters(tfFirstName);
         onlyLetters(tfLastName);
 
-        // 3) Education : lettres + chiffres + espaces + - + / (ex: "3ème année", "Bac+3")
         tfEducationLevel.setTextFormatter(new TextFormatter<String>(change -> {
             String t = change.getControlNewText();
             if (t.matches("[a-zA-ZÀ-ÿ0-9 \\-+/]*")) return change;
             return null;
         }));
-
     }
+
     private void onlyLetters(TextField tf) {
         tf.setTextFormatter(new TextFormatter<String>(change -> {
             String t = change.getControlNewText();
@@ -53,9 +52,17 @@ public class candidatForm {
         }));
     }
 
-    // appelé depuis manageRecruitment
+    // Nouvelle méthode pour définir le job sélectionné (pour l'ajout)
+    public void setSelectedJob(JobPosition job) {
+        this.selectedJob = job;
+        if (lblJobInfo != null && job != null) {
+            lblJobInfo.setText("Applying for: " + job.getTitle());
+        }
+    }
+
     public void setCandidatToEdit(Candidat c) {
         this.candidatToEdit = c;
+        this.selectedJob = c.getJobPosition();
 
         tfFirstName.setText(c.getFirstName());
         tfLastName.setText(c.getLastName());
@@ -64,12 +71,21 @@ public class candidatForm {
         tfEducationLevel.setText(c.getEducationLevel());
         taSkills.setText(c.getSkills());
         cbStatus.setValue(c.getStatus());
+
+        if (lblJobInfo != null && selectedJob != null) {
+            lblJobInfo.setText("Job: " + selectedJob.getTitle());
+        }
     }
 
     @FXML
     private void onSave() {
         if (tfFirstName.getText().isEmpty() || tfLastName.getText().isEmpty()) {
             alert("First name and Last name are required!");
+            return;
+        }
+
+        if (selectedJob == null && candidatToEdit == null) {
+            alert("No job selected for this candidate!");
             return;
         }
 
@@ -82,7 +98,7 @@ public class candidatForm {
         }
 
         if (candidatToEdit == null) {
-            // ADD
+            // ADD - Nouveau candidat
             Candidat c = new Candidat();
             c.setFirstName(tfFirstName.getText());
             c.setLastName(tfLastName.getText());
@@ -91,10 +107,11 @@ public class candidatForm {
             c.setEducationLevel(tfEducationLevel.getText());
             c.setSkills(taSkills.getText());
             c.setStatus(cbStatus.getValue());
+            c.setJobPosition(selectedJob); // Lier au job sélectionné
 
             service.create(c);
         } else {
-            // EDIT
+            // EDIT - Mise à jour
             candidatToEdit.setFirstName(tfFirstName.getText());
             candidatToEdit.setLastName(tfLastName.getText());
             candidatToEdit.setEmail(tfEmail.getText());
@@ -102,6 +119,7 @@ public class candidatForm {
             candidatToEdit.setEducationLevel(tfEducationLevel.getText());
             candidatToEdit.setSkills(taSkills.getText());
             candidatToEdit.setStatus(cbStatus.getValue());
+            // Ne pas changer le job en édition
 
             service.update(candidatToEdit);
         }

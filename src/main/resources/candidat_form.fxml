@@ -41,6 +41,13 @@
                     <Insets top="18" right="18" bottom="18" left="18"/>
                 </padding>
 
+                <!-- JOB INFO (Nouveau) -->
+                <VBox spacing="10" style="-fx-background-color: #e8f0fe; -fx-background-radius: 12; -fx-padding: 10;">
+                    <Label fx:id="lblJobInfo"
+                           text="Select a job first in the main window"
+                           style="-fx-font-weight: bold; -fx-text-fill: #2563eb; -fx-font-size: 14;"/>
+                </VBox>
+
                 <!-- SECTION: PERSONAL INFO -->
                 <VBox spacing="10">
                     <Label text="Personal Information"
