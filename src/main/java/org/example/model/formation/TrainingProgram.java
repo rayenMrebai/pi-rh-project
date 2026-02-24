@@ -9,6 +9,10 @@ public class TrainingProgram {
     private Date startDate;
     private Date endDate;
     private String type;
+    private String status;
+
+
+
     //Constructeurs
     public TrainingProgram() {}
     public TrainingProgram(int id, String title, String description, int duration, Date startDate, Date endDate, String type) {
@@ -84,6 +88,8 @@ public class TrainingProgram {
     public void setType(String type) {
         this.type = type;
     }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     //toString
     @Override
     public String toString() {

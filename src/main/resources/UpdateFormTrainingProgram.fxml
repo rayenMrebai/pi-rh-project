@@ -6,75 +6,93 @@
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.example.Controllers.UpdateFormTrainingProgramController"
-      prefWidth="520" spacing="0"
+      prefWidth="560" spacing="0"
       style="-fx-background-color: #f0f2f5;">
 
     <HBox alignment="CENTER_LEFT" spacing="12"
           style="-fx-background-color: linear-gradient(to right, #e65100, #f57c00); -fx-padding: 16 20;">
         <Label text="🔄" style="-fx-font-size: 22px;"/>
         <VBox spacing="2">
-            <Label text="Modifier un Programme de Formation" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
-            <Label text="Modifiez les informations du programme" style="-fx-text-fill: #ffe0b2; -fx-font-size: 11px;"/>
+            <Label text="Modifier un Programme de Formation"
+                   style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <Label text="Modifiez les informations du programme"
+                   style="-fx-text-fill: #ffe0b2; -fx-font-size: 11px;"/>
         </VBox>
     </HBox>
 
     <VBox spacing="14" style="-fx-background-color: white; -fx-padding: 24;">
 
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <Label text="ID :" style="-fx-font-size: 12px; -fx-text-fill: #90a4ae;"/>
-            <Label fx:id="idLabel" text=""
-                   style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1a237e; -fx-background-color: #e8eaf6; -fx-padding: 3 10; -fx-background-radius: 4;"/>
-        </HBox>
-
+        <!-- Titre -->
         <VBox spacing="5">
-            <Label text="Titre du programme *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
-            <TextField fx:id="titleField" promptText="Ex: Advanced Java Development"
+            <Label text="Titre du programme *"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <TextField fx:id="titleField"
                        style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-padding: 9 12; -fx-font-size: 13px;"/>
         </VBox>
 
+        <!-- Description -->
         <VBox spacing="5">
-            <Label text="Description *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
-            <TextArea fx:id="descriptionField" promptText="Décrivez le programme..." prefRowCount="3"
+            <Label text="Description *"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <TextArea fx:id="descriptionField" prefRowCount="3"
                       style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6; -fx-padding: 9 12; -fx-font-size: 13px;"/>
         </VBox>
 
+        <!-- Durée + Type -->
         <HBox spacing="14">
             <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="Durée (semaines) *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                <Label text="Durée (semaines) *"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
                 <Spinner fx:id="durationSpinner" min="1" max="52" initialValue="4"
                          style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;"/>
             </VBox>
             <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="Type *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                <Label text="Type *"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
                 <ComboBox fx:id="typeCombo" maxWidth="Infinity"
                           style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
             </VBox>
         </HBox>
 
+        <!-- Dates -->
         <HBox spacing="14">
             <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="Date de début *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                <Label text="Date de début *"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
                 <DatePicker fx:id="startDatePicker" maxWidth="Infinity"/>
             </VBox>
             <VBox spacing="5" HBox.hgrow="ALWAYS">
-                <Label text="Date de fin *" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+                <Label text="Date de fin *"
+                       style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
                 <DatePicker fx:id="endDatePicker" maxWidth="Infinity"/>
             </VBox>
         </HBox>
 
+        <!-- ✅ NOUVEAU : Statut -->
         <VBox spacing="5">
-            <Label text="Capacité maximale (participants)" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
-            <Spinner fx:id="capacitySpinner" min="1" max="500" initialValue="20" maxWidth="Infinity"
-                     style="-fx-background-radius: 6; -fx-border-color: #e0e0e0; -fx-border-radius: 6;"/>
+            <Label text="Statut *"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <ComboBox fx:id="statusCombo" maxWidth="Infinity"
+                      style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
         </VBox>
 
+        <!-- Skill associé -->
+        <VBox spacing="5">
+            <Label text="Compétence associée (optionnel)"
+                   style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #455a64;"/>
+            <ComboBox fx:id="skillCombo" maxWidth="Infinity" promptText="Sélectionner une compétence..."
+                      style="-fx-background-radius: 6; -fx-font-size: 13px;"/>
+        </VBox>
+
+        <!-- Error -->
         <Label fx:id="errorLabel" text="" wrapText="true"
                style="-fx-text-fill: #e53935; -fx-font-size: 12px;"/>
 
+        <!-- Buttons -->
         <HBox spacing="12" alignment="CENTER_RIGHT">
             <Button text="Annuler" onAction="#handleCancel"
                     style="-fx-background-color: #eceff1; -fx-text-fill: #546e7a; -fx-font-weight: bold; -fx-padding: 10 24; -fx-background-radius: 6; -fx-cursor: hand;"/>
-            <Button text="🔄  Mettre à jour" onAction="#handleUpdate"
+            <Button text="🔄  Mettre à jour" onAction="#handleSave"
                     style="-fx-background-color: #f57c00; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 24; -fx-background-radius: 6; -fx-cursor: hand;"/>
         </HBox>
     </VBox>
