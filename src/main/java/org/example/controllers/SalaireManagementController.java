@@ -60,6 +60,9 @@ public class SalaireManagementController {
 
     @FXML private Button btnExportExcel;
 
+    @FXML private Button btnNavSalaires;
+    @FXML private Button btnNavStatistics;
+
     @FXML
     public void initialize() {
         salaireService = new SalaireService();
@@ -598,6 +601,28 @@ public class SalaireManagementController {
                 }
             }
         });
+    }
+
+    @FXML
+    private void handleNavSalaires() {
+        System.out.println("Déjà sur Gestion Salaires");
+    }
+
+    @FXML
+    private void handleNavStatistics() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/StatisticsView.fxml"));
+            Parent root = loader.load();
+
+            Stage currentStage = (Stage) btnNavStatistics.getScene().getWindow();
+            Scene scene = new Scene(root);
+            currentStage.setScene(scene);
+            currentStage.setTitle("INTEGRA - Statistiques & IA");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir les statistiques", Alert.AlertType.ERROR);
+        }
     }
 
     /**
