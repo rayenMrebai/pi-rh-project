@@ -27,19 +27,27 @@
                         style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14; -fx-background-radius: 30; -fx-padding: 12 24; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 8, 0, 0, 3);"/>
             </HBox>
 
-            <!-- PROJECTS LIST – BLUE THEME -->
+            <!-- Affichage des taux de change (élégant) -->
+            <HBox alignment="CENTER" spacing="20"
+                  style="-fx-background-color: #e2e8f0; -fx-background-radius: 40; -fx-padding: 8 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 2);">
+                <Label text="💱 Taux en direct" style="-fx-font-weight: bold; -fx-text-fill: #1e3a5f; -fx-font-size: 14;"/>
+                <Label fx:id="rateDisplayLabel" text="Chargement..."
+                       style="-fx-font-weight: 600; -fx-text-fill: #0B63CE; -fx-font-size: 14; -fx-background-color: white; -fx-background-radius: 20; -fx-padding: 5 15;"/>
+            </HBox>
+
+            <!-- PROJECTS LIST -->
             <VBox spacing="12" VBox.vgrow="ALWAYS"
                   style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 5); -fx-padding: 20;">
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <Label text="📊 HR Projects" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1e3a5f; -fx-font-family: 'Segoe UI Semibold';"/>
                     <Label text="(Active and completed projects)" style="-fx-text-fill: #6b7280; -fx-font-size: 12; -fx-padding: 3 0 0 0;"/>
                 </HBox>
-
-                <!-- Search field for projects -->
-                <TextField fx:id="searchProjectField" promptText="Search by project name or ID..."
-                           style="-fx-background-radius: 30; -fx-border-radius: 30; -fx-border-color: #dbeafe; -fx-background-color: white; -fx-padding: 8 15;"/>
-
-                <!-- En-tête des colonnes -->
+                <HBox spacing="10">
+                    <TextField fx:id="searchProjectField" promptText="Search by name or ID..." HBox.hgrow="ALWAYS"
+                               style="-fx-background-radius: 30; -fx-border-radius: 30; -fx-border-color: #dbeafe; -fx-background-color: white; -fx-padding: 8 15;"/>
+                    <ComboBox fx:id="statusFilterCombo" promptText="All statuses" prefWidth="150"
+                              style="-fx-background-radius: 30; -fx-border-radius: 30; -fx-border-color: #dbeafe; -fx-background-color: white; -fx-padding: 5 10;"/>
+                </HBox>
                 <HBox spacing="10" style="-fx-padding: 5 0 5 0; -fx-border-color: #dbeafe; -fx-border-width: 0 0 1 0;">
                     <Label text="Project ID" prefWidth="100" style="-fx-font-weight: bold; -fx-text-fill: #1e3a5f;"/>
                     <Label text="Project Name" prefWidth="250" style="-fx-font-weight: bold; -fx-text-fill: #1e3a5f;"/>
@@ -47,13 +55,12 @@
                     <Label text="End Date" prefWidth="120" style="-fx-font-weight: bold; -fx-text-fill: #1e3a5f;"/>
                     <Label text="Status" prefWidth="140" style="-fx-font-weight: bold; -fx-text-fill: #1e3a5f;"/>
                 </HBox>
-
                 <ListView fx:id="projectsListView" VBox.vgrow="ALWAYS" prefHeight="200" minHeight="200"
                           style="-fx-background-color: transparent; -fx-border-color: #dbeafe; -fx-border-width: 1; -fx-border-radius: 15; -fx-background-insets: 0;">
                 </ListView>
             </VBox>
 
-            <!-- ASSIGNMENTS LIST – GREEN THEME -->
+            <!-- ASSIGNMENTS LIST -->
             <VBox spacing="12" VBox.vgrow="ALWAYS"
                   style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 5); -fx-padding: 20;">
                 <HBox alignment="CENTER_LEFT" spacing="10">
@@ -61,12 +68,8 @@
                     <Label fx:id="selectedProjectLabel" text="Employees assigned to: (select a project)"
                            style="-fx-text-fill: #6b7280; -fx-font-size: 12; -fx-padding: 3 0 0 0;"/>
                 </HBox>
-
-                <!-- Search field for assignments -->
                 <TextField fx:id="searchAssignmentField" promptText="Search by role, ID or employee name..."
                            style="-fx-background-radius: 30; -fx-border-radius: 30; -fx-border-color: #c7f9e9; -fx-background-color: white; -fx-padding: 8 15;"/>
-
-                <!-- En-tête des colonnes -->
                 <HBox spacing="10" style="-fx-padding: 5 0 5 0; -fx-border-color: #c7f9e9; -fx-border-width: 0 0 1 0;">
                     <Label text="Assignment ID" prefWidth="110" style="-fx-font-weight: bold; -fx-text-fill: #0b5e42;"/>
                     <Label text="Employee Name" prefWidth="160" style="-fx-font-weight: bold; -fx-text-fill: #0b5e42;"/>
@@ -75,13 +78,12 @@
                     <Label text="Start" prefWidth="130" style="-fx-font-weight: bold; -fx-text-fill: #0b5e42;"/>
                     <Label text="End" prefWidth="130" style="-fx-font-weight: bold; -fx-text-fill: #0b5e42;"/>
                 </HBox>
-
                 <ListView fx:id="assignmentsListView" VBox.vgrow="ALWAYS" prefHeight="200" minHeight="200"
                           style="-fx-background-color: transparent; -fx-border-color: #c7f9e9; -fx-border-width: 1; -fx-border-radius: 15; -fx-background-insets: 0;">
                 </ListView>
             </VBox>
 
-            <!-- PROJECT DETAILS + ACTIONS (inchangé) -->
+            <!-- PROJECT DETAILS + ACTIONS -->
             <HBox spacing="20" VBox.vgrow="ALWAYS">
                 <!-- Détails du projet -->
                 <VBox spacing="15" HBox.hgrow="ALWAYS"
@@ -92,6 +94,7 @@
                             <ColumnConstraints minWidth="140"/>
                             <ColumnConstraints hgrow="ALWAYS"/>
                         </columnConstraints>
+
                         <Label text="🏷️ Project Name:" style="-fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-font-size: 14;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
                         <Label fx:id="detailName" style="-fx-text-fill: #0f172a; -fx-font-size: 14; -fx-background-color: #f1f9ff; -fx-padding: 5 10; -fx-background-radius: 8;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
@@ -107,12 +110,17 @@
                         <Label text="⚙️ Status:" style="-fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-font-size: 14;" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
                         <Label fx:id="detailStatus" style="-fx-text-fill: #0f172a; -fx-font-size: 14; -fx-background-color: #eef2ff; -fx-padding: 5 10; -fx-background-radius: 8;" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 
+                        <!-- Budget avec bouton de conversion -->
                         <Label text="💰 Budget:" style="-fx-text-fill: #2c3e50; -fx-font-weight: bold; -fx-font-size: 14;" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-                        <Label fx:id="detailBudget" style="-fx-text-fill: #0f172a; -fx-font-size: 14; -fx-background-color: #eef2ff; -fx-padding: 5 10; -fx-background-radius: 8;" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+                        <HBox spacing="10" alignment="CENTER_LEFT" GridPane.rowIndex="5" GridPane.columnIndex="1">
+                            <Label fx:id="detailBudget" style="-fx-text-fill: #0f172a; -fx-font-size: 14; -fx-background-color: #eef2ff; -fx-padding: 5 10; -fx-background-radius: 8;" />
+                            <Label fx:id="detailBudgetCurrency" text="TND" style="-fx-text-fill: #0f172a; -fx-font-size: 14; -fx-font-weight: bold; -fx-padding: 5 0;" />
+                            <Button fx:id="budgetToggleButton" text="⇄" style="-fx-background-color: #e2e8f0; -fx-text-fill: #1e293b; -fx-font-weight: bold; -fx-background-radius: 30; -fx-cursor: hand; -fx-padding: 5 15;"/>
+                        </HBox>
                     </GridPane>
                 </VBox>
 
-                <!-- Actions (inchangé) -->
+                <!-- Actions -->
                 <VBox spacing="15" minWidth="240" alignment="TOP_CENTER"
                       style="-fx-background-color: linear-gradient(to bottom, #ffffff, #f5f9ff); -fx-background-radius: 20; -fx-border-color: #d9e2ef; -fx-border-width: 1; -fx-border-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5); -fx-padding: 25 20;">
                     <Label text="⚡ Quick Actions" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1e3a5f; -fx-font-family: 'Segoe UI Semibold'; -fx-border-width: 0 0 1 0; -fx-border-color: #b0c4de; -fx-padding: 0 0 10 0;"/>
@@ -127,10 +135,20 @@
                             style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14; -fx-background-radius: 30; -fx-padding: 12 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 5, 0, 0, 2);"/>
                     <Button text="❌ Remove Assignment" fx:id="removeAssignmentButton" maxWidth="Infinity"
                             style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14; -fx-background-radius: 30; -fx-padding: 12 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 5, 0, 0, 2);"/>
+                    <!-- PDF Export buttons -->
+                    <Button text="📄 Exporter tout en PDF" fx:id="exportAllPdfButton" maxWidth="Infinity"
+                            style="-fx-background-color: #0B63CE; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14; -fx-background-radius: 30; -fx-padding: 12 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 5, 0, 0, 2);"/>
+                    <Button text="📄 Exporter ce projet" fx:id="exportProjectPdfButton" maxWidth="Infinity"
+                            style="-fx-background-color: #0FA36B; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14; -fx-background-radius: 30; -fx-padding: 12 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 5, 0, 0, 2);"/>
+                    <!-- EXCEL Export buttons -->
+                    <Button text="📊 Exporter tout en Excel" fx:id="exportAllExcelButton" maxWidth="Infinity"
+                            style="-fx-background-color: #0B63CE; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14; -fx-background-radius: 30; -fx-padding: 12 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 5, 0, 0, 2);"/>
+                    <Button text="📊 Exporter ce projet" fx:id="exportProjectExcelButton" maxWidth="Infinity"
+                            style="-fx-background-color: #0FA36B; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14; -fx-background-radius: 30; -fx-padding: 12 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 5, 0, 0, 2);"/>
                 </VBox>
             </HBox>
 
-            <!-- STATUS BAR (inchangé) -->
+            <!-- STATUS BAR -->
             <HBox style="-fx-background-color: linear-gradient(to right, #e2eaf8, #d4e0f0); -fx-padding: 14 22; -fx-background-radius: 40; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 8, 0, 0, 2);" alignment="CENTER_LEFT">
                 <Label fx:id="statusLabel" text="🔌 Connected - Database: INTEGRA_DB • 6 active projects • 8 assignments loaded"
                        style="-fx-text-fill: #1e3a5f; -fx-font-size: 13; -fx-font-family: 'Segoe UI'; -fx-font-weight: 500;"/>

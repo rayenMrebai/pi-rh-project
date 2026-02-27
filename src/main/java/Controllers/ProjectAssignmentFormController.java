@@ -53,11 +53,23 @@ public class ProjectAssignmentFormController implements Initializable {
         allocationSpinner.setValueFactory(valueFactory);
         allocationSpinner.setEditable(true);
 
-        // Lier la ComboBox à la liste des employés (qui sera remplie plus tard par setEmployeeList)
         employeeCombo.setItems(employeeList);
+
+        // Listeners pour effacer les styles d'erreur
+        setupValidationListeners();
 
         assignButton.setOnAction(e -> saveAssignment());
         cancelButton.setOnAction(e -> closeWindow());
+    }
+
+    private void setupValidationListeners() {
+        employeeCombo.valueProperty().addListener((obs, old, newVal) -> employeeCombo.setStyle(""));
+        roleField.textProperty().addListener((obs, old, newVal) -> roleField.setStyle(""));
+        startDatePicker.valueProperty().addListener((obs, old, newVal) -> startDatePicker.setStyle(""));
+        endDatePicker.valueProperty().addListener((obs, old, newVal) -> endDatePicker.setStyle(""));
+        allocationSpinner.valueProperty().addListener((obs, old, newVal) -> allocationSpinner.setStyle(""));
+        // Note: le Spinner n'a pas de méthode setStyle directe sur sa valeur, on peut agir sur l'éditeur
+        // mais pour simplifier, on remettra le style à zéro lors de la validation.
     }
 
     private void setupProjectsTable() {
@@ -71,9 +83,6 @@ public class ProjectAssignmentFormController implements Initializable {
         projectsTable.setItems(projectList);
     }
 
-    /**
-     * Reçoit la liste des employés depuis le DashboardController
-     */
     public void setEmployeeList(ObservableList<EmployesDTO> list) {
         employeeList.setAll(list);
     }
@@ -93,7 +102,6 @@ public class ProjectAssignmentFormController implements Initializable {
             startDatePicker.setValue(assignment.getAssignedFrom());
             endDatePicker.setValue(assignment.getAssignedTo());
 
-            // Sélectionner l'employé correspondant dans la comboBox
             employeeList.stream()
                     .filter(e -> e.getUserId() == assignment.getEmployeeId())
                     .findFirst()
@@ -113,6 +121,9 @@ public class ProjectAssignmentFormController implements Initializable {
     }
 
     private void saveAssignment() {
+        // Réinitialiser les styles
+        resetFieldStyles();
+
         Project selectedProject = projectsTable.getSelectionModel().getSelectedItem();
         EmployesDTO selectedEmployee = employeeCombo.getValue();
         String role = roleField.getText().trim();
@@ -120,34 +131,58 @@ public class ProjectAssignmentFormController implements Initializable {
         LocalDate start = startDatePicker.getValue();
         LocalDate end = endDatePicker.getValue();
 
-        // Validation
+        StringBuilder errorMsg = new StringBuilder();
+        boolean valid = true;
+
         if (selectedProject == null) {
-            showAlert("No Project", "Please select a project.");
-            return;
+            errorMsg.append("• Please select a project.\n");
+            // Pas de champ spécifique à surligner, on pourrait surligner le tableau
+            // Pour simplifier, on se contente de l'alerte.
+            valid = false;
         }
+
         if (selectedEmployee == null) {
-            showAlert("No Employee", "Please select an employee.");
-            return;
+            errorMsg.append("• Please select an employee.\n");
+            employeeCombo.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
         }
+
         if (role.isEmpty()) {
-            showAlert("Role Required", "Please enter the role.");
-            return;
+            errorMsg.append("• Role is required.\n");
+            roleField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
         }
+
         if (allocation == null || allocation < 0 || allocation > 100) {
-            showAlert("Invalid Allocation", "Allocation must be between 0 and 100.");
-            return;
+            errorMsg.append("• Allocation must be between 0 and 100.\n");
+            allocationSpinner.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
         }
-        if (start == null || end == null) {
-            showAlert("Dates Required", "Please enter both start and end dates.");
-            return;
+
+        if (start == null) {
+            errorMsg.append("• Start date is required.\n");
+            startDatePicker.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
         }
-        if (end.isBefore(start)) {
-            showAlert("Invalid Dates", "End date cannot be before start date.");
+
+        if (end == null) {
+            errorMsg.append("• End date is required.\n");
+            endDatePicker.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
+        }
+
+        if (start != null && end != null && end.isBefore(start)) {
+            errorMsg.append("• End date cannot be before start date.\n");
+            endDatePicker.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
+        }
+
+        if (!valid) {
+            showAlert("Validation Error", errorMsg.toString());
             return;
         }
 
         if (assignmentToEdit == null) {
-            // Création
             ProjectAssignment newAssignment = new ProjectAssignment();
             newAssignment.setProject(selectedProject);
             newAssignment.setEmployeeId(selectedEmployee.getUserId());
@@ -157,7 +192,6 @@ public class ProjectAssignmentFormController implements Initializable {
             newAssignment.setAssignedTo(end);
             assignmentService.create(newAssignment);
         } else {
-            // Mise à jour
             assignmentToEdit.setRole(role);
             assignmentToEdit.setAllocationRate(allocation);
             assignmentToEdit.setAssignedTo(end);
@@ -166,6 +200,14 @@ public class ProjectAssignmentFormController implements Initializable {
 
         if (onSaveCallback != null) onSaveCallback.run();
         closeWindow();
+    }
+
+    private void resetFieldStyles() {
+        employeeCombo.setStyle("");
+        roleField.setStyle("");
+        allocationSpinner.setStyle("");
+        startDatePicker.setStyle("");
+        endDatePicker.setStyle("");
     }
 
     private void showAlert(String title, String message) {

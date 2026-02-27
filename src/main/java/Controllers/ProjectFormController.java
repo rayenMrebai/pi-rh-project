@@ -33,14 +33,22 @@ public class ProjectFormController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         statusCombo.setItems(FXCollections.observableArrayList(
-                "PLANNING", "IN PROGRESS", "ON HOLD", "COMPLETED"
+                "PLANNING", "IN PROGRESS", "ACTIVE", "ON HOLD", "COMPLETED"
         ));
 
         saveButton.setOnAction(e -> saveProject());
         cancelButton.setOnAction(e -> closeWindow());
 
-        // Demander le focus après que la scène soit affichée
+        setupValidationListeners();
         Platform.runLater(() -> nameField.requestFocus());
+    }
+
+    private void setupValidationListeners() {
+        nameField.textProperty().addListener((obs, old, newVal) -> nameField.setStyle(""));
+        budgetField.textProperty().addListener((obs, old, newVal) -> budgetField.setStyle(""));
+        startDatePicker.valueProperty().addListener((obs, old, newVal) -> startDatePicker.setStyle(""));
+        endDatePicker.valueProperty().addListener((obs, old, newVal) -> endDatePicker.setStyle(""));
+        statusCombo.valueProperty().addListener((obs, old, newVal) -> statusCombo.setStyle(""));
     }
 
     public void setProjectToEdit(Project project) {
@@ -62,7 +70,6 @@ public class ProjectFormController implements Initializable {
             statusCombo.setValue(null);
             budgetField.clear();
         }
-        // Focus sur le champ nom
         nameField.requestFocus();
     }
 
@@ -71,6 +78,7 @@ public class ProjectFormController implements Initializable {
     }
 
     private void saveProject() {
+        resetFieldStyles();
         if (!validateInputs()) return;
 
         Project project = projectToEdit != null ? projectToEdit : new Project();
@@ -79,10 +87,12 @@ public class ProjectFormController implements Initializable {
         project.setStartDate(startDatePicker.getValue());
         project.setEndDate(endDatePicker.getValue());
         project.setStatus(statusCombo.getValue());
+
         try {
             project.setBudget(Double.parseDouble(budgetField.getText().trim()));
         } catch (NumberFormatException e) {
             showAlert("Invalid Budget", "Budget must be a number.");
+            budgetField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
             return;
         }
 
@@ -97,24 +107,69 @@ public class ProjectFormController implements Initializable {
     }
 
     private boolean validateInputs() {
-        String error = "";
-        if (nameField.getText().trim().isEmpty()) error += "Project Name is required.\n";
-        if (startDatePicker.getValue() == null) error += "Start Date is required.\n";
-        if (endDatePicker.getValue() == null) error += "End Date is required.\n";
-        if (statusCombo.getValue() == null) error += "Status is required.\n";
-        if (budgetField.getText().trim().isEmpty()) error += "Budget is required.\n";
-        else {
+        boolean valid = true;
+        StringBuilder errorMsg = new StringBuilder();
+
+        if (nameField.getText().trim().isEmpty()) {
+            errorMsg.append("• Project Name is required.\n");
+            nameField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
+        }
+
+        if (startDatePicker.getValue() == null) {
+            errorMsg.append("• Start Date is required.\n");
+            startDatePicker.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
+        }
+
+        if (endDatePicker.getValue() == null) {
+            errorMsg.append("• End Date is required.\n");
+            endDatePicker.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
+        } else if (startDatePicker.getValue() != null && endDatePicker.getValue().isBefore(startDatePicker.getValue())) {
+            errorMsg.append("• End Date cannot be before Start Date.\n");
+            endDatePicker.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
+        }
+
+        if (statusCombo.getValue() == null) {
+            errorMsg.append("• Status is required.\n");
+            statusCombo.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
+        }
+
+        if (budgetField.getText().trim().isEmpty()) {
+            errorMsg.append("• Budget is required.\n");
+            budgetField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+            valid = false;
+        } else {
             try {
-                Double.parseDouble(budgetField.getText().trim());
+                double budget = Double.parseDouble(budgetField.getText().trim());
+                if (budget < 0) {
+                    errorMsg.append("• Budget cannot be negative.\n");
+                    budgetField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+                    valid = false;
+                }
             } catch (NumberFormatException e) {
-                error += "Budget must be a valid number.\n";
+                errorMsg.append("• Budget must be a valid number.\n");
+                budgetField.setStyle("-fx-border-color: red; -fx-border-width: 2;");
+                valid = false;
             }
         }
-        if (!error.isEmpty()) {
-            showAlert("Validation Error", error);
+
+        if (!valid) {
+            showAlert("Validation Error", errorMsg.toString());
             return false;
         }
         return true;
+    }
+
+    private void resetFieldStyles() {
+        nameField.setStyle("");
+        startDatePicker.setStyle("");
+        endDatePicker.setStyle("");
+        statusCombo.setStyle("");
+        budgetField.setStyle("");
     }
 
     private void showAlert(String title, String message) {

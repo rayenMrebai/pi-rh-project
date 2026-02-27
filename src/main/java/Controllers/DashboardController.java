@@ -1,5 +1,6 @@
 package Controllers;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -12,20 +13,30 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.example.Services.currency.CurrencyService;
+import org.example.Services.excel.ExcelExportService; // EXCEL EXPORT
+import org.example.Services.pdf.PdfExportService;
 import org.example.Services.projet.ProjectAssignmentService;
 import org.example.Services.projet.ProjectService;
 import org.example.model.projet.EmployesDTO;
 import org.example.model.projet.Project;
 import org.example.model.projet.ProjectAssignment;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 public class DashboardController implements Initializable {
@@ -37,6 +48,7 @@ public class DashboardController implements Initializable {
     // Search fields
     @FXML private TextField searchProjectField;
     @FXML private TextField searchAssignmentField;
+    @FXML private ComboBox<String> statusFilterCombo;
 
     // Other FXML elements
     @FXML private Label selectedProjectLabel;
@@ -46,7 +58,10 @@ public class DashboardController implements Initializable {
     @FXML private Label detailEnd;
     @FXML private Label detailStatus;
     @FXML private Label detailBudget;
+    @FXML private Label detailBudgetCurrency;
+    @FXML private Button budgetToggleButton;
     @FXML private Label statusLabel;
+    @FXML private Label rateDisplayLabel;
 
     @FXML private Button addProjectButton;
     @FXML private Button editProjectButton;
@@ -54,42 +69,64 @@ public class DashboardController implements Initializable {
     @FXML private Button assignEmployeeButton;
     @FXML private Button updateAssignmentButton;
     @FXML private Button removeAssignmentButton;
+    // PDF Export buttons
+    @FXML private Button exportAllPdfButton;
+    @FXML private Button exportProjectPdfButton;
+    // EXCEL EXPORT buttons
+    @FXML private Button exportAllExcelButton;
+    @FXML private Button exportProjectExcelButton;
 
     private final ProjectService projectService = new ProjectService();
     private final ProjectAssignmentService assignmentService = new ProjectAssignmentService();
+    private final CurrencyService currencyService = new CurrencyService();
     private final ObservableList<EmployesDTO> employeeList = FXCollections.observableArrayList();
 
-    // Données brutes
     private final ObservableList<Project> projectData = FXCollections.observableArrayList();
     private final ObservableList<ProjectAssignment> assignmentData = FXCollections.observableArrayList();
 
-    // Listes filtrées pour la recherche
     private FilteredList<Project> filteredProjects;
     private FilteredList<ProjectAssignment> filteredAssignments;
 
-    // Map pour obtenir le nom de l'employé à partir de son ID
     private Map<Integer, String> employeeNameMap = new HashMap<>();
+
+    private double originalBudgetTND;
+    private String currentCurrency = "TND";
+
+    private ScheduledExecutorService scheduler;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Charger les employés et construire la map
         loadSampleEmployees();
         buildEmployeeNameMap();
 
-        // Configurer l'affichage des ListView
+        statusFilterCombo.setItems(FXCollections.observableArrayList(
+                "All statuses", "PLANNING", "IN PROGRESS", "ACTIVE", "ON HOLD", "COMPLETED"
+        ));
+        statusFilterCombo.setValue("All statuses");
+
         setupProjectsListView();
         setupAssignmentsListView();
-
-        // Configurer la recherche
         setupSearch();
-
-        // Installer les écouteurs
         setupListeners();
-
-        // Charger les projets
         loadProjects();
 
+        budgetToggleButton.setOnAction(e -> toggleBudgetCurrency());
+        startRateUpdater();
         updateStatus("Connected - Database: INTEGRA_DB");
+    }
+
+    private void startRateUpdater() {
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            String rates = currencyService.getDisplayRates();
+            Platform.runLater(() -> rateDisplayLabel.setText(rates));
+        }, 0, 60, TimeUnit.SECONDS);
+    }
+
+    public void stopUpdater() {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
     }
 
     private void loadSampleEmployees() {
@@ -119,40 +156,21 @@ public class DashboardController implements Initializable {
                 } else {
                     HBox hbox = new HBox(10);
                     hbox.setAlignment(Pos.CENTER_LEFT);
-                    hbox.setPadding(new Insets(5, 10, 5, 10));
+                    hbox.setPadding(new Insets(10, 12, 10, 12));
+                    String bgColor = (getIndex() % 2 == 0)
+                            ? "linear-gradient(to right, #e6f0ff, #ffffff)"
+                            : "linear-gradient(to right, #ffffff, #f5faff)";
+                    hbox.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,100,200,0.1), 5, 0, 0, 2);");
 
-                    Label idLabel = new Label(String.valueOf(project.getProjectId()));
-                    idLabel.setPrefWidth(100);
-                    idLabel.setStyle("-fx-font-weight: bold;");
+                    Label idLabel = createStyledLabel(String.valueOf(project.getProjectId()), 100, true);
+                    idLabel.setTextFill(Color.web("#0B63CE"));
 
-                    Label nameLabel = new Label(project.getName());
-                    nameLabel.setPrefWidth(250);
+                    Label nameLabel = createStyledLabel(project.getName(), 250, false);
+                    nameLabel.setFont(Font.font("Segoe UI", 13));
 
-                    Label startLabel = new Label(project.getStartDate() != null ? project.getStartDate().toString() : "");
-                    startLabel.setPrefWidth(120);
-
-                    Label endLabel = new Label(project.getEndDate() != null ? project.getEndDate().toString() : "");
-                    endLabel.setPrefWidth(120);
-
-                    Label statusLabel = new Label(project.getStatus());
-                    statusLabel.setPrefWidth(140);
-                    // Coloration du statut
-                    switch (project.getStatus()) {
-                        case "IN PROGRESS":
-                            statusLabel.setStyle("-fx-text-fill: #f59e0b; -fx-font-weight: bold;");
-                            break;
-                        case "PLANNING":
-                            statusLabel.setStyle("-fx-text-fill: #2563eb; -fx-font-weight: bold;");
-                            break;
-                        case "COMPLETED":
-                            statusLabel.setStyle("-fx-text-fill: #10b981; -fx-font-weight: bold;");
-                            break;
-                        case "ON HOLD":
-                            statusLabel.setStyle("-fx-text-fill: #ef4444; -fx-font-weight: bold;");
-                            break;
-                        default:
-                            statusLabel.setStyle("-fx-text-fill: #6b7280;");
-                    }
+                    Label startLabel = createStyledLabel(project.getStartDate() != null ? project.getStartDate().toString() : "", 120, false);
+                    Label endLabel = createStyledLabel(project.getEndDate() != null ? project.getEndDate().toString() : "", 120, false);
+                    Label statusLabel = createStatusBadge(project.getStatus(), 140);
 
                     hbox.getChildren().addAll(idLabel, nameLabel, startLabel, endLabel, statusLabel);
                     setGraphic(hbox);
@@ -172,28 +190,21 @@ public class DashboardController implements Initializable {
                 } else {
                     HBox hbox = new HBox(10);
                     hbox.setAlignment(Pos.CENTER_LEFT);
-                    hbox.setPadding(new Insets(5, 10, 5, 10));
+                    hbox.setPadding(new Insets(10, 12, 10, 12));
+                    String bgColor = (getIndex() % 2 == 0)
+                            ? "linear-gradient(to right, #e0f7e8, #ffffff)"
+                            : "linear-gradient(to right, #ffffff, #f0faf0)";
+                    hbox.setStyle("-fx-background-color: " + bgColor + "; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,150,0,0.1), 5, 0, 0, 2);");
 
-                    Label idLabel = new Label(String.valueOf(assignment.getIdAssignment()));
-                    idLabel.setPrefWidth(110);
-                    idLabel.setStyle("-fx-font-weight: bold;");
+                    Label idLabel = createStyledLabel(String.valueOf(assignment.getIdAssignment()), 110, true);
+                    idLabel.setTextFill(Color.web("#0FA36B"));
 
-                    // Récupérer le nom de l'employé depuis la map
                     String empName = employeeNameMap.getOrDefault(assignment.getEmployeeId(), "Emp " + assignment.getEmployeeId());
-                    Label empLabel = new Label(empName);
-                    empLabel.setPrefWidth(160);
-
-                    Label roleLabel = new Label(assignment.getRole());
-                    roleLabel.setPrefWidth(170);
-
-                    Label allocLabel = new Label(assignment.getAllocationRate() + "%");
-                    allocLabel.setPrefWidth(100);
-
-                    Label startLabel = new Label(assignment.getAssignedFrom() != null ? assignment.getAssignedFrom().toString() : "");
-                    startLabel.setPrefWidth(130);
-
-                    Label endLabel = new Label(assignment.getAssignedTo() != null ? assignment.getAssignedTo().toString() : "");
-                    endLabel.setPrefWidth(130);
+                    Label empLabel = createStyledLabel(empName, 160, false);
+                    Label roleLabel = createStyledLabel(assignment.getRole(), 170, false);
+                    Label allocLabel = createStyledLabel(assignment.getAllocationRate() + "%", 100, false);
+                    Label startLabel = createStyledLabel(assignment.getAssignedFrom() != null ? assignment.getAssignedFrom().toString() : "", 130, false);
+                    Label endLabel = createStyledLabel(assignment.getAssignedTo() != null ? assignment.getAssignedTo().toString() : "", 130, false);
 
                     hbox.getChildren().addAll(idLabel, empLabel, roleLabel, allocLabel, startLabel, endLabel);
                     setGraphic(hbox);
@@ -202,63 +213,81 @@ public class DashboardController implements Initializable {
         });
     }
 
+    private Label createStyledLabel(String text, double width, boolean bold) {
+        Label label = new Label(text);
+        label.setPrefWidth(width);
+        label.setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 13;" + (bold ? "-fx-font-weight: bold;" : ""));
+        label.setTextFill(Color.web("#2c3e50"));
+        return label;
+    }
+
+    private Label createStatusBadge(String status, double width) {
+        Label badge = new Label(status);
+        badge.setPrefWidth(width);
+        badge.setAlignment(Pos.CENTER);
+        badge.setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: white; -fx-background-radius: 20; -fx-padding: 4 10;");
+        badge.setTextFill(Color.WHITE);
+
+        switch (status) {
+            case "PLANNING": badge.setStyle(badge.getStyle() + "-fx-background-color: #2563eb;"); break;
+            case "IN PROGRESS": badge.setStyle(badge.getStyle() + "-fx-background-color: #f59e0b;"); break;
+            case "ACTIVE": badge.setStyle(badge.getStyle() + "-fx-background-color: #10b981;"); break;
+            case "ON HOLD": badge.setStyle(badge.getStyle() + "-fx-background-color: #ef4444;"); break;
+            case "COMPLETED": badge.setStyle(badge.getStyle() + "-fx-background-color: #6b7280;"); break;
+            default: badge.setStyle(badge.getStyle() + "-fx-background-color: #6b7280;");
+        }
+        return badge;
+    }
+
     private void setupSearch() {
-        // Projets : filtrer à partir de projectData
         filteredProjects = new FilteredList<>(projectData, p -> true);
         projectsListView.setItems(filteredProjects);
+        searchProjectField.textProperty().addListener((obs, oldVal, newVal) -> updateProjectFilter());
+        statusFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> updateProjectFilter());
 
-        searchProjectField.textProperty().addListener((obs, oldVal, newVal) -> {
-            filteredProjects.setPredicate(createProjectPredicate(newVal));
-        });
-
-        // Affectations : filtrer à partir de assignmentData
         filteredAssignments = new FilteredList<>(assignmentData, a -> true);
         assignmentsListView.setItems(filteredAssignments);
-
         searchAssignmentField.textProperty().addListener((obs, oldVal, newVal) -> {
             filteredAssignments.setPredicate(createAssignmentPredicate(newVal));
         });
     }
 
-    private Predicate<Project> createProjectPredicate(String searchText) {
-        if (searchText == null || searchText.trim().isEmpty()) {
-            return p -> true;
-        }
-        String lowerCaseFilter = searchText.toLowerCase().trim();
-        return project -> {
-            if (String.valueOf(project.getProjectId()).contains(lowerCaseFilter)) return true;
-            if (project.getName().toLowerCase().contains(lowerCaseFilter)) return true;
-            return false;
-        };
+    private void updateProjectFilter() {
+        String searchText = searchProjectField.getText();
+        String selectedStatus = statusFilterCombo.getValue();
+
+        filteredProjects.setPredicate(project -> {
+            boolean textMatch = true;
+            if (searchText != null && !searchText.trim().isEmpty()) {
+                String lowerSearch = searchText.toLowerCase().trim();
+                textMatch = String.valueOf(project.getProjectId()).contains(lowerSearch) ||
+                        project.getName().toLowerCase().contains(lowerSearch);
+            }
+            boolean statusMatch = true;
+            if (selectedStatus != null && !"All statuses".equals(selectedStatus)) {
+                statusMatch = selectedStatus.equals(project.getStatus());
+            }
+            return textMatch && statusMatch;
+        });
     }
 
     private Predicate<ProjectAssignment> createAssignmentPredicate(String searchText) {
-        if (searchText == null || searchText.trim().isEmpty()) {
-            return a -> true;
-        }
-        String lowerCaseFilter = searchText.toLowerCase().trim();
-        return assignment -> {
-            if (String.valueOf(assignment.getIdAssignment()).contains(lowerCaseFilter)) return true;
-            if (assignment.getRole().toLowerCase().contains(lowerCaseFilter)) return true;
-            String empName = employeeNameMap.getOrDefault(assignment.getEmployeeId(), "").toLowerCase();
-            if (empName.contains(lowerCaseFilter)) return true;
-            return false;
-        };
+        if (searchText == null || searchText.trim().isEmpty()) return a -> true;
+        String lower = searchText.toLowerCase().trim();
+        return a -> String.valueOf(a.getIdAssignment()).contains(lower) ||
+                a.getRole().toLowerCase().contains(lower) ||
+                employeeNameMap.getOrDefault(a.getEmployeeId(), "").toLowerCase().contains(lower);
     }
 
     private void loadProjects() {
         List<Project> projects = projectService.getAll();
-        projectData.setAll(projects); // ← mise à jour directe, filteredProjects réagit automatiquement
-        if (!projectData.isEmpty()) {
-            projectsListView.getSelectionModel().selectFirst();
-        }
+        projectData.setAll(projects);
+        if (!projectData.isEmpty()) projectsListView.getSelectionModel().selectFirst();
     }
 
     private void loadAssignmentsForProject(int projectId) {
         List<ProjectAssignment> assignments = assignmentService.getByProjectId(projectId);
-        assignmentData.setAll(assignments); // ← mise à jour directe
-        // Optionnel : réinitialiser le champ de recherche si tu veux
-        // searchAssignmentField.clear();
+        assignmentData.setAll(assignments);
     }
 
     private void setupListeners() {
@@ -273,25 +302,119 @@ public class DashboardController implements Initializable {
         addProjectButton.setOnAction(e -> openProjectForm(null));
         editProjectButton.setOnAction(e -> {
             Project selected = projectsListView.getSelectionModel().getSelectedItem();
-            if (selected != null) {
-                openProjectForm(selected);
-            } else {
-                showAlert("No selection", "Please select a project to edit.");
-            }
+            if (selected != null) openProjectForm(selected);
+            else showAlert("No selection", "Please select a project to edit.");
         });
         deleteProjectButton.setOnAction(e -> deleteSelectedProject());
 
         assignEmployeeButton.setOnAction(e -> openAssignmentForm(projectsListView.getSelectionModel().getSelectedItem(), null));
         updateAssignmentButton.setOnAction(e -> {
             ProjectAssignment selected = assignmentsListView.getSelectionModel().getSelectedItem();
-            if (selected != null) {
-                openAssignmentForm(selected.getProject(), selected);
-            } else {
-                showAlert("No selection", "Please select an assignment to update.");
-            }
+            if (selected != null) openAssignmentForm(selected.getProject(), selected);
+            else showAlert("No selection", "Please select an assignment to update.");
         });
         removeAssignmentButton.setOnAction(e -> deleteSelectedAssignment());
+
+        // PDF Export buttons
+        exportAllPdfButton.setOnAction(e -> exportAllToPdf());
+        exportProjectPdfButton.setOnAction(e -> exportSelectedProjectToPdf());
+
+        // EXCEL EXPORT buttons
+        exportAllExcelButton.setOnAction(e -> exportAllToExcel());
+        exportProjectExcelButton.setOnAction(e -> exportSelectedProjectToExcel());
     }
+
+    // ==================== PDF EXPORT (inchangé) ====================
+    private void exportAllToPdf() {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer le PDF");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers PDF", "*.pdf"));
+            fileChooser.setInitialFileName("tous_les_projets.pdf");
+            File file = fileChooser.showSaveDialog(projectsListView.getScene().getWindow());
+            if (file == null) return;
+
+            List<ProjectAssignment> allAssignments = assignmentService.getAll();
+            String logoPath = getClass().getResource("/images/logo.png").toExternalForm();
+            PdfExportService pdfService = new PdfExportService();
+            pdfService.exportAllProjects(projectData, allAssignments, file.getAbsolutePath(), logoPath);
+            showAlert("Succès", "PDF généré : " + file.getName());
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de générer le PDF : " + e.getMessage());
+        }
+    }
+
+    private void exportSelectedProjectToPdf() {
+        Project selected = projectsListView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Aucun projet", "Veuillez sélectionner un projet.");
+            return;
+        }
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer le PDF");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers PDF", "*.pdf"));
+            fileChooser.setInitialFileName("projet_" + selected.getProjectId() + ".pdf");
+            File file = fileChooser.showSaveDialog(projectsListView.getScene().getWindow());
+            if (file == null) return;
+
+            List<ProjectAssignment> assignments = assignmentService.getByProjectId(selected.getProjectId());
+            String logoPath = getClass().getResource("/images/logo.png").toExternalForm();
+            PdfExportService pdfService = new PdfExportService();
+            pdfService.exportSingleProject(selected, assignments, file.getAbsolutePath(), logoPath);
+            showAlert("Succès", "PDF généré : " + file.getName());
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de générer le PDF : " + e.getMessage());
+        }
+    }
+
+    // ==================== EXCEL EXPORT ====================
+    private void exportAllToExcel() {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer le fichier Excel");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers Excel", "*.xlsx"));
+            fileChooser.setInitialFileName("rapport_complet.xlsx");
+            File file = fileChooser.showSaveDialog(projectsListView.getScene().getWindow());
+            if (file == null) return;
+
+            List<ProjectAssignment> allAssignments = assignmentService.getAll();
+            ExcelExportService excelService = new ExcelExportService();
+            excelService.exportAllData(projectData, allAssignments, employeeList, file.getAbsolutePath());
+            showAlert("Succès", "Excel généré : " + file.getName());
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de générer le fichier Excel : " + e.getMessage());
+        }
+    }
+
+    private void exportSelectedProjectToExcel() {
+        Project selected = projectsListView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Aucun projet", "Veuillez sélectionner un projet.");
+            return;
+        }
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer le fichier Excel");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers Excel", "*.xlsx"));
+            fileChooser.setInitialFileName("projet_" + selected.getProjectId() + ".xlsx");
+            File file = fileChooser.showSaveDialog(projectsListView.getScene().getWindow());
+            if (file == null) return;
+
+            List<ProjectAssignment> assignments = assignmentService.getByProjectId(selected.getProjectId());
+            ExcelExportService excelService = new ExcelExportService();
+            // Appel de la nouvelle méthode
+            excelService.exportSingleProject(selected, assignments, employeeList, file.getAbsolutePath());
+            showAlert("Succès", "Excel généré : " + file.getName());
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de générer le fichier Excel : " + e.getMessage());
+        }
+    }
+    // =====================================================
 
     private void showProjectDetails(Project p) {
         detailName.setText(p.getName());
@@ -299,7 +422,28 @@ public class DashboardController implements Initializable {
         detailStart.setText(p.getStartDate() != null ? p.getStartDate().toString() : "");
         detailEnd.setText(p.getEndDate() != null ? p.getEndDate().toString() : "");
         detailStatus.setText(p.getStatus());
-        detailBudget.setText(String.format("%.2f", p.getBudget()));
+
+        originalBudgetTND = p.getBudget();
+        currentCurrency = "TND";
+        detailBudget.setText(String.format("%.2f", originalBudgetTND));
+        detailBudgetCurrency.setText("TND");
+    }
+
+    private void toggleBudgetCurrency() {
+        if (originalBudgetTND == 0) return;
+        try {
+            String nextCurrency = switch (currentCurrency) {
+                case "TND" -> "USD";
+                case "USD" -> "EUR";
+                default -> "TND";
+            };
+            double converted = currencyService.convert(originalBudgetTND, "TND", nextCurrency);
+            detailBudget.setText(String.format("%.2f", converted));
+            detailBudgetCurrency.setText(nextCurrency);
+            currentCurrency = nextCurrency;
+        } catch (Exception e) {
+            showAlert("Currency Error", "Impossible de convertir le budget : " + e.getMessage());
+        }
     }
 
     private void deleteSelectedAssignment() {
@@ -324,16 +468,13 @@ public class DashboardController implements Initializable {
             showAlert("No selection", "Please select a project to delete.");
             return;
         }
-
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
                 "Delete project '" + selected.getName() + "'?\nThis will also delete all its assignments.",
                 ButtonType.YES, ButtonType.NO);
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.YES) {
                 List<ProjectAssignment> assignments = assignmentService.getByProjectId(selected.getProjectId());
-                for (ProjectAssignment a : assignments) {
-                    assignmentService.delete(a.getIdAssignment());
-                }
+                for (ProjectAssignment a : assignments) assignmentService.delete(a.getIdAssignment());
                 projectService.delete(selected.getProjectId());
                 refreshAfterSave();
                 updateStatus("Project and its assignments deleted.");
@@ -369,9 +510,7 @@ public class DashboardController implements Initializable {
             controller.setAssignmentToEdit(assignment);
             controller.setEmployeeList(employeeList);
             controller.setOnSaveCallback(() -> {
-                if (project != null) {
-                    loadAssignmentsForProject(project.getProjectId());
-                }
+                if (project != null) loadAssignmentsForProject(project.getProjectId());
                 updateStatus("Assignment saved.");
             });
 
@@ -389,9 +528,7 @@ public class DashboardController implements Initializable {
     private void refreshAfterSave() {
         loadProjects();
         Project selected = projectsListView.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            loadAssignmentsForProject(selected.getProjectId());
-        }
+        if (selected != null) loadAssignmentsForProject(selected.getProjectId());
         updateStatus("Data refreshed.");
     }
 
