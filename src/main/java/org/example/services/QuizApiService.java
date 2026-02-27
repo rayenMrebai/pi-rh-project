@@ -10,182 +10,211 @@ import java.util.concurrent.TimeUnit;
 
 public class QuizApiService {
 
-    // ✅ Open Trivia DB — 100% gratuite, sans clé API
-    private static final String BASE_URL = "https://opentdb.com/api.php";
+    // ✅ API Claude pour générer des questions sur la formation
+    private static final String CLAUDE_URL = "https://api.anthropic.com/v1/messages";
+    private static final String API_KEY    = "VOTRE_CLE_ANTHROPIC_ICI";
+    private static final String MODEL      = "claude-3-haiku-20240307";
 
     private final OkHttpClient client = new OkHttpClient.Builder()
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
+            .connectTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .build();
 
     public static class QuizQuestion {
         private String question;
         private String correctAnswer;
-        private List<String> allAnswers; // mélangées
+        private List<String> allAnswers;
         private String difficulty;
-        private String category;
 
         public QuizQuestion(String question, String correctAnswer,
-                            List<String> allAnswers, String difficulty, String category) {
+                            List<String> allAnswers, String difficulty) {
             this.question      = question;
             this.correctAnswer = correctAnswer;
             this.allAnswers    = allAnswers;
             this.difficulty    = difficulty;
-            this.category      = category;
         }
 
-        public String getQuestion()         { return question; }
-        public String getCorrectAnswer()    { return correctAnswer; }
-        public List<String> getAllAnswers()  { return allAnswers; }
-        public String getDifficulty()       { return difficulty; }
-        public String getCategory()         { return category; }
+        public String getQuestion()        { return question; }
+        public String getCorrectAnswer()   { return correctAnswer; }
+        public List<String> getAllAnswers() { return allAnswers; }
+        public String getDifficulty()      { return difficulty; }
+        public String getCategory()        { return "Formation"; }
     }
 
-    // ✅ Récupérer questions depuis Open Trivia DB
-    public List<QuizQuestion> fetchQuestions(int amount, String difficulty) {
+    // ✅ Générer questions basées sur la formation
+// Dans fetchQuestionsForTraining() — supprimer le paramètre amount
+    public List<QuizQuestion> fetchQuestionsForTraining(
+            String trainingTitle,
+            String trainingDescription,
+            String difficulty) {
+
+        System.out.println("🤖 Génération quiz pour : " + trainingTitle);
+
+        String prompt = buildPrompt(trainingTitle, trainingDescription, difficulty);
+
         List<QuizQuestion> questions = new ArrayList<>();
 
-        // category=18 = Computers, difficulty = easy/medium/hard
-        String url = BASE_URL
-                + "?amount=" + amount
-                + "&category=18"
-                + "&difficulty=" + difficulty
-                + "&type=multiple"
-                + "&encode=base64";
-
-        System.out.println("🎯 Quiz API URL: " + url);
-
         try {
+            JsonObject body = new JsonObject();
+            body.addProperty("model", MODEL);
+            body.addProperty("max_tokens", 2000);
+
+            JsonArray messages = new JsonArray();
+            JsonObject userMsg = new JsonObject();
+            userMsg.addProperty("role", "user");
+            userMsg.addProperty("content", prompt);
+            messages.add(userMsg);
+            body.add("messages", messages);
+
             Request request = new Request.Builder()
-                    .url(url)
-                    .addHeader("Accept", "application/json")
+                    .url(CLAUDE_URL)
+                    .addHeader("Content-Type",      "application/json")
+                    .addHeader("x-api-key",         API_KEY)
+                    .addHeader("anthropic-version", "2023-06-01")
+                    .post(RequestBody.create(
+                            body.toString(),
+                            MediaType.get("application/json")))
                     .build();
 
             try (Response response = client.newCall(request).execute()) {
-                System.out.println("📡 Status: " + response.code());
-                if (!response.isSuccessful() || response.body() == null)
-                    return getFallbackQuestions(difficulty);
+                System.out.println("📡 Claude Status : " + response.code());
+
+                if (!response.isSuccessful() || response.body() == null) {
+                    System.err.println("❌ Claude API erreur : " + response.code());
+                    return getFallbackQuestions(trainingTitle, difficulty);
+                }
 
                 String json = response.body().string();
-                JsonObject root = JsonParser.parseString(json).getAsJsonObject();
-
-                int responseCode = root.get("response_code").getAsInt();
-                if (responseCode != 0) {
-                    System.out.println("⚠️ API response_code: " + responseCode + " → fallback");
-                    return getFallbackQuestions(difficulty);
-                }
-
-                JsonArray results = root.getAsJsonArray("results");
-                for (JsonElement el : results) {
-                    JsonObject obj = el.getAsJsonObject();
-
-                    // Base64 decode
-                    String question       = decode(obj.get("question").getAsString());
-                    String correctAnswer  = decode(obj.get("correct_answer").getAsString());
-                    String difficulty2    = decode(obj.get("difficulty").getAsString());
-                    String category       = decode(obj.get("category").getAsString());
-
-                    List<String> answers = new ArrayList<>();
-                    answers.add(correctAnswer);
-                    for (JsonElement inc : obj.getAsJsonArray("incorrect_answers")) {
-                        answers.add(decode(inc.getAsString()));
-                    }
-                    Collections.shuffle(answers);
-
-                    questions.add(new QuizQuestion(question, correctAnswer, answers, difficulty2, category));
-                }
-
-                System.out.println("✅ Questions reçues: " + questions.size());
-
+                questions = parseClaudeResponse(json, difficulty);
             }
+
         } catch (Exception e) {
-            System.err.println("❌ Erreur QuizAPI: " + e.getMessage());
-            return getFallbackQuestions(difficulty);
+            System.err.println("❌ Erreur réseau Claude : " + e.getMessage());
+            return getFallbackQuestions(trainingTitle, difficulty);
         }
 
-        return questions.isEmpty() ? getFallbackQuestions(difficulty) : questions;
+        // ✅ Garantir exactement 10 questions
+        if (questions.isEmpty()) {
+            questions = new ArrayList<>(getFallbackQuestions(trainingTitle, difficulty));
+        }
+        while (questions.size() < 10) {
+            questions.addAll(getFallbackQuestions(trainingTitle, difficulty));
+        }
+        if (questions.size() > 10) {
+            questions = new ArrayList<>(questions.subList(0, 10));
+        }
+
+        System.out.println("✅ Total final : " + questions.size() + " questions");
+        return questions;
     }
 
-    private String decode(String base64) {
+    // ✅ Construire le prompt pour Claude
+    private String buildPrompt(String title, String description,
+                               String difficulty) {
+        return "Tu es un expert en formation professionnelle. " +
+                "Génère EXACTEMENT 10 questions QCM (ni plus, ni moins) " +
+                "de niveau " + difficulty + " sur la formation suivante :\n\n" +
+                "Titre : " + title + "\n" +
+                "Description : " + description + "\n\n" +
+                "RÈGLES STRICTES :\n" +
+                "- EXACTEMENT 10 questions, pas 8, pas 9, pas 11 — exactement 10\n" +
+                "- Chaque question doit être directement liée au contenu de cette formation\n" +
+                "- Chaque question a exactement 4 choix de réponse\n" +
+                "- Une seule bonne réponse par question\n" +
+                "- Réponds UNIQUEMENT en JSON valide, sans texte avant ou après\n\n" +
+                "FORMAT JSON EXACT à respecter (10 objets dans le tableau) :\n" +
+                "[\n" +
+                "  {\n" +
+                "    \"question\": \"texte de la question ?\",\n" +
+                "    \"correct\": \"bonne réponse\",\n" +
+                "    \"wrong1\": \"mauvaise réponse 1\",\n" +
+                "    \"wrong2\": \"mauvaise réponse 2\",\n" +
+                "    \"wrong3\": \"mauvaise réponse 3\"\n" +
+                "  },\n" +
+                "  ... (10 objets au total)\n" +
+                "]";
+    }
+
+    // ✅ Parser la réponse de Claude
+    private List<QuizQuestion> parseClaudeResponse(String json, String difficulty) {
+        List<QuizQuestion> questions = new ArrayList<>();
+
         try {
-            return new String(java.util.Base64.getDecoder().decode(base64));
+            JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+
+            // Extraire le texte de la réponse Claude
+            String content = root.getAsJsonArray("content")
+                    .get(0).getAsJsonObject()
+                    .get("text").getAsString();
+
+            System.out.println("📦 Claude réponse reçue : " + content.substring(0, Math.min(content.length(), 100)));
+
+            // Nettoyer le JSON (enlever les balises markdown si présentes)
+            content = content.trim();
+            if (content.startsWith("```json")) content = content.substring(7);
+            if (content.startsWith("```"))     content = content.substring(3);
+            if (content.endsWith("```"))       content = content.substring(0, content.length() - 3);
+            content = content.trim();
+
+            JsonArray arr = JsonParser.parseString(content).getAsJsonArray();
+
+            for (JsonElement el : arr) {
+                JsonObject obj = el.getAsJsonObject();
+
+                String question = obj.get("question").getAsString();
+                String correct  = obj.get("correct").getAsString();
+                String wrong1   = obj.get("wrong1").getAsString();
+                String wrong2   = obj.get("wrong2").getAsString();
+                String wrong3   = obj.get("wrong3").getAsString();
+
+                List<String> answers = new ArrayList<>();
+                answers.add(correct);
+                answers.add(wrong1);
+                answers.add(wrong2);
+                answers.add(wrong3);
+                Collections.shuffle(answers);
+
+                questions.add(new QuizQuestion(question, correct, answers, difficulty));
+            }
+
+            System.out.println("✅ " + questions.size() + " questions générées");
+
         } catch (Exception e) {
-            return base64;
+            System.err.println("❌ Erreur parsing Claude : " + e.getMessage());
         }
+
+        return questions;
     }
 
-    // ✅ Questions locales de secours
-    private List<QuizQuestion> getFallbackQuestions(String difficulty) {
+    // ✅ Fallback si Claude inaccessible
+    private List<QuizQuestion> getFallbackQuestions(String title, String difficulty) {
+        System.out.println("⚠️ Fallback questions pour : " + title);
         List<QuizQuestion> fallback = new ArrayList<>();
 
-        String[][][] data = {
-                {
-                        {"What does HTML stand for?"},
-                        {"HyperText Markup Language"},
-                        {"HyperText Markup Language", "High Tech Modern Language", "HyperTransfer Markup Language", "Home Tool Markup Language"},
-                        {"easy"}, {"Web"}
-                },
-                {
-                        {"Which language is used for styling web pages?"},
-                        {"CSS"},
-                        {"CSS", "Java", "Python", "C++"},
-                        {"easy"}, {"Web"}
-                },
-                {
-                        {"What does OOP stand for?"},
-                        {"Object-Oriented Programming"},
-                        {"Object-Oriented Programming", "Open Object Protocol", "Oriented Object Procedure", "Object Operating Process"},
-                        {"easy"}, {"Programming"}
-                },
-                {
-                        {"Which of these is a Java framework?"},
-                        {"Spring"},
-                        {"Spring", "Django", "Laravel", "Rails"},
-                        {"medium"}, {"Java"}
-                },
-                {
-                        {"What is a REST API?"},
-                        {"Representational State Transfer"},
-                        {"Representational State Transfer", "Remote Server Transfer", "Rapid State Technology", "Real-time Server Transport"},
-                        {"medium"}, {"API"}
-                },
-                {
-                        {"What does SQL stand for?"},
-                        {"Structured Query Language"},
-                        {"Structured Query Language", "Simple Question Language", "Sequential Query Logic", "System Query Language"},
-                        {"easy"}, {"Database"}
-                },
-                {
-                        {"Which HTTP method is used to update a resource?"},
-                        {"PUT"},
-                        {"PUT", "GET", "POST", "DELETE"},
-                        {"medium"}, {"HTTP"}
-                },
-                {
-                        {"What is the time complexity of binary search?"},
-                        {"O(log n)"},
-                        {"O(log n)", "O(n)", "O(n²)", "O(1)"},
-                        {"hard"}, {"Algorithms"}
-                },
-                {
-                        {"Which design pattern ensures only one instance of a class?"},
-                        {"Singleton"},
-                        {"Singleton", "Factory", "Observer", "Decorator"},
-                        {"hard"}, {"Design Patterns"}
-                },
-                {
-                        {"What is Docker used for?"},
-                        {"Containerization"},
-                        {"Containerization", "Database management", "Code compilation", "Network routing"},
-                        {"medium"}, {"DevOps"}
-                },
+        String[][] data = {
+                {"Quel est l'objectif principal de la formation '" + title + "' ?",
+                        "Acquérir des compétences spécifiques au domaine",
+                        "Obtenir un diplôme universitaire",
+                        "Apprendre une langue étrangère",
+                        "Gérer un projet informatique"},
+                {"Quelle est la meilleure approche pour maîtriser '" + title + "' ?",
+                        "Pratiquer régulièrement et appliquer les concepts",
+                        "Lire uniquement la théorie",
+                        "Regarder des vidéos sans pratiquer",
+                        "Copier le code des autres"},
+                {"Quel type de compétence développe la formation '" + title + "' ?",
+                        "Compétences techniques et pratiques",
+                        "Compétences culinaires",
+                        "Compétences sportives",
+                        "Compétences musicales"},
         };
 
-        for (String[][] q : data) {
+        for (String[] d : data) {
             List<String> answers = new ArrayList<>();
-            for (String a : q[2]) answers.add(a);
+            answers.add(d[1]); answers.add(d[2]);
+            answers.add(d[3]); answers.add(d[4]);
             Collections.shuffle(answers);
-            fallback.add(new QuizQuestion(q[0][0], q[1][0], answers, q[3][0], q[4][0]));
+            fallback.add(new QuizQuestion(d[0], d[1], answers, difficulty));
         }
 
         return fallback;

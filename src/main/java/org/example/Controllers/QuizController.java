@@ -67,12 +67,18 @@ public class QuizController implements Initializable {
                 training.getDuration() > 4 ? "medium" : "easy";
         difficultyLabel.setText("Niveau : " + difficulty.toUpperCase());
 
-        questionLabel.setText("⏳ Chargement des questions...");
+        questionLabel.setText("⏳ Génération des questions en cours...");
 
         new Thread(() -> {
-            questions   = quizApiService.fetchQuestions(10, difficulty);
-            userAnswers = new String[questions.size()];
-            Platform.runLater(() -> {
+            // ✅ Passer titre + description pour générer questions pertinentes
+// Dans QuizController.java — setData()
+            questions = quizApiService.fetchQuestionsForTraining(
+                    training.getTitle(),
+                    training.getDescription(),
+                    difficulty  // ✅ plus de paramètre amount
+            );
+            userAnswers = new String[questions.size()]; // sera toujours 10
+            javafx.application.Platform.runLater(() -> {
                 if (!questions.isEmpty()) showQuestion(0);
                 else questionLabel.setText("❌ Impossible de charger les questions.");
             });
