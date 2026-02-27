@@ -10,14 +10,17 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/ManageTraining.fxml"));
+
+        // ✅ Changer "ManageTraining" en "UserTrainingList" pour afficher la page user
+        // ✅ Changer en "ManageTraining" pour revenir à la page admin
+        Parent root = FXMLLoader.load(getClass().getResource("/UserTrainingList.fxml"));
 
         Scene scene = new Scene(root);
 
-        primaryStage.setTitle("INTEGRA – HR Management System");
+        primaryStage.setTitle("INTEGRA – Formations");
         primaryStage.setScene(scene);
-        primaryStage.setMinWidth(1100);
-        primaryStage.setMinHeight(650);
+        primaryStage.setMinWidth(900);
+        primaryStage.setMinHeight(620);
         primaryStage.centerOnScreen();
         primaryStage.show();
     }

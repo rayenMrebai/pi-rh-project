@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="org.example.Controllers.QuizController"
+           prefWidth="600" prefHeight="560"
+           style="-fx-background-color: #f0f2f5;">
+
+    <!-- ===== PANEL QUIZ ===== -->
+    <VBox fx:id="quizPanel" spacing="0">
+
+        <!-- Header -->
+        <VBox style="-fx-background-color: linear-gradient(to right, #1565c0, #1976d2);
+                     -fx-padding: 14 20;">
+            <Label fx:id="trainingTitleLabel" text="Quiz"
+                   style="-fx-text-fill: white; -fx-font-size: 15px;
+                          -fx-font-weight: bold;"/>
+            <HBox spacing="16" alignment="CENTER_LEFT">
+                <Label fx:id="questionCounterLabel" text="Question 1 / 10"
+                       style="-fx-text-fill: #90caf9; -fx-font-size: 11px;"/>
+                <Label fx:id="difficultyLabel" text="Niveau : MEDIUM"
+                       style="-fx-text-fill: #90caf9; -fx-font-size: 11px;"/>
+            </HBox>
+            <ProgressBar fx:id="progressBar" maxWidth="Infinity"
+                         prefHeight="6" progress="0.1"
+                         style="-fx-accent: #69f0ae;"/>
+        </VBox>
+
+        <!-- Corps question -->
+        <VBox spacing="14"
+              style="-fx-background-color: white; -fx-padding: 22;"
+              VBox.vgrow="ALWAYS">
+
+            <Label fx:id="categoryLabel" text="📂 Catégorie"
+                   style="-fx-font-size: 11px; -fx-text-fill: #90a4ae;"/>
+
+            <Label fx:id="questionLabel" text="Chargement..."
+                   wrapText="true"
+                   style="-fx-font-size: 15px; -fx-font-weight: bold;
+                          -fx-text-fill: #1a237e; -fx-padding: 0 0 8 0;"/>
+
+            <Separator/>
+
+            <!-- Réponses radio -->
+            <VBox fx:id="answersBox" spacing="8"/>
+
+            <!-- Feedback erreur -->
+            <Label fx:id="feedbackLabel" text=""
+                   style="-fx-font-size: 12px; -fx-font-weight: bold;"/>
+
+        </VBox>
+
+        <!-- Navigation -->
+        <HBox spacing="12" alignment="CENTER_RIGHT"
+              style="-fx-background-color: white; -fx-padding: 12 20;
+                     -fx-border-color: #e0e0e0; -fx-border-width: 1 0 0 0;">
+            <Button fx:id="prevBtn" text="← Précédent" onAction="#handlePrev"
+                    style="-fx-background-color: #eceff1; -fx-text-fill: #546e7a;
+                           -fx-font-weight: bold; -fx-padding: 9 20;
+                           -fx-background-radius: 6; -fx-cursor: hand;"/>
+            <Button fx:id="nextBtn" text="Suivant →" onAction="#handleNext"
+                    style="-fx-background-color: #1565c0; -fx-text-fill: white;
+                           -fx-font-weight: bold; -fx-padding: 9 20;
+                           -fx-background-radius: 6; -fx-cursor: hand;"/>
+        </HBox>
+
+    </VBox>
+
+    <!-- ===== PANEL RÉSULTAT — caché au départ ===== -->
+    <VBox fx:id="resultPanel"
+          visible="false" managed="false"
+          alignment="CENTER" spacing="18"
+          style="-fx-background-color: white; -fx-padding: 40;">
+
+        <Label text="🏆 Résultat du Quiz"
+               style="-fx-font-size: 20px; -fx-font-weight: bold;
+                      -fx-text-fill: #1a237e;"/>
+
+        <Label fx:id="finalPassedLabel" text="✅ RÉUSSI !"
+               style="-fx-font-size: 30px; -fx-font-weight: bold;"/>
+
+        <!-- Score + % -->
+        <HBox spacing="50" alignment="CENTER">
+            <VBox alignment="CENTER" spacing="4">
+                <Label text="Score"
+                       style="-fx-font-size: 11px; -fx-text-fill: #90a4ae;"/>
+                <Label fx:id="finalScoreLabel" text="—"
+                       style="-fx-font-size: 40px; -fx-font-weight: bold;
+                              -fx-text-fill: #1a237e;"/>
+            </VBox>
+            <VBox alignment="CENTER" spacing="4">
+                <Label text="Pourcentage"
+                       style="-fx-font-size: 11px; -fx-text-fill: #90a4ae;"/>
+                <Label fx:id="finalPercentLabel" text="—"
+                       style="-fx-font-size: 40px; -fx-font-weight: bold;
+                              -fx-text-fill: #1976d2;"/>
+            </VBox>
+        </HBox>
+
+        <!-- Barre progression -->
+        <ProgressBar fx:id="finalProgressBar"
+                     prefWidth="320" prefHeight="18"
+                     style="-fx-background-radius: 8; -fx-accent: #43a047;"/>
+
+        <!-- Message -->
+        <Label fx:id="finalMessageLabel" text="" wrapText="true"
+               maxWidth="420"
+               style="-fx-font-size: 13px; -fx-text-fill: #546e7a;
+                      -fx-text-alignment: CENTER;"/>
+
+        <Label text="⚠️ Ce quiz ne peut pas être repassé."
+               style="-fx-font-size: 11px; -fx-text-fill: #f57c00;
+                      -fx-font-style: italic;"/>
+
+        <Button text="✕  Fermer" onAction="#handleClose"
+                style="-fx-background-color: #1565c0; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-padding: 12 36;
+                       -fx-background-radius: 6; -fx-cursor: hand;
+                       -fx-font-size: 13px;"/>
+
+    </VBox>
+
+</StackPane>
