@@ -49,7 +49,7 @@ public class ExportExcelDialogController {
     @FXML private Button btnExporter;
 
     private ExcelExportService excelService;
-    private String defaultSavePath = "/mnt/user-data/outputs";
+    private String defaultSavePath = "C:\\Users\\MSI\\Downloads\\pi_test";
 
     @FXML
     public void initialize() {
@@ -267,9 +267,9 @@ public class ExportExcelDialogController {
         }
 
         // Options
-        filter.setInclureStatistiques(chkStatistiques.isSelected());
-        filter.setInclureBonus(chkBonus.isSelected());
-        filter.setAppliquerFormatage(chkFormatage.isSelected());
+        filter.setInclureStatistiques(chkStatistiques != null && chkStatistiques.isSelected());
+        filter.setInclureBonus(chkBonus != null && chkBonus.isSelected());
+        filter.setAppliquerFormatage(chkFormatage != null && chkFormatage.isSelected());
 
         return filter;
     }

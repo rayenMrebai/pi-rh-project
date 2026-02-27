@@ -53,7 +53,7 @@ public class ExcelExportService {
             }
 
             if (filter.isInclureBonus()) {
-                createBonusSheet(workbook, salaires);
+                createBonusSheet(workbook, salaires, filter);
             }
 
             // 4. Générer le nom du fichier
@@ -196,8 +196,9 @@ public class ExcelExportService {
         for (Salaire salaire : salaires) {
             Row row = sheet.createRow(rowNum++);
 
-            CellStyle dataStyle = gray ? grayStyle : normalStyle;
-            CellStyle numStyle = gray ? numberGrayStyle : numberStyle;
+            boolean zebre = filter.isAppliquerFormatage() && gray;
+            CellStyle dataStyle = zebre ? grayStyle : normalStyle;
+            CellStyle numStyle = zebre ? numberGrayStyle : numberStyle;
 
             createCell(row, 0, salaire.getId(), dataStyle);
             createCell(row, 1, salaire.getUser().getName(), dataStyle);
@@ -208,7 +209,11 @@ public class ExcelExportService {
 
             Cell statusCell = row.createCell(6);
             statusCell.setCellValue(salaire.getStatus().name());
-            statusCell.setCellStyle(createStatusStyle(workbook, salaire.getStatus(), gray));
+            if (filter.isAppliquerFormatage()) {
+                statusCell.setCellStyle(createStatusStyle(workbook, salaire.getStatus(), gray));
+            } else {
+                statusCell.setCellStyle(dataStyle); // style neutre sans couleur
+            }
 
             createCell(row, 7, salaire.getDatePaiement().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), dataStyle);
 
@@ -257,10 +262,17 @@ public class ExcelExportService {
         avgTotal.setCellFormula("AVERAGE(F6:F" + (rowNum - 2) + ")");
         avgTotal.setCellStyle(totalStyle);
 
-        // Auto-size colonnes
+        int[] minWidths = {2000, 6000, 8000, 4000, 4000, 4500, 4000, 5000};
         for (int i = 0; i < headers.length; i++) {
             sheet.autoSizeColumn(i);
+            if (sheet.getColumnWidth(i) < minWidths[i]) {
+                sheet.setColumnWidth(i, minWidths[i]);
+            }
         }
+        // Forcer la largeur des colonnes contenant les formules SUM/AVERAGE
+        sheet.setColumnWidth(3, 5000); // Base
+        sheet.setColumnWidth(4, 5000); // Bonus
+        sheet.setColumnWidth(5, 5500); // Total
     }
 
     /**
@@ -331,7 +343,7 @@ public class ExcelExportService {
     /**
      * Crée la feuille Bonus
      */
-    private void createBonusSheet(XSSFWorkbook workbook, List<Salaire> salaires) {
+    private void createBonusSheet(XSSFWorkbook workbook, List<Salaire> salaires, ExportFilter filter) {
         Sheet sheet = workbook.createSheet("Détails Bonus");
 
         int rowNum = 0;
@@ -376,8 +388,9 @@ public class ExcelExportService {
                 for (BonusRule rule : salaire.getBonusRules()) {
                     Row row = sheet.createRow(rowNum++);
 
-                    CellStyle dataStyle = gray ? grayStyle : normalStyle;
-                    CellStyle numStyle = gray ? numberGrayStyle : numberStyle;
+                    boolean zebre = filter.isAppliquerFormatage() && gray;
+                    CellStyle dataStyle = zebre ? grayStyle : normalStyle;
+                    CellStyle numStyle = zebre ? numberGrayStyle : numberStyle;
 
                     createCell(row, 0, salaire.getUser().getName(), dataStyle);
                     createCell(row, 1, rule.getNomRegle(), dataStyle);
