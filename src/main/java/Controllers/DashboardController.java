@@ -76,6 +76,8 @@ public class DashboardController implements Initializable {
     @FXML private Button exportAllExcelButton;
     @FXML private Button exportProjectExcelButton;
 
+    @FXML private Button aiAssistantButton;
+
     private final ProjectService projectService = new ProjectService();
     private final ProjectAssignmentService assignmentService = new ProjectAssignmentService();
     private final CurrencyService currencyService = new CurrencyService();
@@ -322,6 +324,7 @@ public class DashboardController implements Initializable {
         // EXCEL EXPORT buttons
         exportAllExcelButton.setOnAction(e -> exportAllToExcel());
         exportProjectExcelButton.setOnAction(e -> exportSelectedProjectToExcel());
+        aiAssistantButton.setOnAction(e -> openAIAssistant());
     }
 
     // ==================== PDF EXPORT (inchangé) ====================
@@ -542,5 +545,29 @@ public class DashboardController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void openAIAssistant() {
+        Project selected = projectsListView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Aucun projet", "Veuillez sélectionner un projet.");
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AIAssistant.fxml"));
+            Parent root = loader.load();
+            AIAssistantController controller = loader.getController();
+            controller.setProject(selected);
+            controller.setEmployeeMap(employeeNameMap); // pour avoir les noms des employés si besoin
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Assistant IA - " + selected.getName());
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir l'assistant IA.");
+        }
     }
 }

@@ -107,6 +107,7 @@ public class ProjectFormController implements Initializable {
             micButton.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold;");
             micButton.setText("⏺ Arrêter");
 
+            // Effacer le champ avant de commencer
             Platform.runLater(() -> descriptionField.clear());
 
             recordingThread = new Thread(() -> {
@@ -124,9 +125,6 @@ public class ProjectFormController implements Initializable {
                                 String text = extractTextFromResult(result);
                                 if (!text.isEmpty()) {
                                     fullText.append(text).append(" ");
-                                    System.out.println("Ajouté au fullText : " + text);
-                                } else {
-                                    System.out.println("Texte extrait vide pour résultat : " + result);
                                 }
                             }
                         }
@@ -134,16 +132,28 @@ public class ProjectFormController implements Initializable {
                     String finalResult = recognizer.getFinalResult();
                     System.out.println("Résultat final global : " + finalResult);
                     String finalText = extractTextFromResult(finalResult);
+                    System.out.println("DEBUG: finalText extrait = '" + finalText + "'");
                     if (!finalText.isEmpty()) {
                         fullText.append(finalText);
-                        System.out.println("Ajouté finalText : " + finalText);
                     }
                     String finalDescription = fullText.toString().trim();
-                    System.out.println("Texte final accumulé : '" + finalDescription + "'");
+                    System.out.println("DEBUG: fullText final = '" + finalDescription + "'");
+
+                    // Formatage : première lettre en majuscule + point final
+                    if (!finalDescription.isEmpty()) {
+                        String formatted = finalDescription.substring(0, 1).toUpperCase() + finalDescription.substring(1);
+                        if (!formatted.endsWith(".")) {
+                            formatted += ".";
+                        }
+                        finalDescription = formatted;
+                    }
+
+                    System.out.println("Texte final formaté : '" + finalDescription + "'");
+                    final String textToSet = finalDescription;
                     Platform.runLater(() -> {
-                        descriptionField.setText(finalDescription);
+                        descriptionField.setText(textToSet);
                         descriptionField.requestLayout();
-                        System.out.println("Mise à jour UI effectuée avec : " + finalDescription);
+                        System.out.println("Mise à jour UI effectuée avec : " + textToSet);
                     });
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -174,23 +184,16 @@ public class ProjectFormController implements Initializable {
 
     private String extractTextFromResult(String jsonResult) {
         try {
-            // Essayer d'abord sans espace
-            String search1 = "\"text\":\"";
-            int start = jsonResult.indexOf(search1);
-            if (start != -1) {
-                start += search1.length();
-                int end = jsonResult.indexOf("\"", start);
-                return jsonResult.substring(start, end);
-            }
-            // Essayer avec espace
-            String search2 = "\"text\" : \"";
-            start = jsonResult.indexOf(search2);
-            if (start != -1) {
-                start += search2.length();
-                int end = jsonResult.indexOf("\"", start);
-                return jsonResult.substring(start, end);
-            }
-            return "";
+            // Cherche "text" puis le deux-points puis le guillemet ouvrant
+            int textIndex = jsonResult.indexOf("\"text\"");
+            if (textIndex == -1) return "";
+            int colonIndex = jsonResult.indexOf(":", textIndex + 6);
+            if (colonIndex == -1) return "";
+            int quoteIndex = jsonResult.indexOf("\"", colonIndex + 1);
+            if (quoteIndex == -1) return "";
+            int endQuoteIndex = jsonResult.indexOf("\"", quoteIndex + 1);
+            if (endQuoteIndex == -1) return "";
+            return jsonResult.substring(quoteIndex + 1, endQuoteIndex);
         } catch (Exception e) {
             return "";
         }
