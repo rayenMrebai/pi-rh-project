@@ -18,8 +18,12 @@ import javafx.stage.Stage;
 import org.example.enums.SalaireStatus;
 import org.example.model.salaire.Salaire;
 import org.example.model.salaire.BonusRule;
+import org.example.model.user.UserAccount;
 import org.example.services.salaire.BonusRuleService;
 import org.example.services.salaire.SalaireService;
+
+import org.example.util.SessionManager;
+import org.example.enums.UserRole;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +32,8 @@ import org.example.enums.BonusRuleStatus;
 
 import org.example.services.pdf.PDFService;
 import javafx.application.HostServices;
+import org.example.util.SessionManager;
+import org.example.enums.UserRole;
 
 public class SalaireManagementController {
 
@@ -62,9 +68,15 @@ public class SalaireManagementController {
 
     @FXML private Button btnNavSalaires;
     @FXML private Button btnNavStatistics;
+    @FXML private Label lblCurrentUser;
+    @FXML private Label lblCurrentRole;
+    @FXML private Label lblModuleTitle;
 
     @FXML
     public void initialize() {
+
+        displayCurrentUserInfo();
+        adaptInterfaceToRole();
         salaireService = new SalaireService();
         bonusRuleService = new BonusRuleService();
         salaryList = FXCollections.observableArrayList();
@@ -124,6 +136,60 @@ public class SalaireManagementController {
         loadAllSalaries();
     }
 
+    private void displayCurrentUserInfo() {
+        if (SessionManager.isLoggedIn()) {
+            UserAccount currentUser = SessionManager.getCurrentUser();
+            UserRole currentRole = SessionManager.getCurrentRole();
+
+            // Afficher dans la navbar
+            lblCurrentUser.setText(currentUser.getUsername());
+            lblCurrentRole.setText(currentRole.toString());
+
+            // Adapter le titre du module
+            if (SessionManager.isAdmin()) {
+                lblModuleTitle.setText("Administrator / RH Module");
+            } else {
+                lblModuleTitle.setText("Consultation de mes salaires");
+            }
+
+        } else {
+            // Si pas de session (pour tests)
+            lblCurrentUser.setText("Utilisateur Test");
+            lblCurrentRole.setText("NON CONNECTÉ");
+            lblModuleTitle.setText("Mode Test");
+        }
+    }
+
+    private void adaptInterfaceToRole() {
+        if (SessionManager.isAdmin()) {
+            // Admin : Tout accessible
+            btnAddSalary.setVisible(true);
+            btnUpdateSalary.setDisable(false);
+            btnDeleteSalary.setDisable(false);
+            btnAddRule.setDisable(false);
+            btnExportExcel.setVisible(true);
+            btnNavStatistics.setVisible(true);
+            // ⭐ Bouton Statistiques VISIBLE
+            btnNavStatistics.setVisible(true);
+            btnNavStatistics.setManaged(true);
+
+        } else {
+            // Manager/Employé : Mode consultation uniquement
+            btnAddSalary.setVisible(false);        // Cacher complètement
+            btnUpdateSalary.setDisable(true);      // Désactiver
+            btnDeleteSalary.setDisable(true);      // Désactiver
+            btnAddRule.setDisable(true);           // Désactiver
+            btnExportExcel.setVisible(false);      // Cacher
+            btnNavStatistics.setVisible(false);    // Cacher
+            // ⭐ Bouton Statistiques CACHÉ
+            btnNavStatistics.setVisible(false);
+            btnNavStatistics.setManaged(false);
+
+            // Seul le bouton PDF reste actif
+            btnGeneratePDF.setDisable(false);
+        }
+    }
+
     /**
      * Crée une ligne personnalisée pour chaque salaire dans la ListView
      */
@@ -133,11 +199,11 @@ public class SalaireManagementController {
         row.setPadding(new Insets(12, 10, 12, 10));
         row.setStyle("-fx-background-radius: 8;");
 
-        Label empId = new Label(String.valueOf(salaire.getUser().getId()));
+        Label empId = new Label(String.valueOf(salaire.getUser().getUserId()));
         empId.setPrefWidth(60);
         empId.setStyle("-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #4a5568;");
 
-        Label empName = new Label(salaire.getUser().getName());
+        Label empName = new Label(salaire.getUser().getUsername());
         empName.setPrefWidth(150);
         empName.setStyle("-fx-font-size: 13px; -fx-text-fill: #2d3748;");
 
@@ -262,7 +328,7 @@ public class SalaireManagementController {
             salaryListView.setItems(salaryList);
         } else {
             ObservableList<Salaire> filtered = salaryList.filtered(s ->
-                    s.getUser().getName().toLowerCase().contains(searchText.toLowerCase())
+                    s.getUser().getUsername().toLowerCase().contains(searchText.toLowerCase())
             );
             salaryListView.setItems(filtered);
         }
@@ -274,7 +340,7 @@ public class SalaireManagementController {
     private void displaySalaryDetails(Salaire salaire) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-        lblEmployeeName.setText(salaire.getUser().getName());
+        lblEmployeeName.setText(salaire.getUser().getUsername());
         lblBaseAmount.setText(String.format("%.2f DT", salaire.getBaseAmount()));
         lblBonusAmount.setText(String.format("%.2f DT", salaire.getBonusAmount()));
         lblTotalAmount.setText(String.format("%.2f DT", salaire.getTotalAmount()));
@@ -427,7 +493,7 @@ public class SalaireManagementController {
 
             Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
             confirmation.setTitle("Confirmation");
-            confirmation.setHeaderText("Supprimer le salaire de " + selectedSalaire.getUser().getName());
+            confirmation.setHeaderText("Supprimer le salaire de " + selectedSalaire.getUser().getUsername());
             confirmation.setContentText("Cette action est irréversible. Continuer ?");
 
             confirmation.showAndWait().ifPresent(response -> {
@@ -457,6 +523,15 @@ public class SalaireManagementController {
         if (selectedSalaire == null) {
             showAlert("Erreur", "Veuillez sélectionner un salaire", Alert.AlertType.WARNING);
             return;
+        }
+
+        if (!SessionManager.isAdmin()) {
+            if (selectedSalaire.getUser().getUserId() != SessionManager.getCurrentUser().getUserId()) {
+                showAlert("Accès refusé",
+                        "Vous ne pouvez générer que vos propres fiches de paie",
+                        Alert.AlertType.ERROR);
+                return;
+            }
         }
 
         try {
@@ -610,6 +685,12 @@ public class SalaireManagementController {
 
     @FXML
     private void handleNavStatistics() {
+        if (!SessionManager.isAdmin()) {
+            showAlert("Accès refusé",
+                    "Seuls les administrateurs peuvent accéder aux statistiques.",
+                    Alert.AlertType.ERROR);
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/StatisticsView.fxml"));
             Parent root = loader.load();

@@ -1,4 +1,3 @@
-package org.example.tests;
 
 import org.example.enums.SalaireStatus;
 import org.example.model.salaire.Salaire;
@@ -35,7 +34,7 @@ public class SalaireServiceTest {
 
         List<Salaire> salaires = salaireService.getAll();
         Salaire created = salaires.stream()
-                .filter(s -> s.getUser().getId() == testUser.getId() && s.getBaseAmount() == 3000.0)
+                .filter(s -> s.getUser().getUserId() == testUser.getUserId() && s.getBaseAmount() == 3000.0)
                 .findFirst()
                 .orElse(null);
 
@@ -51,7 +50,7 @@ public class SalaireServiceTest {
 
         assertNotNull(salaire, "Salaire introuvable");
         assertEquals(3000.0, salaire.getBaseAmount(), 0.01);
-        assertEquals(testUser.getId(), salaire.getUser().getId());
+        assertEquals(testUser.getUserId(), salaire.getUser().getUserId());
     }
 
     @Test

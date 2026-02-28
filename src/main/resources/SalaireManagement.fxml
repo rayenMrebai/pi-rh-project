@@ -17,17 +17,19 @@
 
         <!-- ⭐ NAVBAR (NOUVEAU) -->
         <HBox alignment="CENTER_LEFT" spacing="0"
-              style="-fx-background-color: linear-gradient(to right, #0066CC 0%, #00AA66 100%);">
+              style="-fx-background-color: linear-gradient(to right, #667eea 0%, #764ba2 100%); -fx-padding: 0;">
 
             <Button fx:id="btnNavSalaires" text="📋 Gestion des Salaires"
                     prefHeight="60" prefWidth="250"
                     style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 0; -fx-border-width: 0 0 4 0; -fx-border-color: white;"
                     onAction="#handleNavSalaires"/>
 
+            <!-- ⭐ Bouton Statistiques (visible seulement pour ADMIN) -->
             <Button fx:id="btnNavStatistics" text="📊 Statistiques et IA"
                     prefHeight="60" prefWidth="250"
                     style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 0;"
-                    onAction="#handleNavStatistics"/>
+                    onAction="#handleNavStatistics"
+                    visible="true" managed="true"/>
 
             <Region HBox.hgrow="ALWAYS"/>
 
@@ -53,16 +55,18 @@
                 <VBox>
                     <Label text="INTEGRA - Manage Salaries"
                            style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label text="Administrator / RH Module"
+                    <Label fx:id="lblModuleTitle" text="Administrator / RH Module"
                            style="-fx-font-size: 12px; -fx-text-fill: white;"/>
                 </VBox>
 
                 <Region HBox.hgrow="ALWAYS"/>
 
-                <!-- Infos utilisateur -->
+                <!-- ⭐ Infos utilisateur (DYNAMIQUE - identique à navbar) -->
                 <VBox alignment="CENTER_RIGHT">
-                    <Label text="Admin User" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label text="ADMIN" style="-fx-font-size: 11px; -fx-text-fill: white;"/>
+                    <Label fx:id="lblCurrentRole" text="ADMINISTRATEUR"
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                    <Label fx:id="lblHeaderRole" text="ADMIN"
+                           style="-fx-font-size: 11px; -fx-text-fill: white;"/>
                 </VBox>
             </HBox>
 

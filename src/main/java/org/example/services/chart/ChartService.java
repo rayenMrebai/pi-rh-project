@@ -44,7 +44,7 @@ public class ChartService {
                     .collect(Collectors.toList());
 
             List<String> labels = limited.stream()
-                    .map(s -> s.getUser().getName())
+                    .map(s -> s.getUser().getUsername())
                     .collect(Collectors.toList());
 
             List<Double> data = limited.stream()

@@ -43,7 +43,7 @@ public class AddFormSalaireController {
                 @Override
                 protected void updateItem(UserAccount user, boolean empty) {
                     super.updateItem(user, empty);
-                    setText(empty || user == null ? "" : user.getName() + " (ID: " + user.getId() + ")");
+                    setText(empty || user == null ? "" : user.getUsername()+ " (ID: " + user.getUserId() + ")");
                 }
             });
 
@@ -51,7 +51,7 @@ public class AddFormSalaireController {
                 @Override
                 protected void updateItem(UserAccount user, boolean empty) {
                     super.updateItem(user, empty);
-                    setText(empty || user == null ? "" : user.getName() + " (ID: " + user.getId() + ")");
+                    setText(empty || user == null ? "" : user.getUsername() + " (ID: " + user.getUserId() + ")");
                 }
             });
 

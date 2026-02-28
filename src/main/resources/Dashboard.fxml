@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane styleClass="theme-light" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.DashboardController">
+    <top>
+        <HBox styleClass="top-bar" spacing="10">
+            <Label text="INTEGRA" styleClass="logo"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="userNameLabel" styleClass="user-info"/>
+            <Button fx:id="logoutButton" text="Déconnexion" styleClass="logout-button"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox styleClass="main-content" spacing="20" alignment="TOP_CENTER">
+            <padding>
+                <Insets top="40" right="40" bottom="40" left="40"/>
+            </padding>
+            <children>
+                <Label text="Mon Tableau de Bord" style="-fx-font-size: 28px; -fx-font-weight: bold;"/>
+
+                <GridPane hgap="20" vgap="15" alignment="CENTER">
+                    <padding><Insets top="20"/></padding>
+
+                    <Label text="Nom d'utilisateur :" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="dashboard-label"/>
+                    <Label fx:id="usernameDisplay" GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="dashboard-value"/>
+
+                    <Label text="Email :" GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="dashboard-label"/>
+                    <Label fx:id="emailDisplay" GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="dashboard-value"/>
+
+                    <Label text="Rôle :" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="dashboard-label"/>
+                    <Label fx:id="roleDisplay" GridPane.rowIndex="2" GridPane.columnIndex="1" styleClass="dashboard-value"/>
+
+                    <Label text="Statut :" GridPane.rowIndex="3" GridPane.columnIndex="0" styleClass="dashboard-label"/>
+                    <Label fx:id="statusDisplay" GridPane.rowIndex="3" GridPane.columnIndex="1" styleClass="dashboard-value"/>
+                </GridPane>
+
+                <HBox alignment="CENTER" spacing="20">
+                    <Button fx:id="settingsButton" text="Paramètres"/>
+                    <Button fx:id="userListButton" text="Gestion des utilisateurs" visible="false" managed="false"/>
+                </HBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

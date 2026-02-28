@@ -136,8 +136,8 @@ public class Salaire {
     public String toString() {
         return "Salaire {" +
                 "id=" + id +
-                ", userId=" + user.getId() +
-                ", userName='" + user.getName() + '\'' +
+                ", userId=" + user.getUserId() +
+                ", userName='" + user.getUsername() + '\'' +
                 ", userEmail='" + user.getEmail() + '\'' +
                 ", baseAmount=" + baseAmount +
                 ", bonusAmount=" + bonusAmount +

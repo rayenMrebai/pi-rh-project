@@ -72,7 +72,7 @@ public class AddFormBonusRuleController {
 
     private void displaySalaireInfo() {
         if (currentSalaire != null) {
-            lblEmployeeName.setText(currentSalaire.getUser().getName());
+            lblEmployeeName.setText(currentSalaire.getUser().getUsername());
             lblBaseAmount.setText(String.format("%.2f DT", currentSalaire.getBaseAmount()));
         }
     }

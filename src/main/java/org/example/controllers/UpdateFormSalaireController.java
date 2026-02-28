@@ -39,7 +39,7 @@ public class UpdateFormSalaireController {
 
     private void populateFields() {
         if (currentSalaire != null) {
-            lblUserName.setText(currentSalaire.getUser().getName());
+            lblUserName.setText(currentSalaire.getUser().getUsername());
             lblBaseAmount.setText(String.format("%.2f DT", currentSalaire.getBaseAmount()));
             lblBonusAmount.setText(String.format("%.2f DT", currentSalaire.getBonusAmount()));
             lblTotalAmount.setText(String.format("%.2f DT", currentSalaire.getTotalAmount()));

@@ -81,7 +81,7 @@ public class UpdateFormBonusRuleController {
     private void populateFields() {
         if (currentBonusRule != null) {
             // Informations non modifiables
-            lblEmployeeName.setText(currentBonusRule.getSalaire().getUser().getName());
+            lblEmployeeName.setText(currentBonusRule.getSalaire().getUser().getUsername());
             lblBaseAmount.setText(String.format("%.2f DT", currentBonusRule.getSalaire().getBaseAmount()));
             lblBonusAmount.setText(String.format("%.2f DT", currentBonusRule.getBonus()));
 

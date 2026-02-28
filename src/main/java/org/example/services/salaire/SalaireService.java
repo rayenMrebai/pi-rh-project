@@ -10,6 +10,7 @@ import org.example.services.email.EmailTemplate;
 import org.example.util.DatabaseConnection;
 import org.example.services.pdf.PDFService;
 
+import org.example.util.SessionManager;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,13 +24,17 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
     @Override
     public void create(Salaire salaire) {
+        if (!SessionManager.isAdmin()) {
+            System.err.println("❌ ACCÈS REFUSÉ : Seuls les admins peuvent créer des salaires");
+            return;
+        }
         String sql = """
             INSERT INTO salaire(userId, baseAmount, bonusAmount, totalAmount, status, datePaiement)
             VALUES (?, ?, ?, ?, ?, ?)
         """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, salaire.getUser().getId());
+            ps.setInt(1, salaire.getUser().getUserId());
             ps.setDouble(2, salaire.getBaseAmount());
             ps.setDouble(3, salaire.getBonusAmount());
             ps.setDouble(4, salaire.getTotalAmount());
@@ -51,19 +56,36 @@ public class SalaireService implements GlobalInterface<Salaire> {
     @Override
     public List<Salaire> getAll() {
         List<Salaire> salaires = new ArrayList<>();
-
-        String sql = """
+        String sql;
+        if (SessionManager.isAdmin()) {
+            sql = """
                     SELECT 
                         s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
                         s.status, s.datePaiement,
                         s.createdAt, s.updatedAt,
-                        u.name, u.email
+                        u.username, u.email
                     FROM salaire s
-                    JOIN useraccount u ON s.userId = u.id
+                    JOIN user_account u ON s.userId = u.id
+                    WHERE s.userId = ?
                 """;
+        } else {
+            sql = """
+                    SELECT 
+                        s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
+                        s.status, s.datePaiement,
+                        s.createdAt, s.updatedAt,
+                        u.username, u.email
+                    FROM salaire s
+                    JOIN user_account u ON s.userId = u.id
+                """;
+        }
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)){
+            if (!SessionManager.isAdmin()) {
+                ps.setInt(1, SessionManager.getCurrentUser().getUserId());
+            }
+
+            ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
                 Salaire salaire = mapResultSetToSalaire(rs);
@@ -79,6 +101,10 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
     @Override
     public void update(Salaire salaire) {
+        if (!SessionManager.isAdmin()) {
+            System.err.println("❌ ACCÈS REFUSÉ : Seuls les admins peuvent créer des salaires");
+            return;
+        }
         // Récupérer l'ancien statut AVANT la mise à jour
         Salaire oldSalaire = getById(salaire.getId());
         SalaireStatus oldStatus = (oldSalaire != null) ? oldSalaire.getStatus() : null;
@@ -130,6 +156,10 @@ public class SalaireService implements GlobalInterface<Salaire> {
     }
 
     public void updateBonusAndTotal(Salaire salaire) {
+        if (!SessionManager.isAdmin()) {
+            System.err.println("❌ ACCÈS REFUSÉ : Seuls les admins peuvent créer des salaires");
+            return;
+        }
         String sql = """
             UPDATE salaire 
             SET bonusAmount = ?, totalAmount = ?, updatedAt = ?
@@ -149,6 +179,10 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
     @Override
     public void delete(int id) {
+        if (!SessionManager.isAdmin()) {
+            System.err.println("❌ ACCÈS REFUSÉ : Seuls les admins peuvent créer des salaires");
+            return;
+        }
         try (PreparedStatement ps =
                      conn.prepareStatement("DELETE FROM salaire WHERE id = ?")) {
             ps.setInt(1, id);
@@ -162,7 +196,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
         UserAccount user = new UserAccount(
                 rs.getInt("userId"),
-                rs.getString("name"),
+                rs.getString("Username"),
                 rs.getString("email")
         );
 
