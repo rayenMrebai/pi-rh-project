@@ -1,11 +1,13 @@
 package Controllers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.model.recrutement.Candidat;
 import org.example.model.recrutement.JobPosition;
 import org.example.services.recrutement.CandidatService;
+import org.example.services.email.ZeroBounceEmailService;
 
 public class candidatForm {
 
@@ -16,11 +18,15 @@ public class candidatForm {
     @FXML private TextField tfEducationLevel;
     @FXML private TextArea taSkills;
     @FXML private ComboBox<String> cbStatus;
-    @FXML private Label lblJobInfo; // Nouveau label pour afficher le job
+    @FXML private Label lblJobInfo;
+    @FXML private Button btnVerifyEmail;
+    @FXML private Label lblEmailStatus;
 
     private final CandidatService service = new CandidatService();
+    private final ZeroBounceEmailService emailService = ZeroBounceEmailService.getInstance();
     private Candidat candidatToEdit = null;
     private JobPosition selectedJob = null;
+    private boolean emailVerified = false;
 
     @FXML
     public void initialize() {
@@ -42,6 +48,22 @@ public class candidatForm {
             if (t.matches("[a-zA-ZÀ-ÿ0-9 \\-+/]*")) return change;
             return null;
         }));
+
+        // Désactiver le bouton de vérification au début
+        if (btnVerifyEmail != null) {
+            btnVerifyEmail.setDisable(true);
+        }
+
+        // Ajouter un listener sur le champ email
+        tfEmail.textProperty().addListener((obs, oldVal, newVal) -> {
+            emailVerified = false;
+            if (btnVerifyEmail != null) {
+                btnVerifyEmail.setDisable(newVal == null || newVal.trim().isEmpty());
+            }
+            if (lblEmailStatus != null) {
+                lblEmailStatus.setText("");
+            }
+        });
     }
 
     private void onlyLetters(TextField tf) {
@@ -52,7 +74,6 @@ public class candidatForm {
         }));
     }
 
-    // Nouvelle méthode pour définir le job sélectionné (pour l'ajout)
     public void setSelectedJob(JobPosition job) {
         this.selectedJob = job;
         if (lblJobInfo != null && job != null) {
@@ -71,9 +92,73 @@ public class candidatForm {
         tfEducationLevel.setText(c.getEducationLevel());
         taSkills.setText(c.getSkills());
         cbStatus.setValue(c.getStatus());
+        emailVerified = true; // Pour l'édition, on considère que l'email est déjà vérifié
 
         if (lblJobInfo != null && selectedJob != null) {
             lblJobInfo.setText("Job: " + selectedJob.getTitle());
+        }
+    }
+
+    @FXML
+    private void onVerifyEmail() {
+        String email = tfEmail.getText().trim();
+        if (email.isEmpty()) {
+            alert("Veuillez entrer un email à vérifier.");
+            return;
+        }
+
+        // Désactiver le bouton pendant la vérification
+        btnVerifyEmail.setDisable(true);
+        btnVerifyEmail.setText("Vérification...");
+        lblEmailStatus.setText("⏳ Vérification en cours...");
+        lblEmailStatus.setStyle("-fx-text-fill: #f59e0b;");
+
+        emailService.verifyEmail(email)
+                .thenAccept(result -> {
+                    Platform.runLater(() -> {
+                        btnVerifyEmail.setDisable(false);
+                        btnVerifyEmail.setText("Vérifier");
+
+                        if (result.isValid()) {
+                            emailVerified = true;
+                            lblEmailStatus.setText("✅ " + result.getMessage());
+                            lblEmailStatus.setStyle("-fx-text-fill: #22c55e; -fx-font-weight: bold;");
+
+                            if (result.getDetails() != null) {
+                                Tooltip tooltip = new Tooltip(result.getDetails());
+                                Tooltip.install(lblEmailStatus, tooltip);
+                            }
+                        } else {
+                            emailVerified = false;
+                            lblEmailStatus.setText("❌ " + result.getMessage());
+                            lblEmailStatus.setStyle("-fx-text-fill: #ef4444; -fx-font-weight: bold;");
+                        }
+                    });
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        btnVerifyEmail.setDisable(false);
+                        btnVerifyEmail.setText("Vérifier");
+                        lblEmailStatus.setText("❌ Erreur: " + ex.getMessage());
+                        lblEmailStatus.setStyle("-fx-text-fill: #ef4444;");
+                    });
+                    return null;
+                });
+    }
+
+    @FXML
+    private void onVerifyBasic() {
+        String email = tfEmail.getText().trim();
+        ZeroBounceEmailService.EmailVerificationResult result = emailService.verifyBasic(email);
+
+        if (result.isValid()) {
+            emailVerified = true;
+            lblEmailStatus.setText("✅ " + result.getMessage());
+            lblEmailStatus.setStyle("-fx-text-fill: #22c55e;");
+        } else {
+            emailVerified = false;
+            lblEmailStatus.setText("❌ " + result.getMessage());
+            lblEmailStatus.setStyle("-fx-text-fill: #ef4444;");
         }
     }
 
@@ -87,6 +172,18 @@ public class candidatForm {
         if (selectedJob == null && candidatToEdit == null) {
             alert("No job selected for this candidate!");
             return;
+        }
+
+        // Vérifier l'email si ce n'est pas déjà fait (pour un nouveau candidat)
+        if (!emailVerified && candidatToEdit == null) {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Email non vérifié");
+            confirm.setHeaderText("L'email n'a pas été vérifié");
+            confirm.setContentText("Voulez-vous quand même continuer ?");
+
+            if (confirm.showAndWait().get() != ButtonType.OK) {
+                return;
+            }
         }
 
         int phone;
@@ -107,7 +204,7 @@ public class candidatForm {
             c.setEducationLevel(tfEducationLevel.getText());
             c.setSkills(taSkills.getText());
             c.setStatus(cbStatus.getValue());
-            c.setJobPosition(selectedJob); // Lier au job sélectionné
+            c.setJobPosition(selectedJob);
 
             service.create(c);
         } else {
@@ -119,7 +216,6 @@ public class candidatForm {
             candidatToEdit.setEducationLevel(tfEducationLevel.getText());
             candidatToEdit.setSkills(taSkills.getText());
             candidatToEdit.setStatus(cbStatus.getValue());
-            // Ne pas changer le job en édition
 
             service.update(candidatToEdit);
         }

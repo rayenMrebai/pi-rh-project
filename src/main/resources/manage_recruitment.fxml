@@ -317,7 +317,13 @@
                                     <Insets left="20" right="20"/>
                                 </padding>
                             </Button>
-
+                            <Button text="📄 Exporter PDF" onAction="#onExportAllCandidatsPDF"
+                                    style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand; -fx-font-size: 13;"
+                                    prefHeight="40" prefWidth="130">
+                                <padding>
+                                    <Insets left="15" right="15"/>
+                                </padding>
+                            </Button>
                             <Button text="Rejeter" onAction="#onReject"
                                     style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 20; -fx-cursor: hand; -fx-font-size: 13;"
                                     prefHeight="40" prefWidth="120">

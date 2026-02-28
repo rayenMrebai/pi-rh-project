@@ -27,7 +27,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import javafx.stage.FileChooser;
+import java.io.File;
+import java.time.LocalDate;
+import org.example.services.pdf.PdfExportService;
 public class manageRecruitment {
 
     // ====== JOB CARDS ======
@@ -142,7 +145,13 @@ public class manageRecruitment {
             dSkills.setText(c.getSkills() == null ? "" : c.getSkills());
         }
     }
-
+    private void showInfo(String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle("Information");
+        a.setHeaderText(null);
+        a.setContentText(msg);
+        a.showAndWait();
+    }
     private void clearDetails() {
         dFullName.setText("-");
         dEmail.setText("-");
@@ -352,7 +361,66 @@ public class manageRecruitment {
             statsInReview.setText(String.valueOf(reviewCount));
         }
     }
+    @FXML
+    private void onExportAllCandidatsPDF() {
+        if (allCandidats == null || allCandidats.isEmpty()) {
+            showAlert("Aucun candidat à exporter.");
+            return;
+        }
 
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Enregistrer le rapport PDF");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichiers PDF", "*.pdf"));
+
+        // Définir un nom de fichier avec date
+        String fileName = "candidats_" + LocalDate.now() + ".pdf";
+        fileChooser.setInitialFileName(fileName);
+
+        // Suggérer le dossier Téléchargements ou Documents par défaut
+        String userHome = System.getProperty("user.home");
+        File defaultDirectory = new File(userHome + "/Downloads");
+        if (!defaultDirectory.exists()) {
+            defaultDirectory = new File(userHome + "/Documents");
+        }
+        fileChooser.setInitialDirectory(defaultDirectory);
+
+        File file = fileChooser.showSaveDialog(candidatTable.getScene().getWindow());
+
+        if (file != null) {
+            try {
+                PdfExportService.exportAllCandidats(new ArrayList<>(allCandidats), file.getAbsolutePath());
+                showInfo("PDF exporté avec succès : " + file.getName() + "\nEmplacement : " + file.getParent());
+
+                // Optionnel : proposer d'ouvrir le dossier contenant le fichier
+                openFileLocation(file);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                showAlert("Erreur lors de l'export PDF : " + e.getMessage());
+            }
+        }
+    }
+
+    private void openFileLocation(File file) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("PDF créé");
+        alert.setHeaderText("Le PDF a été créé avec succès !");
+        alert.setContentText("Voulez-vous ouvrir le dossier contenant le fichier ?");
+
+        ButtonType openButton = new ButtonType("Ouvrir le dossier");
+        ButtonType cancelButton = new ButtonType("Fermer", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(openButton, cancelButton);
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == openButton) {
+                try {
+                    java.awt.Desktop.getDesktop().open(file.getParentFile());
+                } catch (Exception e) {
+                    showAlert("Impossible d'ouvrir le dossier : " + e.getMessage());
+                }
+            }
+        });
+    }
     private void updateCandidatsForSelectedJob() {
         ObservableList<Candidat> candidatsForJob;
 

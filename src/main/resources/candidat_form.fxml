@@ -79,7 +79,22 @@
                                        promptText="name@mail.com"
                                        style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
                         </VBox>
-
+                        <!-- Dans la section PERSONAL INFO, après le champ Email -->
+                        <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                            <Label text="Email" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <TextField fx:id="tfEmail"
+                                           promptText="name@mail.com"
+                                           HBox.hgrow="ALWAYS"
+                                           style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+                                <Button fx:id="btnVerifyEmail"
+                                        text="Vérifier"
+                                        onAction="#onVerifyEmail"
+                                        style="-fx-background-color: #0B63CE; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12; -fx-cursor: hand;"
+                                        prefHeight="40" prefWidth="80"/>
+                            </HBox>
+                            <Label fx:id="lblEmailStatus" text="" style="-fx-font-size: 11;"/>
+                        </VBox>
                         <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1">
                             <Label text="Phone" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
                             <TextField fx:id="tfPhone"
