@@ -7,7 +7,6 @@ import javafx.stage.Stage;
 import org.example.model.recrutement.Candidat;
 import org.example.model.recrutement.JobPosition;
 import org.example.services.recrutement.CandidatService;
-import org.example.services.email.ZeroBounceEmailService;
 
 public class candidatForm {
 
@@ -23,7 +22,7 @@ public class candidatForm {
     @FXML private Label lblEmailStatus;
 
     private final CandidatService service = new CandidatService();
-    private final ZeroBounceEmailService emailService = ZeroBounceEmailService.getInstance();
+
     private Candidat candidatToEdit = null;
     private JobPosition selectedJob = null;
     private boolean emailVerified = false;
@@ -99,68 +98,7 @@ public class candidatForm {
         }
     }
 
-    @FXML
-    private void onVerifyEmail() {
-        String email = tfEmail.getText().trim();
-        if (email.isEmpty()) {
-            alert("Veuillez entrer un email à vérifier.");
-            return;
-        }
 
-        // Désactiver le bouton pendant la vérification
-        btnVerifyEmail.setDisable(true);
-        btnVerifyEmail.setText("Vérification...");
-        lblEmailStatus.setText("⏳ Vérification en cours...");
-        lblEmailStatus.setStyle("-fx-text-fill: #f59e0b;");
-
-        emailService.verifyEmail(email)
-                .thenAccept(result -> {
-                    Platform.runLater(() -> {
-                        btnVerifyEmail.setDisable(false);
-                        btnVerifyEmail.setText("Vérifier");
-
-                        if (result.isValid()) {
-                            emailVerified = true;
-                            lblEmailStatus.setText("✅ " + result.getMessage());
-                            lblEmailStatus.setStyle("-fx-text-fill: #22c55e; -fx-font-weight: bold;");
-
-                            if (result.getDetails() != null) {
-                                Tooltip tooltip = new Tooltip(result.getDetails());
-                                Tooltip.install(lblEmailStatus, tooltip);
-                            }
-                        } else {
-                            emailVerified = false;
-                            lblEmailStatus.setText("❌ " + result.getMessage());
-                            lblEmailStatus.setStyle("-fx-text-fill: #ef4444; -fx-font-weight: bold;");
-                        }
-                    });
-                })
-                .exceptionally(ex -> {
-                    Platform.runLater(() -> {
-                        btnVerifyEmail.setDisable(false);
-                        btnVerifyEmail.setText("Vérifier");
-                        lblEmailStatus.setText("❌ Erreur: " + ex.getMessage());
-                        lblEmailStatus.setStyle("-fx-text-fill: #ef4444;");
-                    });
-                    return null;
-                });
-    }
-
-    @FXML
-    private void onVerifyBasic() {
-        String email = tfEmail.getText().trim();
-        ZeroBounceEmailService.EmailVerificationResult result = emailService.verifyBasic(email);
-
-        if (result.isValid()) {
-            emailVerified = true;
-            lblEmailStatus.setText("✅ " + result.getMessage());
-            lblEmailStatus.setStyle("-fx-text-fill: #22c55e;");
-        } else {
-            emailVerified = false;
-            lblEmailStatus.setText("❌ " + result.getMessage());
-            lblEmailStatus.setStyle("-fx-text-fill: #ef4444;");
-        }
-    }
 
     @FXML
     private void onSave() {
