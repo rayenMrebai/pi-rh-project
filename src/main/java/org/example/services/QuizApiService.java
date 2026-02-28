@@ -12,7 +12,7 @@ public class QuizApiService {
 
     // ✅ API Claude pour générer des questions sur la formation
     private static final String CLAUDE_URL = "https://api.anthropic.com/v1/messages";
-    private static final String API_KEY    = "VOTRE_CLE_ANTHROPIC_ICI";
+    private static final String API_KEY = System.getenv("GROQ_API_KEY");git add .
     private static final String MODEL      = "claude-3-haiku-20240307";
 
     private final OkHttpClient client = new OkHttpClient.Builder()
