@@ -57,30 +57,34 @@ public class SalaireService implements GlobalInterface<Salaire> {
     public List<Salaire> getAll() {
         List<Salaire> salaires = new ArrayList<>();
         String sql;
+
         if (SessionManager.isAdmin()) {
+            // Admin → voir tous les salaires
             sql = """
-                    SELECT 
-                        s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
-                        s.status, s.datePaiement,
-                        s.createdAt, s.updatedAt,
-                        u.username, u.email
-                    FROM salaire s
-                    JOIN user_account u ON s.userId = u.id
-                    WHERE s.userId = ?
-                """;
+                SELECT 
+                    s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
+                    s.status, s.datePaiement,
+                    s.createdAt, s.updatedAt,
+                    u.username, u.email
+                FROM salaire s
+                JOIN user_account u ON s.userId = u.userId
+            """;
         } else {
+            // User normal → voir seulement son salaire
             sql = """
-                    SELECT 
-                        s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
-                        s.status, s.datePaiement,
-                        s.createdAt, s.updatedAt,
-                        u.username, u.email
-                    FROM salaire s
-                    JOIN user_account u ON s.userId = u.id
-                """;
+                SELECT 
+                    s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
+                    s.status, s.datePaiement,
+                    s.createdAt, s.updatedAt,
+                    u.username, u.email
+                FROM salaire s
+                JOIN user_account u ON s.userId = u.userId
+                WHERE s.userId = ?
+            """;
         }
 
-        try (PreparedStatement ps = conn.prepareStatement(sql)){
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
             if (!SessionManager.isAdmin()) {
                 ps.setInt(1, SessionManager.getCurrentUser().getUserId());
             }
@@ -220,9 +224,9 @@ public class SalaireService implements GlobalInterface<Salaire> {
                         s.id, s.baseAmount, s.bonusAmount, s.totalAmount,
                         s.status, s.datePaiement,
                         s.createdAt, s.updatedAt,
-                        u.id as userId, u.name, u.email
+                        u.userId as userId, u.username, u.email
                     FROM salaire s
-                    JOIN useraccount u ON s.userId = u.id
+                    JOIN user_account u ON s.userId = u.userId
                     WHERE s.id = ?
                 """;
 

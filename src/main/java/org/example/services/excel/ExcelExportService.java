@@ -131,7 +131,7 @@ public class ExcelExportService {
         if (filter.getUserId() == null) {
             return true;
         }
-        return salaire.getUser().getId() == filter.getUserId();
+        return salaire.getUser().getUserId() == filter.getUserId();
     }
 
     private boolean matchMontant(Salaire salaire, ExportFilter filter) {
@@ -201,7 +201,7 @@ public class ExcelExportService {
             CellStyle numStyle = zebre ? numberGrayStyle : numberStyle;
 
             createCell(row, 0, salaire.getId(), dataStyle);
-            createCell(row, 1, salaire.getUser().getName(), dataStyle);
+            createCell(row, 1, salaire.getUser().getUsername(), dataStyle);
             createCell(row, 2, salaire.getUser().getEmail(), dataStyle);
             createCell(row, 3, salaire.getBaseAmount(), numStyle);
             createCell(row, 4, salaire.getBonusAmount(), numStyle);
@@ -392,7 +392,7 @@ public class ExcelExportService {
                     CellStyle dataStyle = zebre ? grayStyle : normalStyle;
                     CellStyle numStyle = zebre ? numberGrayStyle : numberStyle;
 
-                    createCell(row, 0, salaire.getUser().getName(), dataStyle);
+                    createCell(row, 0, salaire.getUser().getUsername(), dataStyle);
                     createCell(row, 1, rule.getNomRegle(), dataStyle);
                     createCell(row, 2, String.format("%.0f%%", rule.getPercentage()), dataStyle);
                     createCell(row, 3, rule.getBonus(), numStyle);

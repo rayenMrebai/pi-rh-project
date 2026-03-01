@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import org.example.enums.UserRole;
 import org.example.model.user.UserAccount;
 import org.example.services.user.UserAccountService;
+import org.example.util.SessionManager;
 
 import java.io.IOException;
 
@@ -40,9 +41,10 @@ public class LoginController {
         try {
             UserAccount user = userService.authenticate(username, password);
             if (user != null) {
-                // Redirection selon le rôle
+                // ✅ FIX : Toujours enregistrer dans SessionManager en premier
+                SessionManager.setCurrentUser(user);
+
                 if (user.getRole() == UserRole.ADMINISTRATEUR || user.getRole() == UserRole.MANAGER) {
-                    // Aller vers la liste des utilisateurs
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserList.fxml"));
                     Parent root = loader.load();
                     UserListController listController = loader.getController();
@@ -54,7 +56,6 @@ public class LoginController {
                     stage.show();
                     Platform.runLater(() -> stage.setMaximized(true));
                 } else {
-                    // Aller vers le tableau de bord personnel
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/Dashboard.fxml"));
                     Parent root = loader.load();
                     DashboardController dashboardController = loader.getController();

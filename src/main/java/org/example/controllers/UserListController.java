@@ -17,6 +17,7 @@ import org.example.model.user.UserAccount;
 import org.example.model.user.UserSettings;
 import org.example.services.user.UserAccountService;
 import org.example.services.user.UserSettingsService;
+import org.example.util.SessionManager;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -48,6 +49,8 @@ public class UserListController {
 
     public void setLoggedInUser(UserAccount user) {
         this.loggedInUser = user;
+        // ✅ FIX : Toujours synchroniser SessionManager
+        SessionManager.setCurrentUser(user);
         userNameLabel.setText(user.getUsername() + " (" + user.getRole() + ")");
 
         // Vérifier le rôle : si employé, rediriger vers dashboard
@@ -70,7 +73,6 @@ public class UserListController {
             return;
         }
 
-        // Sinon, charger les paramètres
         if (userListView.getScene() != null) {
             loadUserSettings();
         } else {
@@ -115,15 +117,15 @@ public class UserListController {
 
         loadUsers();
 
-        // Navigation : le bouton Dashboard ouvre le tableau de bord de l'utilisateur connecté
         navDashboard.setOnAction(e -> openDashboard());
-        navUsers.setOnAction(e -> {}); // déjà sur la page utilisateurs
+        navUsers.setOnAction(e -> {});
         navFormations.setOnAction(e -> showComingSoon("Formations"));
         navProjets.setOnAction(e -> showComingSoon("Projets"));
         navRecrutement.setOnAction(e -> showComingSoon("Recrutement"));
-        navSalaire.setOnAction(e -> showComingSoon("Salaire"));
+        navSalaire.setOnAction(e -> openSalaireManagement());
 
         addButton.setOnAction(event -> openUserForm(null));
+
         editButton.setOnAction(event -> {
             UserAccount selected = userListView.getSelectionModel().getSelectedItem();
             if (selected == null) {
@@ -136,23 +138,27 @@ public class UserListController {
                 showAlert(Alert.AlertType.ERROR, "Accès refusé", "Vous ne pouvez modifier que votre propre compte.");
             }
         });
+
         deleteButton.setOnAction(event -> {
             UserAccount selected = userListView.getSelectionModel().getSelectedItem();
             if (selected != null) deleteUser(selected);
             else showAlert(Alert.AlertType.WARNING, "Attention", "Veuillez sélectionner un utilisateur.");
         });
+
         settingsButton.setOnAction(event -> {
             UserAccount selected = userListView.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 if (loggedInUser.getRole() == UserRole.ADMINISTRATEUR || selected.getUserId() == loggedInUser.getUserId()) {
                     openSettings(selected);
                 } else {
-                    showAlert(Alert.AlertType.ERROR, "Accès refusé", "Vous n'avez pas les droits pour modifier les paramètres de cet utilisateur.");
+                    showAlert(Alert.AlertType.ERROR, "Accès refusé",
+                            "Vous n'avez pas les droits pour modifier les paramètres de cet utilisateur.");
                 }
             } else {
                 showAlert(Alert.AlertType.WARNING, "Attention", "Veuillez sélectionner un utilisateur.");
             }
         });
+
         refreshButton.setOnAction(event -> loadUsers());
         logoutButton.setOnAction(event -> logout());
     }
@@ -162,7 +168,7 @@ public class UserListController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Dashboard.fxml"));
             Parent root = loader.load();
             DashboardController dashboardController = loader.getController();
-            dashboardController.setLoggedInUser(loggedInUser);
+            dashboardController.setLoggedInUser(loggedInUser); // ✅ passer le user
 
             Stage stage = (Stage) navDashboard.getScene().getWindow();
             stage.setScene(new Scene(root));
@@ -170,6 +176,26 @@ public class UserListController {
             stage.setMaximized(true);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void openSalaireManagement() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SalaireManagement.fxml"));
+            Parent root = loader.load();
+
+            // ✅ FIX : Passer l'utilisateur au contrôleur SalaireManagement
+            SalaireManagementController controller = loader.getController();
+            controller.setLoggedInUser(loggedInUser);
+
+            Stage stage = (Stage) navSalaire.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("INTEGRA - Gestion Salaires");
+            stage.setMaximized(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Erreur",
+                    "Impossible d'ouvrir la gestion des salaires : " + e.getMessage());
         }
     }
 
@@ -199,7 +225,6 @@ public class UserListController {
     private void applyTheme(String theme) {
         Scene scene = userListView.getScene();
         if (scene == null) return;
-
         scene.getRoot().getStyleClass().removeAll("theme-light", "theme-dark");
         if ("sombre".equals(theme)) {
             scene.getRoot().getStyleClass().add("theme-dark");
@@ -230,7 +255,8 @@ public class UserListController {
             showAlert(Alert.AlertType.ERROR, "Accès refusé", "Seul l'administrateur peut supprimer un utilisateur.");
             return;
         }
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Supprimer " + user.getUsername() + " ?", ButtonType.YES, ButtonType.NO);
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Supprimer " + user.getUsername() + " ?", ButtonType.YES, ButtonType.NO);
         confirm.showAndWait().ifPresent(response -> {
             if (response == ButtonType.YES) {
                 try {
@@ -264,10 +290,12 @@ public class UserListController {
     }
 
     private void showComingSoon(String module) {
-        showAlert(Alert.AlertType.INFORMATION, "Bientôt disponible", "Le module " + module + " sera implémenté prochainement.");
+        showAlert(Alert.AlertType.INFORMATION, "Bientôt disponible",
+                "Le module " + module + " sera implémenté prochainement.");
     }
 
     private void logout() {
+        SessionManager.logout();
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
             Stage stage = (Stage) logoutButton.getScene().getWindow();

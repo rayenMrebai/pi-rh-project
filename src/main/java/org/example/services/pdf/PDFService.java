@@ -18,6 +18,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import java.io.InputStream;
 
 public class PDFService {
 
@@ -36,7 +38,7 @@ public class PDFService {
     private String generatePayslipCode(Salaire salaire) {
         String datePart = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
-        String fullName = salaire.getUser().getName().replaceAll("\\s+", "");
+        String fullName = salaire.getUser().getUsername().replaceAll("\\s+", "");
         String namePart = fullName.toUpperCase()
                 .substring(0, fullName.length());
 
@@ -89,7 +91,7 @@ public class PDFService {
             document.addPage(page);
 
             PDPageContentStream content = new PDPageContentStream(document, page);
-
+            drawLogo(document, content);
             float yPosition = PAGE_HEIGHT - MARGIN;
 
             // En-tête principal
@@ -270,6 +272,27 @@ public class PDFService {
         return yPosition - 10;
     }
 
+    private void drawLogo(PDDocument document, PDPageContentStream content) throws IOException {
+
+        InputStream is = getClass().getClassLoader().getResourceAsStream("images/logo2.png");
+
+        if (is != null) {
+            PDImageXObject logo = PDImageXObject.createFromByteArray(
+                    document,
+                    is.readAllBytes(),
+                    "logo"
+            );
+
+            float logoWidth = 80;   // largeur du logo
+            float logoHeight = 50;  // hauteur du logo
+
+            float x = PAGE_WIDTH - MARGIN - logoWidth;
+            float y = PAGE_HEIGHT - MARGIN - logoHeight + 20;
+
+            content.drawImage(logo, x, y, logoWidth, logoHeight);
+        }
+    }
+
     // =========================================================================
     // INFORMATIONS EMPLOYÉ
     // =========================================================================
@@ -296,7 +319,7 @@ public class PDFService {
         content.setFont(PDType1Font.HELVETICA_BOLD, 10);
         content.beginText();
         content.newLineAtOffset(MARGIN + 100, yPosition);
-        content.showText(salaire.getUser().getName());
+        content.showText(salaire.getUser().getUsername());
         content.endText();
 
         yPosition -= 15;
@@ -560,7 +583,7 @@ public class PDFService {
      * Format : fiche_paie_NOM_PRENOM_YYYY-MM-DD.pdf
      */
     private String generateFileName(Salaire salaire) {
-        String employeeName = salaire.getUser().getName().replaceAll("\\s+", "_");
+        String employeeName = salaire.getUser().getUsername().replaceAll("\\s+", "_");
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         return "fiche_paie_" + employeeName + "_" + date + ".pdf";
     }

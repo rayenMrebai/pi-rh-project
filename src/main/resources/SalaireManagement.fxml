@@ -19,6 +19,11 @@
         <HBox alignment="CENTER_LEFT" spacing="0"
               style="-fx-background-color: linear-gradient(to right, #667eea 0%, #764ba2 100%); -fx-padding: 0;">
 
+            <Button fx:id="btnNavHome" text="🏠 Home"
+                    prefHeight="60" prefWidth="120"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold;"
+                    onAction="#handleNavHome"/>
+
             <Button fx:id="btnNavSalaires" text="📋 Gestion des Salaires"
                     prefHeight="60" prefWidth="250"
                     style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 0; -fx-border-width: 0 0 4 0; -fx-border-color: white;"
@@ -63,9 +68,9 @@
 
                 <!-- ⭐ Infos utilisateur (DYNAMIQUE - identique à navbar) -->
                 <VBox alignment="CENTER_RIGHT">
-                    <Label fx:id="lblCurrentRole" text="ADMINISTRATEUR"
+                    <Label fx:id="lblCurrentUser" text="ADMINISTRATEUR"
                            style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label fx:id="lblHeaderRole" text="ADMIN"
+                    <Label fx:id="lblCurrentRole" text="ADMIN"
                            style="-fx-font-size: 11px; -fx-text-fill: white;"/>
                 </VBox>
             </HBox>

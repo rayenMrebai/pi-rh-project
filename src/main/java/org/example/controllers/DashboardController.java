@@ -11,6 +11,7 @@ import org.example.enums.UserRole;
 import org.example.model.user.UserAccount;
 import org.example.model.user.UserSettings;
 import org.example.services.user.UserSettingsService;
+import org.example.util.SessionManager;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -24,32 +25,36 @@ public class DashboardController {
     @FXML private Label roleDisplay;
     @FXML private Label statusDisplay;
     @FXML private Button settingsButton;
-    @FXML private Button userListButton;
+
+    @FXML private Button navDashboard;
+    @FXML private Button navUsers;
+    @FXML private Button navFormations;
+    @FXML private Button navProjets;
+    @FXML private Button navRecrutement;
+    @FXML private Button navSalaire;
 
     private UserAccount loggedInUser;
     private UserSettingsService settingsService = new UserSettingsService();
 
     public void setLoggedInUser(UserAccount user) {
         this.loggedInUser = user;
+
+        // ✅ FIX : Toujours synchroniser SessionManager
+        SessionManager.setCurrentUser(user);
+
         userNameLabel.setText(user.getUsername() + " (" + user.getRole() + ")");
         usernameDisplay.setText(user.getUsername());
         emailDisplay.setText(user.getEmail());
         roleDisplay.setText(user.getRole().toString());
         statusDisplay.setText(user.getAccountStatus());
 
-        // Afficher le bouton de liste utilisateurs seulement pour ADMIN et MANAGER
-        if (user.getRole() == UserRole.ADMINISTRATEUR || user.getRole() == UserRole.MANAGER) {
-            userListButton.setVisible(true);
-            userListButton.setManaged(true);
-        }
+        adaptSidebarToRole();
 
-        // Charger le thème après que la scène soit disponible
         settingsButton.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
                 loadUserSettings();
             }
         });
-        // Si la scène est déjà définie, charger directement
         if (settingsButton.getScene() != null) {
             loadUserSettings();
         }
@@ -58,8 +63,33 @@ public class DashboardController {
     @FXML
     public void initialize() {
         settingsButton.setOnAction(event -> openSettings());
-        userListButton.setOnAction(event -> openUserList());
         logoutButton.setOnAction(event -> logout());
+
+        navDashboard.setOnAction(e -> {});
+        navUsers.setOnAction(e -> openUserList());
+        navFormations.setOnAction(e -> showComingSoon("Formations"));
+        navProjets.setOnAction(e -> showComingSoon("Projets"));
+        navRecrutement.setOnAction(e -> showComingSoon("Recrutement"));
+        navSalaire.setOnAction(e -> openSalaireManagement());
+    }
+
+    private void adaptSidebarToRole() {
+        if (loggedInUser == null) return;
+
+        UserRole role = loggedInUser.getRole();
+
+        if (role == UserRole.ADMINISTRATEUR || role == UserRole.MANAGER) {
+            navUsers.setVisible(true);
+            navUsers.setManaged(true);
+            navSalaire.setVisible(true);
+            navSalaire.setManaged(true);
+        } else {
+            // EMPLOYE : seulement Salaire
+            navUsers.setVisible(false);
+            navUsers.setManaged(false);
+            navSalaire.setVisible(true);
+            navSalaire.setManaged(true);
+        }
     }
 
     private void loadUserSettings() {
@@ -99,7 +129,6 @@ public class DashboardController {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
-            // Recharger le thème après modification
             loadUserSettings();
         } catch (IOException e) {
             e.printStackTrace();
@@ -107,14 +136,21 @@ public class DashboardController {
     }
 
     private void openUserList() {
+        if (loggedInUser.getRole() != UserRole.ADMINISTRATEUR &&
+                loggedInUser.getRole() != UserRole.MANAGER) {
+            showAlert(Alert.AlertType.ERROR, "Accès refusé",
+                    "Vous n'avez pas accès à la gestion des utilisateurs.");
+            return;
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserList.fxml"));
             Parent root = loader.load();
 
             UserListController controller = loader.getController();
-            controller.setLoggedInUser(loggedInUser);
+            controller.setLoggedInUser(loggedInUser); // ✅ toujours passer le user
 
-            Stage stage = (Stage) userListButton.getScene().getWindow();
+            Stage stage = (Stage) navUsers.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("Gestion des utilisateurs");
             stage.setMaximized(true);
@@ -123,7 +159,33 @@ public class DashboardController {
         }
     }
 
+    private void openSalaireManagement() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/SalaireManagement.fxml"));
+            Parent root = loader.load();
+
+            // ✅ FIX : Passer l'utilisateur au contrôleur SalaireManagement
+            SalaireManagementController controller = loader.getController();
+            controller.setLoggedInUser(loggedInUser);
+
+            Stage stage = (Stage) navSalaire.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("INTEGRA - Gestion Salaires");
+            stage.setMaximized(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Erreur",
+                    "Impossible d'ouvrir la gestion des salaires : " + e.getMessage());
+        }
+    }
+
+    private void showComingSoon(String module) {
+        showAlert(Alert.AlertType.INFORMATION, "Bientôt disponible",
+                "Le module " + module + " sera implémenté prochainement.");
+    }
+
     private void logout() {
+        SessionManager.logout();
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
             Stage stage = (Stage) logoutButton.getScene().getWindow();
@@ -133,5 +195,13 @@ public class DashboardController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

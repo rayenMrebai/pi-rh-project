@@ -74,7 +74,7 @@ public class EmailTemplate {
                 "<h1>🎉 Votre salaire a été créé</h1>" +
                 "</div>" +
                 "<div class='content'>" +
-                "<p>Bonjour <strong>" + salaire.getUser().getName() + "</strong>,</p>" +
+                "<p>Bonjour <strong>" + salaire.getUser().getUsername() + "</strong>,</p>" +
                 "<p>Votre salaire pour le mois de <strong>" +
                 salaire.getDatePaiement().getMonth() + " " +
                 salaire.getDatePaiement().getYear() +
@@ -121,7 +121,7 @@ public class EmailTemplate {
                 "<h1>⭐ Règle de bonus activée !</h1>" +
                 "</div>" +
                 "<div class='content'>" +
-                "<p>Bonjour <strong>" + salaire.getUser().getName() + "</strong>,</p>" +
+                "<p>Bonjour <strong>" + salaire.getUser().getUsername() + "</strong>,</p>" +
                 "<p>Une nouvelle règle de bonus vient d'être <strong>activée</strong> sur votre salaire.</p>" +
 
                 "<div class='detail-box'>" +
@@ -180,7 +180,7 @@ public class EmailTemplate {
                 "<h1>✅ Votre salaire a été payé</h1>" +
                 "</div>" +
                 "<div class='content'>" +
-                "<p>Bonjour <strong>" + salaire.getUser().getName() + "</strong>,</p>" +
+                "<p>Bonjour <strong>" + salaire.getUser().getUsername() + "</strong>,</p>" +
                 "<p>Bonne nouvelle ! Votre salaire du mois de <strong>" +
                 salaire.getDatePaiement().getMonth() + " " +
                 salaire.getDatePaiement().getYear() +
