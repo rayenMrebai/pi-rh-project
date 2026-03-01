@@ -12,6 +12,7 @@ import org.example.model.recrutement.JobPosition;
 import org.example.services.recrutement.CandidatService;
 
 import java.io.IOException;
+import java.util.List;
 
 public class candidatForm {
 
@@ -133,6 +134,7 @@ public class candidatForm {
 
     @FXML
     private void onSave() {
+        // Validation des champs obligatoires
         if (tfFirstName.getText().isEmpty() || tfLastName.getText().isEmpty()) {
             alert("First name and Last name are required!");
             return;
@@ -161,25 +163,49 @@ public class candidatForm {
             return;
         }
 
+        // Construction de l'objet candidat (pour la vérification des doublons)
+        Candidat candidat;
         if (candidatToEdit == null) {
-            Candidat c = new Candidat();
-            c.setFirstName(tfFirstName.getText());
-            c.setLastName(tfLastName.getText());
-            c.setEmail(tfEmail.getText());
-            c.setPhone(phone);
-            c.setEducationLevel(tfEducationLevel.getText());
-            c.setSkills(taSkills.getText());
-            c.setStatus(cbStatus.getValue());
-            c.setJobPosition(selectedJob);
-            service.create(c);
+            candidat = new Candidat();
         } else {
-            candidatToEdit.setFirstName(tfFirstName.getText());
-            candidatToEdit.setLastName(tfLastName.getText());
-            candidatToEdit.setEmail(tfEmail.getText());
-            candidatToEdit.setPhone(phone);
-            candidatToEdit.setEducationLevel(tfEducationLevel.getText());
-            candidatToEdit.setSkills(taSkills.getText());
-            candidatToEdit.setStatus(cbStatus.getValue());
+            candidat = candidatToEdit;
+        }
+        candidat.setFirstName(tfFirstName.getText());
+        candidat.setLastName(tfLastName.getText());
+        candidat.setEmail(tfEmail.getText());
+        candidat.setPhone(phone);
+        candidat.setEducationLevel(tfEducationLevel.getText());
+        candidat.setSkills(taSkills.getText());
+        candidat.setStatus(cbStatus.getValue());
+        // Pour un nouveau candidat, on affecte le job sélectionné
+        if (candidatToEdit == null) {
+            candidat.setJobPosition(selectedJob);
+        }
+
+        // Vérification des doublons
+        List<Candidat> duplicates = service.findDuplicates(candidat);
+        if (!duplicates.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Doublon potentiel");
+            alert.setHeaderText("Des candidats similaires existent déjà :");
+            StringBuilder sb = new StringBuilder();
+            for (Candidat d : duplicates) {
+                sb.append("• ").append(d.getFirstName()).append(" ").append(d.getLastName())
+                        .append(" (").append(d.getEmail()).append(")\n");
+            }
+            sb.append("\nVoulez-vous quand même enregistrer ce candidat ?");
+            alert.setContentText(sb.toString());
+            alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+
+            if (alert.showAndWait().get() == ButtonType.NO) {
+                return; // Annuler la sauvegarde
+            }
+        }
+
+        // Sauvegarde
+        if (candidatToEdit == null) {
+            service.create(candidat);   // ou service.add(candidat) selon votre implémentation
+        } else {
             service.update(candidatToEdit);
         }
 
