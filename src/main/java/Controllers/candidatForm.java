@@ -2,17 +2,18 @@ package Controllers;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.stage.Stage;
-import org.example.model.recrutement.Candidat;
-import org.example.model.recrutement.JobPosition;
-import org.example.services.recrutement.CandidatService;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.stage.Modality;
-import java.io.IOException;
+import javafx.stage.Stage;
+import org.example.model.recrutement.Candidat;
 import org.example.model.recrutement.ExtractedCVData;
+import org.example.model.recrutement.JobPosition;
+import org.example.services.recrutement.CandidatService;
+
+import java.io.IOException;
 
 public class candidatForm {
 
@@ -54,12 +55,10 @@ public class candidatForm {
             return null;
         }));
 
-        // Désactiver le bouton de vérification au début
         if (btnVerifyEmail != null) {
             btnVerifyEmail.setDisable(true);
         }
 
-        // Ajouter un listener sur le champ email
         tfEmail.textProperty().addListener((obs, oldVal, newVal) -> {
             emailVerified = false;
             if (btnVerifyEmail != null) {
@@ -85,6 +84,7 @@ public class candidatForm {
             lblJobInfo.setText("Applying for: " + job.getTitle());
         }
     }
+
     @FXML
     private void onUploadCV() {
         try {
@@ -92,9 +92,8 @@ public class candidatForm {
             Parent root = loader.load();
 
             UploadCVController controller = loader.getController();
-            controller.setSelectedJob(selectedJob); // Passer le job sélectionné si disponible
+            controller.setSelectedJob(selectedJob);
             controller.setOnCvExtractedListener(extractedData -> {
-                // Remplir les champs avec les données extraites
                 tfFirstName.setText(extractedData.getFirstName());
                 tfLastName.setText(extractedData.getLastName());
                 tfEmail.setText(extractedData.getEmail());
@@ -102,9 +101,6 @@ public class candidatForm {
                 tfEducationLevel.setText(extractedData.getEducationLevel());
                 taSkills.setText(extractedData.getSkills());
                 cbStatus.setValue(extractedData.getStatus() != null ? extractedData.getStatus() : "NEW");
-
-                // Optionnel : rechercher un job par titre (si vous avez une liste)
-                // Pour l'instant, on laisse l'utilisateur choisir manuellement
             });
 
             Stage stage = new Stage();
@@ -118,6 +114,7 @@ public class candidatForm {
             alert("Erreur lors de l'ouverture de la fenêtre d'upload : " + e.getMessage());
         }
     }
+
     public void setCandidatToEdit(Candidat c) {
         this.candidatToEdit = c;
         this.selectedJob = c.getJobPosition();
@@ -129,14 +126,12 @@ public class candidatForm {
         tfEducationLevel.setText(c.getEducationLevel());
         taSkills.setText(c.getSkills());
         cbStatus.setValue(c.getStatus());
-        emailVerified = true; // Pour l'édition, on considère que l'email est déjà vérifié
+        emailVerified = true;
 
         if (lblJobInfo != null && selectedJob != null) {
             lblJobInfo.setText("Job: " + selectedJob.getTitle());
         }
     }
-
-
 
     @FXML
     private void onSave() {
@@ -150,13 +145,11 @@ public class candidatForm {
             return;
         }
 
-        // Vérifier l'email si ce n'est pas déjà fait (pour un nouveau candidat)
         if (!emailVerified && candidatToEdit == null) {
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setTitle("Email non vérifié");
             confirm.setHeaderText("L'email n'a pas été vérifié");
             confirm.setContentText("Voulez-vous quand même continuer ?");
-
             if (confirm.showAndWait().get() != ButtonType.OK) {
                 return;
             }
@@ -171,7 +164,6 @@ public class candidatForm {
         }
 
         if (candidatToEdit == null) {
-            // ADD - Nouveau candidat
             Candidat c = new Candidat();
             c.setFirstName(tfFirstName.getText());
             c.setLastName(tfLastName.getText());
@@ -181,10 +173,8 @@ public class candidatForm {
             c.setSkills(taSkills.getText());
             c.setStatus(cbStatus.getValue());
             c.setJobPosition(selectedJob);
-
             service.create(c);
         } else {
-            // EDIT - Mise à jour
             candidatToEdit.setFirstName(tfFirstName.getText());
             candidatToEdit.setLastName(tfLastName.getText());
             candidatToEdit.setEmail(tfEmail.getText());
@@ -192,7 +182,6 @@ public class candidatForm {
             candidatToEdit.setEducationLevel(tfEducationLevel.getText());
             candidatToEdit.setSkills(taSkills.getText());
             candidatToEdit.setStatus(cbStatus.getValue());
-
             service.update(candidatToEdit);
         }
 

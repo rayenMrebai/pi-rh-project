@@ -17,11 +17,9 @@
             <padding>
                 <Insets top="18" right="18" bottom="18" left="18"/>
             </padding>
-
             <Label text="Candidate"
                    textFill="WHITE"
                    style="-fx-font-size: 18; -fx-font-weight: bold;"/>
-
             <Label text="Add / Edit candidate profile"
                    textFill="WHITE"
                    style="-fx-opacity: 0.85; -fx-font-size: 12;"/>
@@ -41,7 +39,7 @@
                     <Insets top="18" right="18" bottom="18" left="18"/>
                 </padding>
 
-                <!-- JOB INFO (Nouveau) -->
+                <!-- JOB INFO -->
                 <VBox spacing="10" style="-fx-background-color: #e8f0fe; -fx-background-radius: 12; -fx-padding: 10;">
                     <Label fx:id="lblJobInfo"
                            text="Select a job first in the main window"
@@ -73,8 +71,7 @@
                                        style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
                         </VBox>
 
-
-                        <!-- Dans la section PERSONAL INFO, après le champ Email -->
+                        <!-- Email -->
                         <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="0">
                             <Label text="Email" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
                             <HBox spacing="10" alignment="CENTER_LEFT">
@@ -82,9 +79,12 @@
                                            promptText="name@mail.com"
                                            HBox.hgrow="ALWAYS"
                                            style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+
                             </HBox>
                             <Label fx:id="lblEmailStatus" text="" style="-fx-font-size: 11;"/>
                         </VBox>
+
+                        <!-- Phone -->
                         <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1">
                             <Label text="Phone" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
                             <TextField fx:id="tfPhone"
@@ -120,8 +120,7 @@
                                       prefHeight="40"
                                       style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 4 8 4 8;"/>
                         </VBox>
-                        <Button text="📂 Upload CV" onAction="#onUploadCV"
-                                style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12;"/>
+
                         <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2">
                             <Label text="Skills" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
                             <TextArea fx:id="taSkills"
@@ -132,6 +131,12 @@
                         </VBox>
                     </GridPane>
                 </VBox>
+
+                <!-- BOUTON UPLOAD CV -->
+                <HBox alignment="CENTER">
+                    <Button text="📂 Upload CV" onAction="#onUploadCV"
+                            style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 10 20; -fx-cursor: hand;"/>
+                </HBox>
 
                 <!-- BUTTONS -->
                 <HBox spacing="12">
