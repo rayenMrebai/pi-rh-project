@@ -120,7 +120,8 @@
                                       prefHeight="40"
                                       style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 4 8 4 8;"/>
                         </VBox>
-
+                        <Button text="📂 Upload CV" onAction="#onUploadCV"
+                                style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12;"/>
                         <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2">
                             <Label text="Skills" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
                             <TextArea fx:id="taSkills"

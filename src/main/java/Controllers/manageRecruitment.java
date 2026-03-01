@@ -22,6 +22,7 @@ import org.example.model.recrutement.Candidat;
 import org.example.model.recrutement.JobPosition;
 import org.example.services.recrutement.CandidatService;
 import org.example.services.recrutement.JobPositionService;
+import org.example.services.ai.ATSService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -96,6 +97,13 @@ public class manageRecruitment {
                         data.getValue().getFirstName() + " " + data.getValue().getLastName()
                 )
         );
+        TableColumn<Candidat, String> colATSScore = new TableColumn<>("Score ATS");
+        colATSScore.setCellValueFactory(data -> {
+            double score = ATSService.calculateMatchScore(data.getValue(), selectedJob);
+            return new SimpleStringProperty(String.format("%.0f%%", score));
+        });
+// Ajoutez cette colonne à votre TableView
+        candidatTable.getColumns().add(colATSScore);
 
         // Colorier les statuts
         colCandStatus.setCellFactory(column -> new TableCell<Candidat, String>() {
@@ -125,7 +133,30 @@ public class manageRecruitment {
             }
         });
     }
+    @FXML
+    private void onUploadCV() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/upload_cv.fxml"));
+            Parent root = loader.load();
+            UploadCVController controller = loader.getController();
+            // Si un job est sélectionné, on peut le passer
+            controller.setSelectedJob(selectedJob);
 
+            Stage stage = new Stage();
+            stage.setTitle("Upload et analyse de CV");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+            // Après fermeture, rafraîchir la liste des candidats
+            loadAllCandidats();
+            updateCandidatsForSelectedJob();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur lors de l'ouverture de la fenêtre d'upload: " + e.getMessage());
+        }
+    }
     private void initSelectionListeners() {
         candidatTable.getSelectionModel().selectedItemProperty().addListener((obs, oldV, c) -> {
             if (c == null) {

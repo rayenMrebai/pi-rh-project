@@ -7,6 +7,12 @@ import javafx.stage.Stage;
 import org.example.model.recrutement.Candidat;
 import org.example.model.recrutement.JobPosition;
 import org.example.services.recrutement.CandidatService;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import java.io.IOException;
+import org.example.model.recrutement.ExtractedCVData;
 
 public class candidatForm {
 
@@ -79,7 +85,39 @@ public class candidatForm {
             lblJobInfo.setText("Applying for: " + job.getTitle());
         }
     }
+    @FXML
+    private void onUploadCV() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/upload_cv.fxml"));
+            Parent root = loader.load();
 
+            UploadCVController controller = loader.getController();
+            controller.setSelectedJob(selectedJob); // Passer le job sélectionné si disponible
+            controller.setOnCvExtractedListener(extractedData -> {
+                // Remplir les champs avec les données extraites
+                tfFirstName.setText(extractedData.getFirstName());
+                tfLastName.setText(extractedData.getLastName());
+                tfEmail.setText(extractedData.getEmail());
+                tfPhone.setText(extractedData.getPhone());
+                tfEducationLevel.setText(extractedData.getEducationLevel());
+                taSkills.setText(extractedData.getSkills());
+                cbStatus.setValue(extractedData.getStatus() != null ? extractedData.getStatus() : "NEW");
+
+                // Optionnel : rechercher un job par titre (si vous avez une liste)
+                // Pour l'instant, on laisse l'utilisateur choisir manuellement
+            });
+
+            Stage stage = new Stage();
+            stage.setTitle("Uploader un CV");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            alert("Erreur lors de l'ouverture de la fenêtre d'upload : " + e.getMessage());
+        }
+    }
     public void setCandidatToEdit(Candidat c) {
         this.candidatToEdit = c;
         this.selectedJob = c.getJobPosition();
