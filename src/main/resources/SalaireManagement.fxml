@@ -12,70 +12,72 @@
             prefHeight="900.0" prefWidth="1400.0"
             style="-fx-background-color: #f7fafc;">
 
-    <VBox spacing="0" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0"
-          AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0">
+    <!-- NAVBAR + HEADER HORIZONTAL -->
+    <HBox alignment="CENTER_LEFT" spacing="25"
+          AnchorPane.topAnchor="0"
+          AnchorPane.leftAnchor="0"
+          AnchorPane.rightAnchor="0"
+          style="-fx-background-color: linear-gradient(to right, #0066CC 0%, #00AA66 100%);
+             -fx-padding: 20;">
 
-        <!-- ⭐ NAVBAR (NOUVEAU) -->
-        <HBox alignment="CENTER_LEFT" spacing="0"
-              style="-fx-background-color: linear-gradient(to right, #667eea 0%, #764ba2 100%); -fx-padding: 0;">
+        <!-- LOGO -->
+        <ImageView fx:id="logoImage" fitHeight="50" fitWidth="50" preserveRatio="true">
+            <image>
+                <Image url="@images/logo.png"/>
+            </image>
+        </ImageView>
+
+        <!-- TITRE -->
+        <VBox spacing="3">
+            <Label text="INTEGRA - Manage Salaries"
+                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label fx:id="lblModuleTitle"
+                   text="Administrator / RH Module"
+                   style="-fx-font-size: 12px; -fx-text-fill: white;"/>
+        </VBox>
+
+        <!-- ESPACE FLEXIBLE -->
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <!-- NAVIGATION -->
+        <HBox spacing="10" alignment="CENTER">
 
             <Button fx:id="btnNavHome" text="🏠 Home"
-                    prefHeight="60" prefWidth="120"
-                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold;"
+                    style="-fx-background-color: transparent;
+                       -fx-text-fill: white;
+                       -fx-font-size: 14px;
+                       -fx-font-weight: bold;"
                     onAction="#handleNavHome"/>
 
             <Button fx:id="btnNavSalaires" text="📋 Gestion des Salaires"
-                    prefHeight="60" prefWidth="250"
-                    style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 0; -fx-border-width: 0 0 4 0; -fx-border-color: white;"
+                    style="-fx-background-color: rgba(255,255,255,0.3);
+                       -fx-text-fill: white;
+                       -fx-font-size: 14px;
+                       -fx-font-weight: bold;
+                       -fx-background-radius: 5;"
                     onAction="#handleNavSalaires"/>
 
-            <!-- ⭐ Bouton Statistiques (visible seulement pour ADMIN) -->
             <Button fx:id="btnNavStatistics" text="📊 Statistiques et IA"
-                    prefHeight="60" prefWidth="250"
-                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold; -fx-background-radius: 0;"
-                    onAction="#handleNavStatistics"
-                    visible="true" managed="true"/>
-
-            <Region HBox.hgrow="ALWAYS"/>
-
+                    style="-fx-background-color: transparent;
+                       -fx-text-fill: white;
+                       -fx-font-size: 14px;
+                       -fx-font-weight: bold;"
+                    onAction="#handleNavStatistics"/>
         </HBox>
 
-        <!-- WRAPPER POUR CONSERVER LE GRADIENT -->
-        <AnchorPane VBox.vgrow="ALWAYS"
-                    style="-fx-background-color: linear-gradient(to right, #0066CC 0%, #00AA66 100%);">
+        <!-- ESPACE -->
+        <Region HBox.hgrow="ALWAYS"/>
 
-            <!-- HEADER (Votre header existant) -->
-            <HBox alignment="CENTER_LEFT" spacing="20"
-                  AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
-                  style="-fx-background-color: rgba(0,0,0,0.4); -fx-padding: 20;">
+        <!-- USER INFO -->
+        <VBox alignment="CENTER_RIGHT">
+            <Label fx:id="lblCurrentUser"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label fx:id="lblCurrentRole"
+                   style="-fx-font-size: 11px; -fx-text-fill: white;"/>
+        </VBox>
 
-                <!-- Logo -->
-                <ImageView fx:id="logoImage" fitHeight="50" fitWidth="50" pickOnBounds="true" preserveRatio="true">
-                    <image>
-                        <Image url="@images/logo.png"/>
-                    </image>
-                </ImageView>
-
-                <!-- Texte principal -->
-                <VBox>
-                    <Label text="INTEGRA - Manage Salaries"
-                           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label fx:id="lblModuleTitle" text="Administrator / RH Module"
-                           style="-fx-font-size: 12px; -fx-text-fill: white;"/>
-                </VBox>
-
-                <Region HBox.hgrow="ALWAYS"/>
-
-                <!-- ⭐ Infos utilisateur (DYNAMIQUE - identique à navbar) -->
-                <VBox alignment="CENTER_RIGHT">
-                    <Label fx:id="lblCurrentUser" text="ADMINISTRATEUR"
-                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                    <Label fx:id="lblCurrentRole" text="ADMIN"
-                           style="-fx-font-size: 11px; -fx-text-fill: white;"/>
-                </VBox>
-            </HBox>
-
-            <!-- MAIN CONTENT (Votre contenu existant) -->
+    </HBox>
+    <!-- MAIN CONTENT (Votre contenu existant) -->
             <HBox spacing="20" AnchorPane.topAnchor="90" AnchorPane.leftAnchor="20"
                   AnchorPane.rightAnchor="20" AnchorPane.bottomAnchor="20">
 
@@ -229,8 +231,5 @@
 
             </HBox>
 
-        </AnchorPane>
-
-    </VBox>
-
 </AnchorPane>
+

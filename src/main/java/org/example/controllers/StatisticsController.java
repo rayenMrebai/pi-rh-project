@@ -8,11 +8,14 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import org.example.enums.UserRole;
 import org.example.model.salaire.Salaire;
+import org.example.model.user.UserAccount;
 import org.example.services.chart.ChartService;
 import org.example.services.chart.SalaryStatistics;
 import org.example.services.prediction.PredictionService;
 import org.example.services.salaire.SalaireService;
+import org.example.util.SessionManager;
 
 import java.io.File;
 import java.util.List;
@@ -41,12 +44,17 @@ public class StatisticsController {
     @FXML private Label lblPrediction3;
     @FXML private Label lblConfidence;
 
+    @FXML private Label lblCurrentUser;
+    @FXML private Label lblCurrentRole;
+    @FXML private Label lblModuleTitle;
+
     @FXML private Button btnRefresh;
     @FXML private ProgressIndicator progressIndicator;
 
     private SalaireService salaireService;
     private ChartService chartService;
     private PredictionService predictionService;
+
 
     @FXML
     public void initialize() {
@@ -55,8 +63,38 @@ public class StatisticsController {
         predictionService = new PredictionService();
 
         progressIndicator.setVisible(false);
-
+        displayCurrentUserInfo();
         loadStatistics();
+    }
+
+
+
+    private void displayCurrentUserInfo() {
+        // ✅ FIX : Vérifier que les labels sont injectés ET que la session est active
+        if (lblCurrentUser == null || lblCurrentRole == null || lblModuleTitle == null) {
+            System.out.println("⚠️ Labels non injectés (vérifier fx:id dans FXML)");
+            return;
+        }
+
+        if (SessionManager.isLoggedIn()) {
+            UserAccount currentUser = SessionManager.getCurrentUser();
+            UserRole currentRole = SessionManager.getCurrentRole();
+
+            lblCurrentUser.setText(currentUser.getUsername());
+            lblCurrentRole.setText(currentRole.toString());
+
+            if (SessionManager.isAdmin()) {
+                lblModuleTitle.setText("Administrator / RH Module");
+            } else if (SessionManager.isManager()) {
+                lblModuleTitle.setText("Manager / Consultation Salaires");
+            } else {
+                lblModuleTitle.setText("Consultation de mes salaires");
+            }
+        } else {
+            lblCurrentUser.setText("Non connecté");
+            lblCurrentRole.setText("-");
+            lblModuleTitle.setText("Mode Test");
+        }
     }
 
     /**
