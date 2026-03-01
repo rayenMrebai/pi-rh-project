@@ -6,7 +6,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="Controllers.candidatForm"
+            fx:controller="org.example.controllers.candidatForm"
             prefWidth="600" prefHeight="720"
             style="-fx-background-color: #f5f7fb;">
 

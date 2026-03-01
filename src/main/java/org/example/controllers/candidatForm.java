@@ -1,6 +1,5 @@
-package Controllers;
+package org.example.controllers;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,7 +8,6 @@ import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.model.recrutement.Candidat;
-import org.example.model.recrutement.ExtractedCVData;
 import org.example.model.recrutement.JobPosition;
 import org.example.services.recrutement.CandidatService;
 
