@@ -7,20 +7,18 @@
 <BorderPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.example.controllers.candidatForm"
-            prefWidth="600" prefHeight="720"
+            prefWidth="620" prefHeight="740"
             style="-fx-background-color: #f5f7fb;">
 
     <!-- HEADER -->
     <top>
-        <VBox spacing="6"
+        <VBox spacing="4"
               style="-fx-background-color: linear-gradient(to right, #0B63CE, #0FA36B);">
-            <padding>
-                <Insets top="18" right="18" bottom="18" left="18"/>
-            </padding>
-            <Label text="Candidate"
+            <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+            <Label text="Candidat"
                    textFill="WHITE"
                    style="-fx-font-size: 18; -fx-font-weight: bold;"/>
-            <Label text="Add / Edit candidate profile"
+            <Label text="Ajouter / Modifier un profil candidat"
                    textFill="WHITE"
                    style="-fx-opacity: 0.85; -fx-font-size: 12;"/>
         </VBox>
@@ -29,26 +27,24 @@
     <!-- CONTENT -->
     <center>
         <VBox spacing="16">
-            <padding>
-                <Insets top="18" right="18" bottom="18" left="18"/>
-            </padding>
+            <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
 
             <VBox spacing="16"
-                  style="-fx-background-color: white; -fx-background-radius: 16; -fx-border-radius: 16; -fx-border-color: #e6e9f0;">
-                <padding>
-                    <Insets top="18" right="18" bottom="18" left="18"/>
-                </padding>
+                  style="-fx-background-color: white; -fx-background-radius: 16;
+                         -fx-border-radius: 16; -fx-border-color: #e6e9f0; -fx-border-width: 1;
+                         -fx-effect: dropshadow(three-pass-box,rgba(0,0,0,0.05),8,0,0,2);">
+                <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
 
                 <!-- JOB INFO -->
-                <VBox spacing="10" style="-fx-background-color: #e8f0fe; -fx-background-radius: 12; -fx-padding: 10;">
+                <VBox style="-fx-background-color: #e8f0fe; -fx-background-radius: 10; -fx-padding: 10;">
                     <Label fx:id="lblJobInfo"
-                           text="Select a job first in the main window"
-                           style="-fx-font-weight: bold; -fx-text-fill: #2563eb; -fx-font-size: 14;"/>
+                           text="Sélectionnez d'abord un poste dans la fenêtre principale"
+                           style="-fx-font-weight: bold; -fx-text-fill: #2563eb; -fx-font-size: 13;"/>
                 </VBox>
 
                 <!-- SECTION: PERSONAL INFO -->
                 <VBox spacing="10">
-                    <Label text="Personal Information"
+                    <Label text="Informations personnelles"
                            style="-fx-font-weight: bold; -fx-text-fill: #111827; -fx-font-size: 13;"/>
 
                     <GridPane hgap="12" vgap="12">
@@ -57,39 +53,67 @@
                             <ColumnConstraints percentWidth="50"/>
                         </columnConstraints>
 
-                        <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="0">
-                            <Label text="First Name" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
-                            <TextField fx:id="tfFirstName"
-                                       promptText="e.g. Youssef"
-                                       style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+                        <!-- Prénom -->
+                        <VBox spacing="5" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                            <Label text="Prénom" style="-fx-font-weight: bold; -fx-text-fill: #374151; -fx-font-size: 12;"/>
+                            <TextField fx:id="tfFirstName" promptText="ex. Youssef"
+                                       style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                              -fx-border-color: #e5e7eb; -fx-padding: 9;"/>
                         </VBox>
 
-                        <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="1">
-                            <Label text="Last Name" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
-                            <TextField fx:id="tfLastName"
-                                       promptText="e.g. Hammami"
-                                       style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+                        <!-- Nom -->
+                        <VBox spacing="5" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                            <Label text="Nom" style="-fx-font-weight: bold; -fx-text-fill: #374151; -fx-font-size: 12;"/>
+                            <TextField fx:id="tfLastName" promptText="ex. Hammami"
+                                       style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                              -fx-border-color: #e5e7eb; -fx-padding: 9;"/>
                         </VBox>
 
-                        <!-- Email -->
-                        <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="0">
-                            <Label text="Email" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
-                            <HBox spacing="10" alignment="CENTER_LEFT">
+                        <!-- ✅ EMAIL + BOUTON VÉRIFIER -->
+                        <VBox spacing="5" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                            <Label text="Email" style="-fx-font-weight: bold; -fx-text-fill: #374151; -fx-font-size: 12;"/>
+
+                            <!-- Champ email + bouton côte à côte -->
+                            <HBox spacing="8" alignment="CENTER_LEFT">
                                 <TextField fx:id="tfEmail"
-                                           promptText="name@mail.com"
+                                           promptText="nom@domaine.com"
                                            HBox.hgrow="ALWAYS"
-                                           style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+                                           style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                                  -fx-border-color: #e5e7eb; -fx-padding: 9;"/>
 
+                                <Button fx:id="btnVerifyEmail"
+                                        text="Vérifier"
+                                        onAction="#onVerifyEmail"
+                                        style="-fx-background-color: #0B63CE;
+                                               -fx-text-fill: white;
+                                               -fx-font-weight: bold;
+                                               -fx-font-size: 11;
+                                               -fx-background-radius: 10;
+                                               -fx-cursor: hand;
+                                               -fx-padding: 9 14;"
+                                        prefHeight="36"/>
                             </HBox>
-                            <Label fx:id="lblEmailStatus" text="" style="-fx-font-size: 11;"/>
+
+                            <!-- ✅ Indicateur de statut email (sous le champ) -->
+                            <HBox fx:id="emailStatusBox" spacing="6" alignment="CENTER_LEFT"
+                                  visible="false" managed="false">
+                                <Label fx:id="lblEmailIcon" text="●" style="-fx-font-size: 10;"/>
+                                <Label fx:id="lblEmailStatus" text=""
+                                       style="-fx-font-size: 11; -fx-font-weight: bold;"/>
+                            </HBox>
+
+                            <!-- Détails supplémentaires (domaine, type) -->
+                            <Label fx:id="lblEmailDetail" text=""
+                                   style="-fx-font-size: 10; -fx-text-fill: #94a3b8;"
+                                   visible="false" managed="false"/>
                         </VBox>
 
-                        <!-- Phone -->
-                        <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1">
-                            <Label text="Phone" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
-                            <TextField fx:id="tfPhone"
-                                       promptText="Only digits"
-                                       style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+                        <!-- Téléphone -->
+                        <VBox spacing="5" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <Label text="Téléphone" style="-fx-font-weight: bold; -fx-text-fill: #374151; -fx-font-size: 12;"/>
+                            <TextField fx:id="tfPhone" promptText="Chiffres uniquement"
+                                       style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                              -fx-border-color: #e5e7eb; -fx-padding: 9;"/>
                         </VBox>
                     </GridPane>
                 </VBox>
@@ -98,7 +122,7 @@
 
                 <!-- SECTION: PROFILE -->
                 <VBox spacing="10">
-                    <Label text="Profile"
+                    <Label text="Profil"
                            style="-fx-font-weight: bold; -fx-text-fill: #111827; -fx-font-size: 13;"/>
 
                     <GridPane hgap="12" vgap="12">
@@ -107,56 +131,53 @@
                             <ColumnConstraints percentWidth="50"/>
                         </columnConstraints>
 
-                        <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="0">
-                            <Label text="Education Level" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
-                            <TextField fx:id="tfEducationLevel"
-                                       promptText="e.g. 3ème année"
-                                       style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+                        <VBox spacing="5" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                            <Label text="Niveau d'études" style="-fx-font-weight: bold; -fx-text-fill: #374151; -fx-font-size: 12;"/>
+                            <TextField fx:id="tfEducationLevel" promptText="ex. 3ème année"
+                                       style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                              -fx-border-color: #e5e7eb; -fx-padding: 9;"/>
                         </VBox>
 
-                        <VBox spacing="6" GridPane.rowIndex="0" GridPane.columnIndex="1">
-                            <Label text="Status" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
-                            <ComboBox fx:id="cbStatus"
-                                      prefHeight="40"
-                                      style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 4 8 4 8;"/>
+                        <VBox spacing="5" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                            <Label text="Statut" style="-fx-font-weight: bold; -fx-text-fill: #374151; -fx-font-size: 12;"/>
+                            <ComboBox fx:id="cbStatus" prefHeight="38" maxWidth="Infinity"
+                                      style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                             -fx-border-color: #e5e7eb;"/>
                         </VBox>
 
-                        <VBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2">
-                            <Label text="Skills" style="-fx-font-weight: bold; -fx-text-fill: #374151;"/>
-                            <TextArea fx:id="taSkills"
-                                      promptText="Write skills..."
-                                      prefRowCount="5"
-                                      wrapText="true"
-                                      style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e5e7eb; -fx-padding: 10;"/>
+                        <VBox spacing="5" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                            <Label text="Compétences" style="-fx-font-weight: bold; -fx-text-fill: #374151; -fx-font-size: 12;"/>
+                            <TextArea fx:id="taSkills" promptText="Listez les compétences..."
+                                      prefRowCount="4" wrapText="true"
+                                      style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                             -fx-border-color: #e5e7eb; -fx-padding: 9;"/>
                         </VBox>
                     </GridPane>
                 </VBox>
 
-                <!-- BOUTON UPLOAD CV -->
+                <!-- Upload CV -->
                 <HBox alignment="CENTER">
                     <Button text="📂 Upload CV" onAction="#onUploadCV"
-                            style="-fx-background-color: #8b5cf6; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 10 20; -fx-cursor: hand;"/>
+                            style="-fx-background-color: #8b5cf6; -fx-text-fill: white;
+                                   -fx-font-weight: bold; -fx-background-radius: 10;
+                                   -fx-padding: 9 20; -fx-cursor: hand; -fx-font-size: 12;"/>
                 </HBox>
 
-                <!-- BUTTONS -->
+                <!-- Boutons Save / Cancel -->
                 <HBox spacing="12">
-                    <Button fx:id="btnCancel"
-                            text="Cancel"
-                            onAction="#onCancel"
-                            HBox.hgrow="ALWAYS"
-                            maxWidth="Infinity"
-                            style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 10;"/>
-
-                    <Button fx:id="btnSave"
-                            text="Save"
-                            onAction="#onSave"
-                            HBox.hgrow="ALWAYS"
-                            maxWidth="Infinity"
-                            style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 12; -fx-padding: 10;"/>
+                    <Button fx:id="btnCancel" text="Annuler" onAction="#onCancel"
+                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            style="-fx-background-color: #ef4444; -fx-text-fill: white;
+                                   -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10;
+                                   -fx-cursor: hand;"/>
+                    <Button fx:id="btnSave" text="Enregistrer" onAction="#onSave"
+                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            style="-fx-background-color: #2563eb; -fx-text-fill: white;
+                                   -fx-font-weight: bold; -fx-background-radius: 10; -fx-padding: 10;
+                                   -fx-cursor: hand;"/>
                 </HBox>
 
             </VBox>
         </VBox>
     </center>
-
 </BorderPane>
