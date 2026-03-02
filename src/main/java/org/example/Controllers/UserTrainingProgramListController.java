@@ -182,7 +182,7 @@ public class UserTrainingProgramListController implements Initializable {
 
     @FXML
     private void handleLogout() {
-        SessionManager.clearSession();
+        SessionManager.logout();
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
             Stage stage = (Stage) trainingsTable.getScene().getWindow();

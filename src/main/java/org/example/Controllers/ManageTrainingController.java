@@ -367,7 +367,7 @@ public class ManageTrainingController implements Initializable {
         a.setTitle("Déconnexion");
         a.setHeaderText("Voulez-vous vraiment vous déconnecter ?");
         if (a.showAndWait().get() == ButtonType.OK) {
-            SessionManager.clearSession();
+            SessionManager.logout();
             try {
                 Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
                 Stage stage = (Stage) skillsTable.getScene().getWindow();

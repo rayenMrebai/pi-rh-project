@@ -1,7 +1,11 @@
 package org.example.model.user;
 
 import org.example.enums.UserRole;
+import org.example.model.salaire.Salaire;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserAccount {
     private int userId;
@@ -39,6 +43,15 @@ public class UserAccount {
         this.accountCreatedDate = accountCreatedDate;
         this.accountStatus = accountStatus;
     }
+    // Constructeur user
+    public UserAccount(int id, String name, String email) {
+        this.userId = id;
+        this.username = name;
+        this.email = email;
+    }
+    // association avec salaire
+    private List<Salaire> salaires = new ArrayList<>();
+
 
     // Getters et setters
     public int getUserId() { return userId; }

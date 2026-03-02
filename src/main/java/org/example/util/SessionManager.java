@@ -1,44 +1,65 @@
 package org.example.util;
 
+import org.example.enums.UserRole;
 import org.example.model.user.UserAccount;
 
-/**
- * Classe singleton pour gérer la session utilisateur
- */
 public class SessionManager {
 
     private static UserAccount currentUser;
 
+    /**
+     * Enregistre l'utilisateur connecté
+     */
     public static void setCurrentUser(UserAccount user) {
         currentUser = user;
-        if (user != null) {
-            System.out.println("✅ Session créée pour : " + user.getUsername());
-        }
-    }
-    public static Integer getUserId() {
-        return currentUser != null ? currentUser.getUserId() : null;
     }
 
-    public static String getUsername() {
-        return currentUser != null ? currentUser.getUsername() : null;
-    }
+    /**
+     * Récupère l'utilisateur connecté
+     */
     public static UserAccount getCurrentUser() {
         return currentUser;
     }
 
-    public static boolean isLoggedIn() {
-        return currentUser != null;
+    /**
+     * Récupère le rôle de l'utilisateur connecté
+     */
+    public static UserRole getCurrentRole() {
+        return currentUser != null ? currentUser.getRole() : null;
     }
 
-    public static void clearSession() {
-        if (currentUser != null) {
-            System.out.println("🔒 Session fermée pour : " + currentUser.getUsername());
-        }
+    /**
+     * Vérifie si l'utilisateur est admin
+     */
+    public static boolean isAdmin() {
+        return currentUser != null && currentUser.getRole() == UserRole.ADMINISTRATEUR;
+    }
+
+    /**
+     * Vérifie si l'utilisateur est employé
+     */
+    public static boolean isEmployee() {
+        return currentUser != null && currentUser.getRole() == UserRole.EMPLOYE;
+    }
+
+    /**
+     * Vérifie si l'utilisateur est manager
+     */
+    public static boolean isManager() {
+        return currentUser != null && currentUser.getRole() == UserRole.MANAGER;
+    }
+
+    /**
+     * Déconnexion
+     */
+    public static void logout() {
         currentUser = null;
     }
 
-    public static boolean hasRole(String role) {
-        return currentUser != null &&
-                currentUser.getRole().toString().equalsIgnoreCase(role);
+    /**
+     * Vérifie si un utilisateur est connecté
+     */
+    public static boolean isLoggedIn() {
+        return currentUser != null;
     }
 }

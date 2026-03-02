@@ -9,10 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserSettingsService implements GlobalInterface<UserSettings> {
-
-    // ✅ Utiliser votre singleton
     private final Connection conn = DatabaseConnection.getInstance().getConnection();
-
     @Override
     public void create(UserSettings entity) {
         String sql = "INSERT INTO user_settings (userId, theme, language, defaultModule, notificationsEnabled, dashboardLayout, accessPreferences) VALUES (?, ?, ?, ?, ?, ?, ?)";

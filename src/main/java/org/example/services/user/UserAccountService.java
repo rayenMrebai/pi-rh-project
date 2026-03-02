@@ -13,9 +13,7 @@ import java.util.List;
 
 public class UserAccountService implements GlobalInterface<UserAccount> {
 
-    // ✅ Utiliser votre singleton
     private final Connection conn = DatabaseConnection.getInstance().getConnection();
-
     @Override
     public void create(UserAccount entity) {
         String sql = "INSERT INTO user_account (username, email, passwordHash, role, isActive, accountStatus, accountCreatedDate) VALUES (?, ?, ?, ?, ?, ?, ?)";
