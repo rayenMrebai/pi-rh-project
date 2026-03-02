@@ -2,7 +2,6 @@ package org.example.Controllers;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -13,23 +12,19 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.model.formation.TrainingProgram;
 import org.example.model.user.UserAccount;
+import org.example.services.formation.QuizService;
 import org.example.services.formation.TrainingProgramService;
 import org.example.util.SessionManager;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class UserTrainingProgramListController implements Initializable {
 
-    // ===================== FXML FIELDS =====================
-
     @FXML private Label welcomeLabel;
-    @FXML private Label footerLabel;
-
-    @FXML private TextField searchField;
-
     @FXML private TableView<TrainingProgram> trainingsTable;
     @FXML private TableColumn<TrainingProgram, String> colId;
     @FXML private TableColumn<TrainingProgram, String> colTitle;
@@ -37,31 +32,35 @@ public class UserTrainingProgramListController implements Initializable {
     @FXML private TableColumn<TrainingProgram, String> colType;
     @FXML private TableColumn<TrainingProgram, String> colStatus;
     @FXML private TableColumn<TrainingProgram, String> colQuiz;
-
-    // ===================== FIELDS =====================
+    @FXML private TextField searchField;
+    @FXML private Label footerLabel;
 
     private TrainingProgramService trainingService;
-    private ObservableList<TrainingProgram> allTrainings;
+    private QuizService quizResultService;
+    private List<TrainingProgram> allTrainings;
+
+    // ✅ Utilisateur connecté
     private UserAccount loggedInUser;
 
     // ===================== SET USER =====================
 
     public void setLoggedInUser(UserAccount user) {
         this.loggedInUser = user;
-        if (welcomeLabel != null && user != null) {
+        if (user != null) {
             welcomeLabel.setText("👤 Bienvenue, " + user.getUsername()
                     + " (" + user.getRole() + ")");
+            // Recharger avec le vrai userId pour la colonne quiz
+            loadTrainings();
         }
-        updateFooter();
     }
 
     // ===================== INITIALIZE =====================
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        trainingService = new TrainingProgramService();
+        trainingService   = new TrainingProgramService();
+        quizResultService = new QuizService();
 
-        // Colonnes
         colId.setCellValueFactory(d -> new SimpleStringProperty(
                 String.format("%04d", d.getValue().getId())));
         colTitle.setCellValueFactory(d -> new SimpleStringProperty(
@@ -71,86 +70,97 @@ public class UserTrainingProgramListController implements Initializable {
         colType.setCellValueFactory(d -> new SimpleStringProperty(
                 d.getValue().getType().toUpperCase()));
         colStatus.setCellValueFactory(d -> new SimpleStringProperty(
-                getStatus(d.getValue())));
-        colQuiz.setCellValueFactory(d -> new SimpleStringProperty(
-                "📝 Quiz"));
+                d.getValue().getStatus() != null ? d.getValue().getStatus() : "PROGRAMMÉ"));
 
-        // Style colonnes Status et Quiz
-        applyStatusCellStyle();
-        applyQuizCellStyle();
+        // ✅ Colonne quiz avec le vrai userId
+        colQuiz.setCellValueFactory(d -> {
+            int userId = (loggedInUser != null) ? loggedInUser.getUserId() : 0;
+            boolean taken = quizResultService.hasAlreadyTaken(userId, d.getValue().getId());
+            return new SimpleStringProperty(taken ? "✅ Complété" : "📝 Disponible");
+        });
 
-        // Double-clic → détails
+        applyStyles();
+
+        // Double-clic → ouvrir détails
         trainingsTable.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
-                handleViewDetail();
+                TrainingProgram sel = trainingsTable.getSelectionModel().getSelectedItem();
+                if (sel != null) openTrainingDetail(sel);
             }
         });
 
-        // Recherche
-        searchField.textProperty().addListener((obs, old, nv) -> applyFilter(nv));
+        searchField.textProperty().addListener((obs, old, nv) -> applySearch(nv));
 
         loadTrainings();
-        updateFooter();
     }
 
     // ===================== LOAD DATA =====================
 
     private void loadTrainings() {
-        try {
-            allTrainings = FXCollections.observableArrayList(trainingService.getAll());
-            trainingsTable.setItems(allTrainings);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        allTrainings = trainingService.getAll();
+        trainingsTable.setItems(FXCollections.observableArrayList(allTrainings));
+        updateFooter();
     }
 
-    private void applyFilter(String text) {
-        if (text == null || text.isEmpty()) {
-            trainingsTable.setItems(allTrainings);
+    private void applySearch(String txt) {
+        if (txt == null || txt.isEmpty()) {
+            trainingsTable.setItems(FXCollections.observableArrayList(allTrainings));
             return;
         }
-        String lower = text.toLowerCase();
+        String kw = txt.toLowerCase();
         trainingsTable.setItems(FXCollections.observableArrayList(
                 allTrainings.stream()
-                        .filter(t -> t.getTitle().toLowerCase().contains(lower)
-                                || t.getType().toLowerCase().contains(lower))
+                        .filter(t -> t.getTitle().toLowerCase().contains(kw) ||
+                                t.getType().toLowerCase().contains(kw))
                         .collect(Collectors.toList())));
     }
 
     // ===================== ACTIONS =====================
 
+    private void openTrainingDetail(TrainingProgram training) {
+        // ✅ Vérifier si le FXML existe avant de le charger
+        URL fxmlUrl = getClass().getResource("/UserTrainingDetail.fxml");
+        if (fxmlUrl != null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(fxmlUrl);
+                Stage stage = new Stage();
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.initOwner(trainingsTable.getScene().getWindow());
+                stage.setTitle("📚 " + training.getTitle());
+                stage.setScene(new Scene(loader.load()));
+
+                UserTrainingDetailController ctrl = loader.getController();
+                int userId = (loggedInUser != null) ? loggedInUser.getUserId() : 0;
+                String userName = (loggedInUser != null) ? loggedInUser.getUsername() : "Utilisateur";
+                ctrl.setData(userId, userName, training);
+
+                stage.showAndWait();
+                trainingsTable.refresh();
+            } catch (IOException e) {
+                showAlert("❌ Erreur chargement : " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            // ✅ FXML absent → afficher les détails dans une Alert
+            showAlert(Alert.AlertType.INFORMATION, training.getTitle(),
+                    "📚 Formation  : " + training.getTitle()
+                            + "\n⏱ Durée      : " + training.getDuration() + " semaines"
+                            + "\n🎓 Type       : " + training.getType()
+                            + "\n📊 Statut     : " + (training.getStatus() != null ? training.getStatus() : "PROGRAMMÉ")
+                            + "\n📅 Début      : " + training.getStartDate()
+                            + "\n📅 Fin        : " + training.getEndDate()
+                            + "\n📝 Description: " + training.getDescription());
+        }
+    }
+
     @FXML
     private void handleViewDetail() {
-        TrainingProgram selected = trainingsTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert(Alert.AlertType.WARNING, "Attention",
-                    "Veuillez sélectionner une formation.");
+        TrainingProgram sel = trainingsTable.getSelectionModel().getSelectedItem();
+        if (sel == null) {
+            showAlert(Alert.AlertType.WARNING, "Attention", "Veuillez sélectionner une formation.");
             return;
         }
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/TrainingDetail.fxml"));
-            Parent root = loader.load();
-
-            // Si votre controller de détail existe, passer la formation :
-            // TrainingDetailController ctrl = loader.getController();
-            // ctrl.setTraining(selected);
-            // ctrl.setLoggedInUser(loggedInUser);
-
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Détail : " + selected.getTitle());
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
-        } catch (IOException e) {
-            // Si le fichier n'existe pas encore, afficher les infos en alerte
-            showAlert(Alert.AlertType.INFORMATION, selected.getTitle(),
-                    "Formation : " + selected.getTitle()
-                            + "\nDurée : " + selected.getDuration() + " semaines"
-                            + "\nType : " + selected.getType()
-                            + "\nStatut : " + getStatus(selected)
-                            + "\nDescription : " + selected.getDescription());
-        }
+        openTrainingDetail(sel);
     }
 
     @FXML
@@ -178,9 +188,7 @@ public class UserTrainingProgramListController implements Initializable {
             Stage stage = (Stage) trainingsTable.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("INTEGRA – Connexion");
-            stage.setResizable(false);
             stage.setMaximized(false);
-            stage.centerOnScreen();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -188,58 +196,67 @@ public class UserTrainingProgramListController implements Initializable {
 
     // ===================== HELPERS =====================
 
-    private String getStatus(TrainingProgram t) {
-        long now = System.currentTimeMillis();
-        long start = t.getStartDate().getTime();
-        long end = t.getEndDate().getTime();
-        return now >= start && now <= end ? "EN COURS"
-                : now < start ? "PROGRAMMÉ" : "TERMINÉ";
+    private void updateFooter() {
+        if (footerLabel == null) return;
+        String user = (loggedInUser != null) ? loggedInUser.getUsername() : "—";
+        int count = (allTrainings != null) ? allTrainings.size() : 0;
+        footerLabel.setText("Connecté : " + user + " • " + count + " formations disponibles");
     }
 
-    private void applyStatusCellStyle() {
+    private void applyStyles() {
         colStatus.setCellFactory(col -> new TableCell<TrainingProgram, String>() {
             @Override protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) { setText(null); setStyle(""); return; }
                 setText(item);
-                String c = item.equals("EN COURS")  ? "#66bb6a"
-                        : item.equals("PROGRAMMÉ") ? "#1e88e5"
-                        : "#9e9e9e";
-                setStyle("-fx-background-color:" + c
-                        + "; -fx-text-fill:white; -fx-font-weight:bold; -fx-alignment:CENTER;");
+                String c;
+                switch (item) {
+                    case "EN COURS":  c = "#43a047"; break;
+                    case "PROGRAMMÉ": c = "#1976d2"; break;
+                    case "TERMINÉ":   c = "#757575"; break;
+                    case "ANNULÉ":    c = "#e53935"; break;
+                    case "SUSPENDU":  c = "#f57c00"; break;
+                    default:          c = "#90a4ae"; break;
+                }
+                setStyle("-fx-background-color:" + c +
+                        "; -fx-text-fill:white; -fx-font-weight:bold; -fx-alignment:CENTER;");
             }
         });
-    }
 
-    private void applyQuizCellStyle() {
+        colType.setCellFactory(col -> new TableCell<TrainingProgram, String>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) { setText(null); setStyle(""); return; }
+                setText(item);
+                String c = item.contains("LIGNE")    ? "#2196f3" :
+                        item.contains("HYBRIDE")  ? "#9c27b0" :
+                                item.contains("WORKSHOP") ? "#ff9800" : "#f44336";
+                setStyle("-fx-background-color:" + c +
+                        "; -fx-text-fill:white; -fx-font-weight:bold; -fx-alignment:CENTER;");
+            }
+        });
+
         colQuiz.setCellFactory(col -> new TableCell<TrainingProgram, String>() {
             @Override protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) { setText(null); setStyle(""); return; }
                 setText(item);
-                setStyle("-fx-text-fill: #1976d2; -fx-font-weight: bold; "
-                        + "-fx-alignment: CENTER; -fx-cursor: hand;");
+                String c = item.contains("Complété") ? "#43a047" : "#1976d2";
+                setStyle("-fx-background-color:" + c +
+                        "; -fx-text-fill:white; -fx-font-weight:bold; -fx-alignment:CENTER;");
             }
         });
     }
 
-    private void updateFooter() {
-        if (footerLabel == null) return;
-        try {
-            int count = trainingService.getAll().size();
-            String user = (loggedInUser != null) ? loggedInUser.getUsername() : "—";
-            footerLabel.setText("Connecté : " + user
-                    + " • INTEGRA_DB • " + count + " formations disponibles");
-        } catch (Exception e) {
-            footerLabel.setText("Connecté • INTEGRA HR");
-        }
+    private void showAlert(String msg) {
+        showAlert(Alert.AlertType.INFORMATION, "Information", msg);
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Alert a = new Alert(type);
+        a.setTitle(title);
+        a.setHeaderText(null);
+        a.setContentText(message);
+        a.showAndWait();
     }
 }
