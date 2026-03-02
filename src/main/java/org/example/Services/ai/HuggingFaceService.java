@@ -19,7 +19,7 @@ public class HuggingFaceService {
     // APRÈS — token lu depuis variable d'environnement
     private static final String API_TOKEN = System.getenv("HF_API_TOKEN") != null
             ? System.getenv("HF_API_TOKEN")
-            : "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"; // fallback local uniquement
+            : "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"; // fallback local uniquement
 
     private final ObjectMapper mapper = new ObjectMapper();
 
