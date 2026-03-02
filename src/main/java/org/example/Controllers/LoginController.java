@@ -41,42 +41,44 @@ public class LoginController {
         try {
             UserAccount user = userService.authenticate(username, password);
             if (user != null) {
-
-                // ✅ Sauvegarder dans la session
+                // ✅ FIX : Toujours enregistrer dans SessionManager en premier
                 SessionManager.setCurrentUser(user);
-                System.out.println("✅ Connecté : " + user.getUsername()
-                        + " | Rôle : " + user.getRole());
 
-                // ✅ Naviguer vers le Dashboard pour tous les rôles
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Dashboard.fxml"));
-                Parent root = loader.load();
+                if (user.getRole() == UserRole.ADMINISTRATEUR || user.getRole() == UserRole.MANAGER) {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/UserList.fxml"));
+                    Parent root = loader.load();
+                    UserListController listController = loader.getController();
+                    listController.setLoggedInUser(user);
 
-                // ✅ Passer l'utilisateur connecté au DashboardController
-                DashboardController dashboardController = loader.getController();
-                dashboardController.setLoggedInUser(user);
+                    Stage stage = (Stage) loginButton.getScene().getWindow();
+                    stage.setScene(new Scene(root));
+                    stage.setTitle("Gestion des utilisateurs");
+                    stage.show();
+                    Platform.runLater(() -> stage.setMaximized(true));
+                } else {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/Dashboard.fxml"));
+                    Parent root = loader.load();
+                    DashboardController dashboardController = loader.getController();
+                    dashboardController.setLoggedInUser(user);
 
-                Stage stage = (Stage) loginButton.getScene().getWindow();
-                stage.setScene(new Scene(root));
-                stage.setTitle("INTEGRA – Tableau de Bord");
-                stage.setMinWidth(900);
-                stage.setMinHeight(620);
-                stage.show();
-                Platform.runLater(() -> stage.setMaximized(true));
-
+                    Stage stage = (Stage) loginButton.getScene().getWindow();
+                    stage.setScene(new Scene(root));
+                    stage.setTitle("Mon Tableau de Bord");
+                    stage.show();
+                    Platform.runLater(() -> stage.setMaximized(true));
+                }
             } else {
-                showAlert(Alert.AlertType.ERROR, "Erreur",
-                        "Nom d'utilisateur ou mot de passe incorrect.");
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Nom d'utilisateur ou mot de passe incorrect.");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur",
-                    "Erreur de connexion : " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur de connexion : " + e.getMessage());
         }
     }
 
     private void openSignUp() {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/Signup.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/SignUp.fxml"));
             Stage stage = (Stage) signUpLink.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("Inscription");
