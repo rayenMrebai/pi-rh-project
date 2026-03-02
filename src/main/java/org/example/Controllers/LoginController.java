@@ -10,7 +10,7 @@ import javafx.stage.Stage;
 import org.example.enums.UserRole;
 import org.example.model.user.UserAccount;
 import org.example.services.user.UserAccountService;
-import org.example.util.Session;
+import org.example.util.SessionManager;
 
 import java.io.IOException;
 
@@ -43,7 +43,7 @@ public class LoginController {
             if (user != null) {
 
                 // ✅ Sauvegarder dans la session
-                Session.setCurrentUser(user);
+                SessionManager.setCurrentUser(user);
                 System.out.println("✅ Connecté : " + user.getUsername()
                         + " | Rôle : " + user.getRole());
 

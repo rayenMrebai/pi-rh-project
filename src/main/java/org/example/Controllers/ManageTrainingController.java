@@ -15,7 +15,7 @@ import org.example.model.formation.Skill;
 import org.example.model.formation.TrainingProgram;
 import org.example.services.SkillService;
 import org.example.services.TrainingProgramService;
-import org.example.util.Session;
+import org.example.util.SessionManager;
 
 import java.net.URL;
 import java.util.List;
@@ -316,7 +316,7 @@ public class ManageTrainingController implements Initializable {
         a.setTitle("Déconnexion");
         a.setHeaderText("Voulez-vous vraiment vous déconnecter ?");
         if (a.showAndWait().get() == ButtonType.OK) {
-            Session.clear();
+            SessionManager.clear();
             try {
                 Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
                 Stage stage = (Stage) skillsTable.getScene().getWindow();

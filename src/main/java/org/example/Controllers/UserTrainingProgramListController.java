@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 import org.example.model.formation.TrainingProgram;
 import org.example.services.QuizService;
 import org.example.services.TrainingProgramService;
-import org.example.util.Session;
+import org.example.util.SessionManager;
 
 import java.net.URL;
 import java.util.List;
@@ -45,8 +45,8 @@ public class UserTrainingProgramListController implements Initializable {
         trainingService   = new TrainingProgramService();
         quizResultService = new QuizService();
 
-        userId   = Session.getUserId();
-        userName = Session.getUsername();
+        userId   = SessionManager.getUserId();
+        userName = SessionManager.getUsername();
         welcomeLabel.setText("👤 Bienvenue, " + userName);
 
         colId.setCellValueFactory(d -> new SimpleStringProperty(
@@ -131,7 +131,7 @@ public class UserTrainingProgramListController implements Initializable {
 
     @FXML
     private void handleLogout() {
-        Session.clear();
+        SessionManager.clear();
         try {
             Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
             Stage stage = (Stage) trainingsTable.getScene().getWindow();
