@@ -1,45 +1,122 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane styleClass="theme-light" stylesheets="@style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controllers.UserListController">
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controllers.UserListController"
+            stylesheets="@style.css"
+            styleClass="theme-light">
+
+    <!-- TOP BAR -->
     <top>
-        <HBox styleClass="top-bar" spacing="10">
-            <Label text="INTEGRA" styleClass="logo"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label fx:id="userNameLabel" styleClass="user-info"/>
-            <Button fx:id="logoutButton" text="Déconnexion" styleClass="logout-button"/>
-        </HBox>
+        <VBox>
+            <HBox alignment="CENTER_LEFT" spacing="15"
+                  styleClass="bg-primary"
+                  style="-fx-padding: 16 28; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 4);">
+                <Label text="INTEGRA" styleClass="text-white" style="-fx-font-size: 22; -fx-font-weight: bold; -fx-font-family: 'Segoe UI Semibold';"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="userNameLabel" styleClass="text-secondary" style="-fx-font-size: 13;"/>
+                <Button fx:id="logoutButton" text="🚪  Déconnexion" styleClass="button-secondary" style="-fx-font-size: 13; -fx-padding: 8 20;"/>
+            </HBox>
+
+            <!-- FILTER BAR -->
+            <HBox spacing="14" alignment="CENTER_LEFT"
+                  styleClass="bg-white"
+                  style="-fx-padding: 14 28; -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
+                <Label text="🔍" style="-fx-font-size: 14;"/>
+                <TextField fx:id="searchField" promptText="Rechercher par nom ou email..."
+                           HBox.hgrow="ALWAYS"
+                           styleClass="text-primary"
+                           style="-fx-background-radius: 30; -fx-border-radius: 30; -fx-border-color: #dbeafe; -fx-background-color: #f8fafc; -fx-padding: 8 16; -fx-font-size: 13;"/>
+                <ComboBox fx:id="roleFilterCombo" promptText="Tous les rôles" prefWidth="160"
+                          styleClass="text-primary"
+                          style="-fx-background-radius: 30; -fx-border-radius: 30; -fx-border-color: #dbeafe; -fx-background-color: #f8fafc; -fx-padding: 4 10; -fx-font-size: 13;"/>
+                <ComboBox fx:id="statusFilterCombo" promptText="Tous les statuts" prefWidth="160"
+                          styleClass="text-primary"
+                          style="-fx-background-radius: 30; -fx-border-radius: 30; -fx-border-color: #dbeafe; -fx-background-color: #f8fafc; -fx-padding: 4 10; -fx-font-size: 13;"/>
+                <Button fx:id="clearFilterButton" text="✕  Effacer" styleClass="button-secondary" style="-fx-font-size: 13; -fx-padding: 8 18;"/>
+            </HBox>
+        </VBox>
     </top>
 
+    <!-- SIDEBAR -->
     <left>
-        <VBox styleClass="sidebar">
-            <Button fx:id="navDashboard" text="🏠 Dashboard"/>
-            <Button fx:id="navUsers" text="👥 Utilisateurs"/>
-            <Button fx:id="navFormations" text="📚 Formations"/>
-            <Button fx:id="navProjets" text="📁 Projets"/>
-            <Button fx:id="navRecrutement" text="📋 Recrutement"/>
-            <Button fx:id="navSalaire" text="💰 Salaire"/>
+        <VBox spacing="4" styleClass="bg-sidebar"
+              style="-fx-padding: 20 12; -fx-min-width: 200; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 4, 0);">
+            <Label text="NAVIGATION" styleClass="text-secondary"
+                   style="-fx-font-size: 10; -fx-font-weight: bold; -fx-padding: 0 8 10 8;"/>
+            <Button fx:id="navDashboard" text="🏠  Dashboard" maxWidth="Infinity"
+                    styleClass="text-white"
+                    style="-fx-background-color: transparent; -fx-font-size: 13; -fx-background-radius: 10; -fx-padding: 11 14; -fx-alignment: CENTER_LEFT;"/>
+            <Button fx:id="navUsers" text="👥  Utilisateurs" maxWidth="Infinity"
+                    styleClass="text-white"
+                    style="-fx-background-color: rgba(11,99,206,0.3); -fx-font-weight: bold; -fx-font-size: 13; -fx-background-radius: 10; -fx-padding: 11 14; -fx-alignment: CENTER_LEFT;"/>
+            <Button fx:id="navFormations" text="📚  Formations" maxWidth="Infinity"
+                    styleClass="text-white"
+                    style="-fx-background-color: transparent; -fx-font-size: 13; -fx-background-radius: 10; -fx-padding: 11 14; -fx-alignment: CENTER_LEFT;"/>
+            <Button fx:id="navProjets" text="📁  Projets" maxWidth="Infinity"
+                    styleClass="text-white"
+                    style="-fx-background-color: transparent; -fx-font-size: 13; -fx-background-radius: 10; -fx-padding: 11 14; -fx-alignment: CENTER_LEFT;"/>
+            <Button fx:id="navRecrutement" text="📋  Recrutement" maxWidth="Infinity"
+                    styleClass="text-white"
+                    style="-fx-background-color: transparent; -fx-font-size: 13; -fx-background-radius: 10; -fx-padding: 11 14; -fx-alignment: CENTER_LEFT;"/>
+            <Button fx:id="navSalaire" text="💰  Salaire" maxWidth="Infinity"
+                    styleClass="text-white"
+                    style="-fx-background-color: transparent; -fx-font-size: 13; -fx-background-radius: 10; -fx-padding: 11 14; -fx-alignment: CENTER_LEFT;"/>
         </VBox>
     </left>
 
+    <!-- MAIN CONTENT -->
     <center>
-        <VBox styleClass="main-content" spacing="20">
-            <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="Gestion des utilisateurs" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+        <VBox spacing="20" styleClass="theme-light">
+            <padding><Insets top="24" right="28" bottom="24" left="28"/></padding>
+
+            <!-- PAGE TITLE -->
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Label text="👥  Gestion des utilisateurs" styleClass="text-primary"
+                       style="-fx-font-size: 24; -fx-font-weight: bold; -fx-font-family: 'Segoe UI Semibold';"/>
                 <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="exportPdfButton" text="📄  Exporter PDF" styleClass="button-primary"
+                        style="-fx-font-size: 13; -fx-padding: 10 22; -fx-effect: dropshadow(gaussian, rgba(11,99,206,0.3), 8, 0, 0, 3);"/>
+                <Button fx:id="refreshButton" text="🔄  Actualiser" styleClass="button-secondary"
+                        style="-fx-font-size: 13; -fx-padding: 10 20;"/>
             </HBox>
 
-            <ListView fx:id="userListView" VBox.vgrow="ALWAYS"/>
+            <!-- USER LIST CARD -->
+            <VBox spacing="14" VBox.vgrow="ALWAYS" styleClass="bg-white"
+                  style="-fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 5); -fx-padding: 20;">
+                <Label text="📋  Liste des utilisateurs" styleClass="text-primary"
+                       style="-fx-font-size: 16; -fx-font-weight: bold; -fx-font-family: 'Segoe UI Semibold';"/>
+                <ListView fx:id="userListView" VBox.vgrow="ALWAYS" prefHeight="400"
+                          styleClass="border-light"
+                          style="-fx-background-color: transparent; -fx-border-width: 1; -fx-border-radius: 12; -fx-background-insets: 0;"/>
+            </VBox>
 
-            <HBox alignment="CENTER" spacing="10">
-                <Button fx:id="addButton" text="Ajouter"/>
-                <Button fx:id="editButton" text="Modifier"/>
-                <Button fx:id="deleteButton" text="Supprimer"/>
-                <Button fx:id="settingsButton" text="Paramètres"/>
-                <Button fx:id="refreshButton" text="Actualiser"/>
+            <!-- ACTION BUTTONS -->
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button fx:id="addButton" text="➕  Ajouter" styleClass="button-success"
+                        style="-fx-font-size: 13; -fx-padding: 10 22; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);"/>
+                <Button fx:id="editButton" text="✏️  Modifier" styleClass="button-warning"
+                        style="-fx-font-size: 13; -fx-padding: 10 22; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);"/>
+                <Button fx:id="deleteButton" text="🗑️  Supprimer" styleClass="button-danger"
+                        style="-fx-font-size: 13; -fx-padding: 10 22; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 6, 0, 0, 2);"/>
+                <Button fx:id="settingsButton" text="⚙️  Paramètres" styleClass="button-primary"
+                        style="-fx-font-size: 13; -fx-padding: 10 22; -fx-effect: dropshadow(gaussian, rgba(11,99,206,0.3), 6, 0, 0, 2);"/>
+            </HBox>
+
+            <!-- STATUS BAR -->
+            <HBox styleClass="bg-primary" style="-fx-padding: 12 22; -fx-background-radius: 40;">
+                <Label text="🔌  Connecté – INTEGRA RH Management • Gestion des utilisateurs"
+                       styleClass="text-white" style="-fx-font-size: 12; -fx-font-family: 'Segoe UI'; -fx-font-weight: 500;"/>
             </HBox>
         </VBox>
     </center>

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class UserAccountService implements GlobalInterface<UserAccount> {
 
-    private final Connection conn = DatabaseConnection.getInstance().getConnection();
+    private static final Connection conn = DatabaseConnection.getInstance().getConnection();
     @Override
     public void create(UserAccount entity) {
         String sql = "INSERT INTO user_account (username, email, passwordHash, role, isActive, accountStatus, accountCreatedDate) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -89,7 +89,7 @@ public class UserAccountService implements GlobalInterface<UserAccount> {
         }
     }
 
-    public UserAccount authenticate(String username, String password) {
+    public static UserAccount authenticate(String username, String password) {
         System.out.println("=== authenticate ===");
         System.out.println("Tentative pour : " + username);
         String sql = "SELECT * FROM user_account WHERE username = ?";
@@ -114,7 +114,7 @@ public class UserAccountService implements GlobalInterface<UserAccount> {
         return null;
     }
 
-    private void updateLastLogin(int userId) {
+    private static void updateLastLogin(int userId) {
         String sql = "UPDATE user_account SET lastLogin = ? WHERE userId = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
@@ -171,7 +171,21 @@ public class UserAccountService implements GlobalInterface<UserAccount> {
         return null;
     }
 
-    private UserAccount mapUser(ResultSet rs) throws SQLException {
+    public UserAccount findByEmail(String email) {
+        String sql = "SELECT * FROM user_account WHERE email = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return mapUser(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static UserAccount mapUser(ResultSet rs) throws SQLException {
         UserAccount user = new UserAccount();
         user.setUserId(rs.getInt("userId"));
         user.setUsername(rs.getString("username"));

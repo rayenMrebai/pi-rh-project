@@ -1,8 +1,11 @@
 package org.example.controllers;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,16 +15,24 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 import org.example.enums.UserRole;
 import org.example.model.user.UserAccount;
 import org.example.model.user.UserSettings;
 import org.example.services.user.UserAccountService;
 import org.example.services.user.UserSettingsService;
+import org.example.util.PdfExporter;
 import org.example.util.SessionManager;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class UserListController {
 
@@ -41,10 +52,17 @@ public class UserListController {
     @FXML private Button deleteButton;
     @FXML private Button settingsButton;
     @FXML private Button refreshButton;
+    @FXML private Button exportPdfButton;
+
+    @FXML private TextField searchField;
+    @FXML private ComboBox<String> roleFilterCombo;
+    @FXML private ComboBox<String> statusFilterCombo;
+    @FXML private Button clearFilterButton;
 
     private UserAccountService userService = new UserAccountService();
     private UserSettingsService settingsService = new UserSettingsService();
-    private ObservableList<UserAccount> userList = FXCollections.observableArrayList();
+    private ObservableList<UserAccount> masterData = FXCollections.observableArrayList();
+    private FilteredList<UserAccount> filteredData;
     private UserAccount loggedInUser;
 
     public void setLoggedInUser(UserAccount user) {
@@ -117,6 +135,16 @@ public class UserListController {
 
         loadUsers();
 
+
+        setupFilters();
+
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> applyFilter());
+        roleFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> applyFilter());
+        statusFilterCombo.valueProperty().addListener((obs, oldVal, newVal) -> applyFilter());
+
+        clearFilterButton.setOnAction(event -> clearFilters());
+        exportPdfButton.setOnAction(event -> exportToPdf());
+
         navDashboard.setOnAction(e -> openDashboard());
         navUsers.setOnAction(e -> {});
         navFormations.setOnAction(e -> showComingSoon("Formations"));
@@ -163,6 +191,74 @@ public class UserListController {
         logoutButton.setOnAction(event -> logout());
     }
 
+    private void setupFilters() {
+        List<String> roles = Arrays.stream(UserRole.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        roles.add(0, "Tous");
+        roleFilterCombo.setItems(FXCollections.observableArrayList(roles));
+        roleFilterCombo.getSelectionModel().select("Tous");
+
+        List<String> statuses = masterData.stream()
+                .map(UserAccount::getAccountStatus)
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+        statuses.add(0, "Tous");
+        statusFilterCombo.setItems(FXCollections.observableArrayList(statuses));
+        statusFilterCombo.getSelectionModel().select("Tous");
+    }
+
+    private void applyFilter() {
+        String searchText = searchField.getText().toLowerCase().trim();
+        String selectedRole = roleFilterCombo.getSelectionModel().getSelectedItem();
+        String selectedStatus = statusFilterCombo.getSelectionModel().getSelectedItem();
+
+        Predicate<UserAccount> predicate = user -> {
+            if (!searchText.isEmpty()) {
+                boolean matchesSearch = user.getUsername().toLowerCase().contains(searchText) ||
+                        user.getEmail().toLowerCase().contains(searchText);
+                if (!matchesSearch) return false;
+            }
+            if (selectedRole != null && !"Tous".equals(selectedRole)) {
+                if (!user.getRole().name().equals(selectedRole)) return false;
+            }
+            if (selectedStatus != null && !"Tous".equals(selectedStatus)) {
+                if (!user.getAccountStatus().equals(selectedStatus)) return false;
+            }
+            return true;
+        };
+
+        filteredData.setPredicate(predicate);
+    }
+
+    private void clearFilters() {
+        searchField.clear();
+        roleFilterCombo.getSelectionModel().select("Tous");
+        statusFilterCombo.getSelectionModel().select("Tous");
+    }
+
+    private void exportToPdf() {
+        List<UserAccount> usersToExport = filteredData.stream().collect(Collectors.toList());
+        if (usersToExport.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Aucune donnée", "Aucun utilisateur à exporter.");
+            return;
+        }
+
+        String downloadsPath = System.getProperty("user.home") + "/Downloads/";
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String filename = "utilisateurs_" + timestamp + ".pdf";
+        String filePath = downloadsPath + filename;
+
+        try {
+            PdfExporter.exportUsersToPdf(usersToExport, filePath);
+            showAlert(Alert.AlertType.INFORMATION, "Succès", "Export PDF terminé !\nFichier : " + filePath);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Échec de l'export PDF : " + e.getMessage());
+        }
+    }
+
     private void openDashboard() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Dashboard.fxml"));
@@ -202,8 +298,12 @@ public class UserListController {
     private void loadUsers() {
         try {
             List<UserAccount> users = userService.getAll();
-            userList.setAll(users);
-            userListView.setItems(userList);
+            masterData.setAll(users);
+
+            // ✅ Initialiser filteredData ici
+            filteredData = new FilteredList<>(masterData, p -> true);
+            userListView.setItems(filteredData);
+
         } catch (Exception e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger les utilisateurs.");
@@ -305,6 +405,22 @@ public class UserListController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void switchSceneWithMaximize(Stage stage, Parent root, String title) {
+        stage.setScene(new Scene(root));
+        stage.setTitle(title);
+        stage.addEventHandler(WindowEvent.WINDOW_SHOWN, e -> {
+            Platform.runLater(() -> stage.setMaximized(true));
+        });
+        stage.show();
+        Timeline fallback = new Timeline(new KeyFrame(Duration.millis(100), e -> {
+            if (!stage.isMaximized()) {
+                stage.setMaximized(true);
+            }
+        }));
+        fallback.setCycleCount(1);
+        fallback.play();
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {
