@@ -9,10 +9,13 @@ import java.util.concurrent.TimeUnit;
 
 public class CourseraApiService {
 
-    // ✅ Remplacez par votre vraie clé RapidAPI
     private static final String RAPID_API_KEY  = "72e2d8e622msh0ad24cb45cb6f78p164861jsn18f0e77a3774";
     private static final String RAPID_API_HOST = "coursera-courses-and-learning.p.rapidapi.com";
     private static final String BASE_URL       = "https://" + RAPID_API_HOST;
+
+    // ✅ Timestamp du dernier appel pour éviter le rate limit
+    private long lastCallTime = 0;
+    private static final long MIN_DELAY_MS = 1000; // 1 seconde minimum entre appels
 
     private final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
@@ -24,11 +27,11 @@ public class CourseraApiService {
         private String id;
         private String title;
         private String description;
-        private String partner;       // ex: Google, IBM, Stanford
-        private String difficulty;    // Beginner, Intermediate, Advanced
+        private String partner;
+        private String difficulty;
         private String duration;
         private String url;
-        private String type;          // course, specialization, certificate
+        private String type;
 
         public CourseraCourse(String id, String title, String description,
                               String partner, String difficulty,
@@ -54,16 +57,26 @@ public class CourseraApiService {
 
         @Override
         public String toString() {
-            return title + (partner.isEmpty() ? "" : " — " + partner);
+            return title + (partner == null || partner.isEmpty() ? "" : " — " + partner);
         }
     }
 
-    // ===== RECHERCHE DE FORMATIONS =====
+    // ===== RECHERCHE AVEC PROTECTION RATE LIMIT =====
     public List<CourseraCourse> searchCourses(String keyword) {
-        List<CourseraCourse> results = new ArrayList<>();
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getFallbackCourses("");
+        }
+
+        // ✅ Protection rate limit : attendre si dernier appel trop récent
+        long now = System.currentTimeMillis();
+        if (now - lastCallTime < MIN_DELAY_MS) {
+            System.out.println("⏳ Rate limit local — utilisation du fallback");
+            return getFallbackCourses(keyword);
+        }
+        lastCallTime = now;
 
         String url = BASE_URL + "/search"
-                + "?query=" + keyword.replace(" ", "%20")
+                + "?query=" + keyword.trim().replace(" ", "%20")
                 + "&limit=10";
 
         System.out.println("🔍 Coursera URL : " + url);
@@ -77,31 +90,41 @@ public class CourseraApiService {
                     .build();
 
             try (Response response = client.newCall(request).execute()) {
-                System.out.println("📡 HTTP Status : " + response.code());
+                int code = response.code();
+                System.out.println("📡 HTTP Status : " + code);
 
+                // ✅ Gestion explicite des codes d'erreur
+                if (code == 429) {
+                    System.out.println("⚠️ Rate limit API (429) → fallback local");
+                    return getFallbackCourses(keyword);
+                }
+                if (code == 404) {
+                    System.out.println("⚠️ Endpoint introuvable (404) → fallback local");
+                    return getFallbackCourses(keyword);
+                }
                 if (!response.isSuccessful() || response.body() == null) {
-                    System.err.println("❌ Erreur : " + response.code());
+                    System.out.println("⚠️ Erreur HTTP " + code + " → fallback local");
                     return getFallbackCourses(keyword);
                 }
 
                 String json = response.body().string();
                 System.out.println("📦 JSON : " + json.substring(0, Math.min(json.length(), 300)));
 
-                results = parseCourseraResponse(json);
+                List<CourseraCourse> results = parseCourseraResponse(json);
 
                 if (results.isEmpty()) {
                     System.out.println("⚠️ Résultats vides → fallback local");
                     return getFallbackCourses(keyword);
                 }
+
+                System.out.println("✅ Coursera résultats : " + results.size());
+                return results;
             }
 
         } catch (Exception e) {
             System.err.println("❌ Erreur réseau : " + e.getMessage());
             return getFallbackCourses(keyword);
         }
-
-        System.out.println("✅ Coursera résultats : " + results.size());
-        return results;
     }
 
     // ===== PARSER LA RÉPONSE =====
@@ -111,7 +134,6 @@ public class CourseraApiService {
         try {
             JsonElement root = JsonParser.parseString(json);
 
-            // Structure 1 : tableau direct [...]
             if (root.isJsonArray()) {
                 for (JsonElement el : root.getAsJsonArray()) {
                     CourseraCourse c = parseCourseObject(el.getAsJsonObject());
@@ -122,7 +144,6 @@ public class CourseraApiService {
 
             JsonObject rootObj = root.getAsJsonObject();
 
-            // Structure 2 : { "courses": [...] }
             if (rootObj.has("courses")) {
                 for (JsonElement el : rootObj.getAsJsonArray("courses")) {
                     CourseraCourse c = parseCourseObject(el.getAsJsonObject());
@@ -131,7 +152,6 @@ public class CourseraApiService {
                 return results;
             }
 
-            // Structure 3 : { "results": [...] }
             if (rootObj.has("results")) {
                 for (JsonElement el : rootObj.getAsJsonArray("results")) {
                     CourseraCourse c = parseCourseObject(el.getAsJsonObject());
@@ -140,7 +160,6 @@ public class CourseraApiService {
                 return results;
             }
 
-            // Structure 4 : { "data": { "courses": { "elements": [...] } } }
             if (rootObj.has("data")) {
                 JsonObject data = rootObj.getAsJsonObject("data");
                 if (data.has("courses")) {
@@ -163,20 +182,16 @@ public class CourseraApiService {
 
     private CourseraCourse parseCourseObject(JsonObject obj) {
         try {
-            // ID
-            String id = obj.has("id") ? obj.get("id").getAsString() :
-                    obj.has("slug") ? obj.get("slug").getAsString() : "";
+            String id = obj.has("id")   ? obj.get("id").getAsString()   :
+                    obj.has("slug") ? obj.get("slug").getAsString()  : "";
 
-            // Titre
             String title = obj.has("name")  ? obj.get("name").getAsString()  :
                     obj.has("title") ? obj.get("title").getAsString() : "";
             if (title.isEmpty()) return null;
 
-            // Description
             String desc = obj.has("description")     ? obj.get("description").getAsString()     :
                     obj.has("shortDescription") ? obj.get("shortDescription").getAsString() : "";
 
-            // Partner / Organisation
             String partner = "";
             if (obj.has("partnerName")) {
                 partner = obj.get("partnerName").getAsString();
@@ -188,15 +203,12 @@ public class CourseraApiService {
                 }
             }
 
-            // Difficulté
-            String difficulty = obj.has("level")           ? obj.get("level").getAsString()           :
-                    obj.has("difficultyLevel")  ? obj.get("difficultyLevel").getAsString() : "Beginner";
+            String difficulty = obj.has("level")          ? obj.get("level").getAsString()          :
+                    obj.has("difficultyLevel") ? obj.get("difficultyLevel").getAsString() : "Beginner";
 
-            // Durée
-            String duration = obj.has("workload")       ? obj.get("workload").getAsString()       :
-                    obj.has("estimatedTime")   ? obj.get("estimatedTime").getAsString()  : "4 semaines";
+            String duration = obj.has("workload")     ? obj.get("workload").getAsString()     :
+                    obj.has("estimatedTime") ? obj.get("estimatedTime").getAsString() : "4 semaines";
 
-            // URL
             String courseUrl = "";
             if (obj.has("slug")) {
                 courseUrl = "https://www.coursera.org/learn/" + obj.get("slug").getAsString();
@@ -204,7 +216,6 @@ public class CourseraApiService {
                 courseUrl = obj.get("url").getAsString();
             }
 
-            // Type
             String type = obj.has("courseType") ? obj.get("courseType").getAsString() :
                     obj.has("type")        ? obj.get("type").getAsString()        : "course";
 
@@ -219,29 +230,42 @@ public class CourseraApiService {
     // ===== DONNÉES LOCALES DE SECOURS =====
     private List<CourseraCourse> getFallbackCourses(String keyword) {
         List<CourseraCourse> fallback = new ArrayList<>();
-        String kw = keyword.toLowerCase();
+        String kw = keyword == null ? "" : keyword.toLowerCase();
 
         String[][] data = {
-                {"java-programming", "Java Programming Masterclass", "Maîtrisez Java de zéro à expert.", "Tim Buchalka", "Beginner", "80 heures", "en ligne"},
-                {"python-everybody", "Python for Everybody", "Introduction à Python pour la data.", "University of Michigan", "Beginner", "8 mois", "en ligne"},
-                {"machine-learning", "Machine Learning Specialization", "Fondements du machine learning.", "Stanford / Andrew Ng", "Intermediate", "3 mois", "en ligne"},
-                {"web-design", "Full Stack Web Development", "HTML, CSS, JavaScript, React, Node.", "The Hong Kong University", "Intermediate", "6 mois", "en ligne"},
-                {"google-project", "Google Project Management", "Gestion de projet professionnelle.", "Google", "Beginner", "6 mois", "en ligne"},
-                {"deep-learning", "Deep Learning Specialization", "Réseaux de neurones et IA.", "deeplearning.ai", "Advanced", "5 mois", "en ligne"},
-                {"sql-databases", "SQL for Data Science", "Maîtrisez SQL pour l'analyse de données.", "UC Davis", "Beginner", "4 semaines", "en ligne"},
-                {"cloud-aws", "AWS Cloud Solutions Architect", "Architecture cloud sur Amazon AWS.", "Amazon", "Intermediate", "4 mois", "en ligne"},
-                {"cybersecurity", "Google Cybersecurity Certificate", "Fondements de la cybersécurité.", "Google", "Beginner", "6 mois", "en ligne"},
-                {"agile-scrum", "Agile Project Management", "Méthodes agiles et Scrum en pratique.", "Google", "Beginner", "4 semaines", "en ligne"},
-                {"data-science", "IBM Data Science Professional", "Data science complète avec IBM.", "IBM", "Beginner", "11 mois", "en ligne"},
-                {"android-dev", "Android App Development", "Développement Android avec Kotlin.", "Meta", "Intermediate", "7 mois", "en ligne"},
-                {"react-native", "React Native Development", "Applications mobiles avec React Native.", "Meta", "Intermediate", "4 mois", "en ligne"},
-                {"devops", "DevOps on AWS Specialization", "CI/CD, Docker, Kubernetes sur AWS.", "Amazon", "Advanced", "3 mois", "en ligne"},
-                {"leadership", "Leadership and Management", "Leadership et management d'équipe.", "HEC Paris", "Beginner", "5 mois", "en ligne"},
+                {"java-programming",    "Java Programming Masterclass",        "Maîtrisez Java de zéro à expert.",                 "Tim Buchalka",             "Beginner",     "80 heures", "en ligne"},
+                {"python-everybody",    "Python for Everybody",                "Introduction à Python pour la data.",               "University of Michigan",   "Beginner",     "8 mois",    "en ligne"},
+                {"machine-learning",    "Machine Learning Specialization",     "Fondements du machine learning.",                   "Stanford / Andrew Ng",     "Intermediate", "3 mois",    "en ligne"},
+                {"web-design",          "Full Stack Web Development",          "HTML, CSS, JavaScript, React, Node.",               "The Hong Kong University", "Intermediate", "6 mois",    "en ligne"},
+                {"google-project",      "Google Project Management",           "Gestion de projet professionnelle.",                "Google",                   "Beginner",     "6 mois",    "en ligne"},
+                {"deep-learning",       "Deep Learning Specialization",        "Réseaux de neurones et IA.",                        "deeplearning.ai",          "Advanced",     "5 mois",    "en ligne"},
+                {"sql-databases",       "SQL for Data Science",                "Maîtrisez SQL pour l'analyse de données.",          "UC Davis",                 "Beginner",     "4 semaines","en ligne"},
+                {"cloud-aws",           "AWS Cloud Solutions Architect",       "Architecture cloud sur Amazon AWS.",                "Amazon",                   "Intermediate", "4 mois",    "en ligne"},
+                {"cybersecurity",       "Google Cybersecurity Certificate",    "Fondements de la cybersécurité.",                   "Google",                   "Beginner",     "6 mois",    "en ligne"},
+                {"agile-scrum",         "Agile Project Management",            "Méthodes agiles et Scrum en pratique.",             "Google",                   "Beginner",     "4 semaines","en ligne"},
+                {"data-science",        "IBM Data Science Professional",       "Data science complète avec IBM.",                   "IBM",                      "Beginner",     "11 mois",   "en ligne"},
+                {"android-dev",         "Android App Development",             "Développement Android avec Kotlin.",                "Meta",                     "Intermediate", "7 mois",    "en ligne"},
+                {"react-native",        "React Native Development",            "Applications mobiles avec React Native.",           "Meta",                     "Intermediate", "4 mois",    "en ligne"},
+                {"devops",              "DevOps on AWS Specialization",        "CI/CD, Docker, Kubernetes sur AWS.",                "Amazon",                   "Advanced",     "3 mois",    "en ligne"},
+                {"leadership",          "Leadership and Management",           "Leadership et management d'équipe.",                "HEC Paris",                "Beginner",     "5 mois",    "en ligne"},
+                {"cisco-networking",    "Cisco Networking Basics",             "Fondamentaux des réseaux Cisco.",                   "Cisco",                    "Beginner",     "5 semaines","en ligne"},
+                {"php-laravel",         "PHP & Laravel for Beginners",         "Développement web avec PHP et Laravel.",            "Udemy / Brad Traversy",    "Beginner",     "10 heures", "en ligne"},
+                {"react-js",            "React - The Complete Guide",          "React JS avec Hooks, Redux, React Router.",         "Academind",                "Intermediate", "48 heures", "en ligne"},
+                {"spring-boot",         "Spring Boot Microservices",           "Microservices avec Spring Boot et Docker.",         "in28Minutes",              "Advanced",     "6 semaines","en ligne"},
+                {"excel-data",          "Excel Skills for Business",           "Maîtrisez Excel pour le business.",                "Macquarie University",     "Beginner",     "6 mois",    "en ligne"},
+                {"scrum-master",        "Scrum Master Certification",          "Préparation à la certification Scrum Master.",      "LearnQuest",               "Intermediate", "4 semaines","en ligne"},
+                {"kotlin-android",      "Kotlin for Android Developers",       "Développement Android moderne avec Kotlin.",        "Google",                   "Intermediate", "3 mois",    "en ligne"},
+                {"node-js",             "Node.js Developer Course",            "Backend JavaScript avec Node.js et Express.",       "Andrew Mead",              "Intermediate", "35 heures", "en ligne"},
+                {"docker-kubernetes",   "Docker & Kubernetes Bootcamp",        "Conteneurisation avec Docker et Kubernetes.",       "Bret Fisher",              "Advanced",     "20 heures", "en ligne"},
+                {"typescript",          "TypeScript for Professionals",        "TypeScript avancé pour développeurs JS.",           "Microsoft",                "Intermediate", "6 semaines","en ligne"},
         };
 
         for (String[] d : data) {
-            if (d[1].toLowerCase().contains(kw) || d[2].toLowerCase().contains(kw) ||
-                    d[0].toLowerCase().contains(kw)  || d[3].toLowerCase().contains(kw)) {
+            if (kw.isEmpty() ||
+                    d[0].toLowerCase().contains(kw) ||
+                    d[1].toLowerCase().contains(kw) ||
+                    d[2].toLowerCase().contains(kw) ||
+                    d[3].toLowerCase().contains(kw)) {
                 fallback.add(new CourseraCourse(
                         d[0], d[1], d[2], d[3], d[4], d[5],
                         "https://www.coursera.org/learn/" + d[0], d[6]));
@@ -258,6 +282,7 @@ public class CourseraApiService {
             }
         }
 
+        System.out.println("📚 Fallback local : " + fallback.size() + " résultats pour '" + keyword + "'");
         return fallback;
     }
 }

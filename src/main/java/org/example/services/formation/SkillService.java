@@ -186,13 +186,14 @@ public class SkillService implements GlobalInterface<Skill> {
     // ========== DELETE ==========
     public void delete(int id) {
         String sql = "DELETE FROM skill WHERE id = ?";
-
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
-            stmt.executeUpdate();
-            System.out.println("✓ Compétence supprimée");
+            int rows = stmt.executeUpdate();
+            System.out.println("✅ Delete skill id=" + id + " → rows affected: " + rows);
+            // Si rows = 0, la suppression n'a pas eu lieu en base
         } catch (SQLException e) {
             System.err.println("Erreur delete : " + e.getMessage());
+            e.printStackTrace();
         }
     }
 

@@ -68,13 +68,14 @@ public class UpdateFormTrainingProgramController implements Initializable {
         updateStatusColor();
 
         // Dates
+        // Dates — toLocalDate() fonctionne directement sur java.sql.Date
         if (training.getStartDate() != null) {
-            startDatePicker.setValue(training.getStartDate().toInstant()
-                    .atZone(ZoneId.systemDefault()).toLocalDate());
+            startDatePicker.setValue(
+                    new java.sql.Date(training.getStartDate().getTime()).toLocalDate());
         }
         if (training.getEndDate() != null) {
-            endDatePicker.setValue(training.getEndDate().toInstant()
-                    .atZone(ZoneId.systemDefault()).toLocalDate());
+            endDatePicker.setValue(
+                    new java.sql.Date(training.getEndDate().getTime()).toLocalDate());
         }
 
         // Skill associé

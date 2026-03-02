@@ -127,11 +127,10 @@ public class ManageTrainingController implements Initializable {
     private void loadSkills() {
         try {
             List<Skill> skills = skillService.getAll();
-            // ✅ Forcer le rafraîchissement complet
-            skillsTable.setItems(null);
             allSkills = FXCollections.observableArrayList(skills);
-            skillsTable.setItems(allSkills);
-            skillsTable.refresh();
+            skillsTable.setItems(null);          // ✅ forcer reset
+            skillsTable.setItems(allSkills);     // ✅ recharger
+            skillsTable.refresh();               // ✅ forcer rafraîchissement visuel
         } catch (Exception e) {
             e.printStackTrace();
         }
