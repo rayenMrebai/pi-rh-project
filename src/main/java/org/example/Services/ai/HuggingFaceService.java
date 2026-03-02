@@ -16,7 +16,10 @@ public class HuggingFaceService {
                     "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/" +
                     "pipeline/feature-extraction";
 
-    private static final String API_TOKEN = "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";
+    // APRÈS — token lu depuis variable d'environnement
+    private static final String API_TOKEN = System.getenv("HF_API_TOKEN") != null
+            ? System.getenv("HF_API_TOKEN")
+            : "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"; // fallback local uniquement
 
     private final ObjectMapper mapper = new ObjectMapper();
 
