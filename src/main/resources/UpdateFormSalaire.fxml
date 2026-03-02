@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.controllers.UpdateFormSalaireController"
+            prefHeight="550.0" prefWidth="550.0"
+            style="-fx-background-color: #ecf0f1;">
+
+    <VBox spacing="20" alignment="TOP_CENTER" AnchorPane.topAnchor="30"
+          AnchorPane.leftAnchor="50" AnchorPane.rightAnchor="50">
+
+        <Label text="Modifier le Salaire"
+               style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #3498db;"/>
+
+        <Separator prefWidth="450"/>
+
+        <VBox spacing="10" style="-fx-background-color: #bdc3c7; -fx-padding: 15; -fx-border-radius: 5;">
+            <Label text="Informations du Salaire (non modifiables)"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+            <GridPane hgap="15" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="150" prefWidth="150"/>
+                    <ColumnConstraints minWidth="250" prefWidth="250"/>
+                </columnConstraints>
+
+                <Label text="Nom d'utilisateur:" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                       style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblUserName" text="-" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                <Label text="Salaire de Base:" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                       style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblBaseAmount" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                       style="-fx-text-fill: #2980b9;"/>
+
+                <Label text="Bonus:" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                       style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblBonusAmount" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                       style="-fx-text-fill: #27ae60;"/>
+
+                <Label text="Total:" GridPane.columnIndex="0" GridPane.rowIndex="3"
+                       style="-fx-font-weight: bold;"/>
+                <Label fx:id="lblTotalAmount" text="-" GridPane.columnIndex="1" GridPane.rowIndex="3"
+                       style="-fx-font-weight: bold; -fx-text-fill: #e74c3c;"/>
+            </GridPane>
+        </VBox>
+
+        <Separator prefWidth="450"/>
+
+        <Label text="Champs Modifiables"
+               style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+
+        <GridPane hgap="15" vgap="20">
+            <columnConstraints>
+                <ColumnConstraints minWidth="150" prefWidth="150"/>
+                <ColumnConstraints minWidth="250" prefWidth="250"/>
+            </columnConstraints>
+
+            <Label text="Statut *" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+            <ComboBox fx:id="cmbStatus" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+            <Label text="Date de Paiement *" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+            <DatePicker fx:id="datePickerPaiement" prefWidth="250" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+        </GridPane>
+
+        <Separator prefWidth="450"/>
+
+        <HBox spacing="20" alignment="CENTER">
+            <Button fx:id="btnUpdate" text="Mettre a Jour"
+                    prefWidth="170" prefHeight="45"
+                    style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold;"
+                    onAction="#handleUpdate"/>
+            <Button fx:id="btnCancel" text="Annuler"
+                    prefWidth="170" prefHeight="45"
+                    style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: bold;"
+                    onAction="#handleCancel"/>
+        </HBox>
+    </VBox>
+
+</AnchorPane>

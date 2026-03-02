@@ -1,34 +1,39 @@
 package org.example.model.salaire;
 
+import org.example.enums.BonusRuleStatus;
 import org.example.enums.SalaireStatus;
-
+import org.example.model.user.UserAccount;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Salaire {
 
-    private int id;
-    private int userId;
-
+    private int id;;
     private double baseAmount;
     private double bonusAmount;
     private double totalAmount;
-
     private SalaireStatus status;
     private LocalDate datePaiement;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String userName;
-    private String userEmail;
+
+
+    // Association par avec user
+    private UserAccount user;
+
+    // association avec regle
+    private List<BonusRule> bonusRules = new ArrayList<>();
+
 
 
     public Salaire() {
     }
 
-    // Création salaire
-    public Salaire(int userId, double baseAmount, LocalDate datePaiement) {
-        this.userId = userId;
+    // Constructeur de creation
+    public Salaire(UserAccount user, double baseAmount, LocalDate datePaiement) {
+        this.user = user;
         this.baseAmount = baseAmount;
         this.bonusAmount = 0;
         this.totalAmount = baseAmount;
@@ -38,17 +43,30 @@ public class Salaire {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // ===== Getters =====
+    // constructeur de creation et affichage
+    public Salaire(int id, UserAccount user, double baseAmount, double bonusAmount, double totalAmount, SalaireStatus status, LocalDate datePaiement, LocalDateTime createdAt, LocalDateTime updatedAt) {
+
+        this.id = id;
+        this.user = user;
+        this.baseAmount = baseAmount;
+        this.bonusAmount = bonusAmount;
+        this.totalAmount = totalAmount;
+        this.status = status;
+        this.datePaiement = datePaiement;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    // Getters
 
     public int getId() { return id; }
-    public int getUserId() { return userId; }
     public double getBaseAmount() { return baseAmount; }
     public double getBonusAmount() { return bonusAmount; }
     public double getTotalAmount() { return totalAmount; }
     public SalaireStatus getStatus() { return status; }
     public LocalDate getDatePaiement() { return datePaiement; }
 
-    // ===== Setters autorisés =====
+    // Setters
 
     public void setStatus(SalaireStatus status) {
         this.status = status;
@@ -64,10 +82,6 @@ public class Salaire {
         this.id = id;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
     public void setBaseAmount(double baseAmount) {
         this.baseAmount = baseAmount;
     }
@@ -80,40 +94,51 @@ public class Salaire {
         this.totalAmount = totalAmount;
     }
 
-
-
-    public String getUserName() {
-        return userName;
+    // add getter et setter user
+    public UserAccount getUser() {
+        return user;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUser(UserAccount user) {
+        this.user = user;
     }
 
-    public String getUserEmail() {
-        return userEmail;
+    // get et set list
+    public List<BonusRule> getBonusRules() {
+
+        return bonusRules;
     }
 
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+    public void setBonusRules(List<BonusRule> bonusRules) {
+
+        this.bonusRules = bonusRules;
     }
 
-    // ===== Logique métier =====
+    // ajout regle
+    public void addBonusRule(BonusRule rule) {
+        this.bonusRules.add(rule);
+    }
 
-    public void addBonus(double bonus) {
-        this.bonusAmount += bonus;
+    // methode de calcule de total amount a partir de bonus des regles de bonus
+
+    public void recalculateBonusFromActiveRules() {
+        this.bonusAmount = bonusRules.stream()
+                .filter(rule -> rule.getStatus() == BonusRuleStatus.ACTIVE)
+                .mapToDouble(BonusRule::getBonus)
+                .sum();
+
         this.totalAmount = this.baseAmount + this.bonusAmount;
         this.updatedAt = LocalDateTime.now();
     }
 
-
+    // affichage
     @Override
     public String toString() {
         return "Salaire {" +
                 "id=" + id +
-                ", userId=" + userId +
-                ", userName='" + userName + '\'' +
-                ", userEmail='" + userEmail + '\'' +
+                ", userId=" + user.getUserId() +
+                ", userName='" + user.getUsername() + '\'' +
+                ", userEmail='" + user.getEmail() + '\'' +
                 ", baseAmount=" + baseAmount +
                 ", bonusAmount=" + bonusAmount +
                 ", totalAmount=" + totalAmount +

@@ -1,57 +1,95 @@
 package org.example.services.salaire;
 
+import org.example.model.user.UserAccount;
 import org.example.enums.SalaireStatus;
 import org.example.interfaces.GlobalInterface;
 import org.example.model.salaire.BonusRule;
 import org.example.model.salaire.Salaire;
+import org.example.services.email.EmailService;
+import org.example.services.email.EmailTemplate;
 import org.example.util.DatabaseConnection;
+import org.example.services.pdf.PDFService;
 
+import org.example.util.SessionManager;
 import java.sql.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SalaireService implements GlobalInterface<Salaire> {
 
     private final Connection conn = DatabaseConnection.getInstance().getConnection();
+    private final EmailService emailService = new EmailService();
+    private final PDFService pdfService = new PDFService();
 
-    // fonction CREATE
     @Override
     public void create(Salaire salaire) {
+        if (!SessionManager.isAdmin()) {
+            System.err.println("❌ ACCÈS REFUSÉ : Seuls les admins peuvent créer des salaires");
+            return;
+        }
         String sql = """
             INSERT INTO salaire(userId, baseAmount, bonusAmount, totalAmount, status, datePaiement)
             VALUES (?, ?, ?, ?, ?, ?)
         """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, salaire.getUserId());
+            ps.setInt(1, salaire.getUser().getUserId());
             ps.setDouble(2, salaire.getBaseAmount());
             ps.setDouble(3, salaire.getBonusAmount());
             ps.setDouble(4, salaire.getTotalAmount());
             ps.setString(5, salaire.getStatus().name());
             ps.setDate(6, Date.valueOf(salaire.getDatePaiement()));
             ps.executeUpdate();
+
+            // ⭐ ENVOI EMAIL AUTOMATIQUE
+            String employeeEmail = salaire.getUser().getEmail();
+            String subject = "🎉 Votre salaire a été créé";
+            String htmlContent = EmailTemplate.salaryCreatedTemplate(salaire);
+
+            emailService.sendEmail(employeeEmail, subject, htmlContent);
         } catch (SQLException e) {
             System.out.println("Erreur create: " + e.getMessage());
         }
     }
 
-    // fonction READ ALL
     @Override
     public List<Salaire> getAll() {
         List<Salaire> salaires = new ArrayList<>();
+        String sql;
 
-        String sql = """
-            SELECT 
-                s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
-                s.status, s.datePaiement,
-                u.name, u.email
-            FROM salaire s
-            JOIN useraccount u ON s.userId = u.id
-        """;
+        if (SessionManager.isAdmin()) {
+            // Admin → voir tous les salaires
+            sql = """
+                SELECT 
+                    s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
+                    s.status, s.datePaiement,
+                    s.createdAt, s.updatedAt,
+                    u.username, u.email
+                FROM salaire s
+                JOIN user_account u ON s.userId = u.userId
+            """;
+        } else {
+            // User normal → voir seulement son salaire
+            sql = """
+                SELECT 
+                    s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
+                    s.status, s.datePaiement,
+                    s.createdAt, s.updatedAt,
+                    u.username, u.email
+                FROM salaire s
+                JOIN user_account u ON s.userId = u.userId
+                WHERE s.userId = ?
+            """;
+        }
 
-        try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            if (!SessionManager.isAdmin()) {
+                ps.setInt(1, SessionManager.getCurrentUser().getUserId());
+            }
+
+            ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
                 Salaire salaire = mapResultSetToSalaire(rs);
@@ -65,28 +103,90 @@ public class SalaireService implements GlobalInterface<Salaire> {
         return salaires;
     }
 
-    // fonction UPDATE
     @Override
     public void update(Salaire salaire) {
+        if (!SessionManager.isAdmin()) {
+            System.err.println("❌ ACCÈS REFUSÉ : Seuls les admins peuvent créer des salaires");
+            return;
+        }
+        // Récupérer l'ancien statut AVANT la mise à jour
+        Salaire oldSalaire = getById(salaire.getId());
+        SalaireStatus oldStatus = (oldSalaire != null) ? oldSalaire.getStatus() : null;
+
         String sql = """
-            UPDATE salaire 
-            SET status = ?, datePaiement = ?, updatedAt = ?
-            WHERE id = ?
-        """;
+        UPDATE salaire 
+        SET status = ?, datePaiement = ?, updatedAt = ?
+        WHERE id = ?
+    """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, salaire.getStatus().name());
             ps.setDate(2, Date.valueOf(salaire.getDatePaiement()));
-            ps.setInt(3, salaire.getId());
+            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(4, salaire.getId());
             ps.executeUpdate();
+
+            // ENVOI EMAIL + PDF SI STATUT CHANGE À PAYÉ
+            SalaireStatus newStatus = salaire.getStatus();
+            String employeeEmail = salaire.getUser().getEmail();
+
+            if (oldStatus != SalaireStatus.PAYÉ && newStatus == SalaireStatus.PAYÉ) {
+                // ⭐ CORRECTION : Charger le salaire COMPLET
+                Salaire salaireComplet = getById(salaire.getId());
+
+                if (salaireComplet != null) {
+                    // 1. Générer la fiche de paie PDF
+                    String pdfPath = pdfService.generatePayslip(salaireComplet);
+
+                    // 2. Préparer l'email
+                    String subject = "✅ Votre salaire a été payé";
+                    String htmlContent = EmailTemplate.salaryPaidTemplate(salaireComplet);
+
+                    // 3. Envoyer l'email avec le PDF en pièce jointe
+                    if (pdfPath != null) {
+                        emailService.sendEmailWithAttachment(employeeEmail, subject, htmlContent, pdfPath);
+                        System.out.println("✅ Email avec fiche de paie envoyé à: " + employeeEmail);
+                    } else {
+                        // Si PDF échoue, envoyer email sans pièce jointe
+                        emailService.sendEmail(employeeEmail, subject, htmlContent);
+                        System.out.println("⚠️ Email envoyé sans fiche de paie (erreur PDF)");
+                    }
+                }
+            }
+
         } catch (SQLException e) {
             System.out.println("Erreur update: " + e.getMessage());
         }
     }
 
-    // fonction DELETE
+    public void updateBonusAndTotal(Salaire salaire) {
+        if (!SessionManager.isAdmin()) {
+            System.err.println("❌ ACCÈS REFUSÉ : Seuls les admins peuvent créer des salaires");
+            return;
+        }
+        String sql = """
+            UPDATE salaire 
+            SET bonusAmount = ?, totalAmount = ?, updatedAt = ?
+            WHERE id = ?
+        """;
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDouble(1, salaire.getBonusAmount());
+            ps.setDouble(2, salaire.getTotalAmount());
+            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setInt(4, salaire.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println("Erreur updateBonusAndTotal: " + e.getMessage());
+        }
+    }
+
     @Override
     public void delete(int id) {
+        if (!SessionManager.isAdmin()) {
+            System.err.println("❌ ACCÈS REFUSÉ : Seuls les admins peuvent créer des salaires");
+            return;
+        }
         try (PreparedStatement ps =
                      conn.prepareStatement("DELETE FROM salaire WHERE id = ?")) {
             ps.setInt(1, id);
@@ -96,45 +196,53 @@ public class SalaireService implements GlobalInterface<Salaire> {
         }
     }
 
-    // fonction MAP RESULTSET TO SALAIRE
     private Salaire mapResultSetToSalaire(ResultSet rs) throws SQLException {
-        Salaire salaire = new Salaire();
 
-        salaire.setId(rs.getInt("id"));
-        salaire.setUserId(rs.getInt("userId"));
-        salaire.setBaseAmount(rs.getDouble("baseAmount"));
-        salaire.setBonusAmount(rs.getDouble("bonusAmount"));
-        salaire.setTotalAmount(rs.getDouble("totalAmount"));
-        salaire.setStatus(SalaireStatus.valueOf(rs.getString("status")));
-        salaire.setDatePaiement(rs.getDate("datePaiement").toLocalDate());
+        UserAccount user = new UserAccount(
+                rs.getInt("userId"),
+                rs.getString("Username"),
+                rs.getString("email")
+        );
 
-        // User info
-        salaire.setUserName(rs.getString("name"));
-        salaire.setUserEmail(rs.getString("email"));
-
-        return salaire;
+        return new Salaire(
+                rs.getInt("id"),
+                user,
+                rs.getDouble("baseAmount"),
+                rs.getDouble("bonusAmount"),
+                rs.getDouble("totalAmount"),
+                SalaireStatus.valueOf(rs.getString("status")),
+                rs.getDate("datePaiement").toLocalDate(),
+                rs.getTimestamp("createdAt").toLocalDateTime(),
+                rs.getTimestamp("updatedAt").toLocalDateTime()
+        );
     }
 
 
-
-    // fonction GET BY ID
     public Salaire getById(int id) {
         String sql = """
-            SELECT 
-                s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
-                s.status, s.datePaiement,
-                u.name, u.email
-            FROM salaire s
-            JOIN useraccount u ON s.userId = u.id
-            WHERE s.id = ?
-        """;
+                    SELECT 
+                        s.id, s.baseAmount, s.bonusAmount, s.totalAmount,
+                        s.status, s.datePaiement,
+                        s.createdAt, s.updatedAt,
+                        u.userId as userId, u.username, u.email
+                    FROM salaire s
+                    JOIN user_account u ON s.userId = u.userId
+                    WHERE s.id = ?
+                """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return mapResultSetToSalaire(rs);
+                Salaire salaire = mapResultSetToSalaire(rs);
+
+                // Créer le service
+                BonusRuleService bonusRuleService = new BonusRuleService();
+                List<BonusRule> rules = bonusRuleService.getRulesBySalaire(id);
+                salaire.setBonusRules(rules);
+
+                return salaire;
             }
 
         } catch (SQLException e) {
@@ -143,5 +251,4 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
         return null;
     }
-
 }

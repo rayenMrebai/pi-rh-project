@@ -6,35 +6,35 @@ import java.time.LocalDateTime;
 public class BonusRule {
 
     private int id;
-    private int salaryId;
-
     private String nomRegle;
     private double percentage;
     private double bonus;
-
     private String condition;
     private BonusRuleStatus status;
-
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    // Association avec salaire
+    private Salaire salaire;
+
     public BonusRule() {}
 
-    // Création règle
-    public BonusRule(int salaryId, String nomRegle, double percentage, String condition) {
-        this.salaryId = salaryId;
+    /*constructeur*/
+    public BonusRule(Salaire salaire, String nomRegle, double percentage, String condition) {
+        this.salaire = salaire;
         this.nomRegle = nomRegle;
         this.percentage = percentage;
         this.condition = condition;
-        this.bonus = 0;
         this.status = BonusRuleStatus.CRÉE;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+
+        // calcul de bonus dapres salaire avec pourcentage
+        this.bonus = salaire.getBaseAmount() * (percentage / 100);
     }
 
     // ===== Getters =====
     public int getId() { return id; }
-    public int getSalaryId() { return salaryId; }
     public String getNomRegle() { return nomRegle; }
     public double getPercentage() { return percentage; }
     public double getBonus() { return bonus; }
@@ -42,16 +42,11 @@ public class BonusRule {
     public BonusRuleStatus getStatus() { return status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public Salaire getSalaire() { return salaire; }
 
     // ===== Setters =====
     public void setId(int id) {
         this.id = id;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void setSalaryId(int salaryId) {
-        this.salaryId = salaryId;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void setNomRegle(String nomRegle) {
@@ -59,14 +54,18 @@ public class BonusRule {
         this.updatedAt = LocalDateTime.now();
     }
 
+    /* set de pourcentage aussi que salaire */
     public void setPercentage(double percentage) {
         this.percentage = percentage;
+        // Recalculer le bonus automatiquement
+        if (this.salaire != null) {
+            this.bonus = this.salaire.getBaseAmount() * (percentage / 100);
+        }
         this.updatedAt = LocalDateTime.now();
     }
 
     public void setBonus(double bonus) {
         this.bonus = bonus;
-        this.updatedAt = LocalDateTime.now();
     }
 
     public void setCondition(String condition) {
@@ -87,19 +86,25 @@ public class BonusRule {
         this.updatedAt = updatedAt;
     }
 
-    // ===== Activation =====
-    public void activate(double baseAmount) {
-        this.bonus = baseAmount * (percentage / 100);
-        this.status = BonusRuleStatus.ACTIVE;
-        this.updatedAt = LocalDateTime.now();
+    public void setSalaire(Salaire salaire) {
+        this.salaire = salaire;
     }
 
-    // ===== ToString =====
+
+    /* mmethode de recalcule de salaire*/
+    public void recalculateBonus() {
+        if (this.salaire != null) {
+            this.bonus = this.salaire.getBaseAmount() * (this.percentage / 100);
+            this.updatedAt = LocalDateTime.now();
+        }
+    }
+
+    // affichage
     @Override
     public String toString() {
         return "BonusRule {" +
                 "id=" + id +
-                ", salaryId=" + salaryId +
+                ", salaryId=" + (salaire != null ? salaire.getId() : "null") +
                 ", nomRegle='" + nomRegle + '\'' +
                 ", percentage=" + percentage +
                 ", bonus=" + bonus +

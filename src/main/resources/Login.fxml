@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controllers.LoginController"
+            style="-fx-background-color: #f8fafc;">
+    <center>
+        <VBox alignment="CENTER" spacing="22" maxWidth="460"
+              style="-fx-background-color: white; -fx-background-radius: 24; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 30, 0, 0, 8); -fx-padding: 40 44;">
+            <padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
+
+            <!-- HEADER -->
+            <VBox alignment="CENTER" spacing="6">
+                <Label text="INTEGRA"
+                       style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #0B63CE; -fx-font-family: 'Segoe UI Semibold';"/>
+                <Label text="Connectez-vous à votre espace"
+                       style="-fx-font-size: 13; -fx-text-fill: #6b7280; -fx-font-family: 'Segoe UI';"/>
+            </VBox>
+
+            <!-- TAB TOGGLE -->
+            <HBox spacing="0" alignment="CENTER" style="-fx-background-color: #f1f5f9; -fx-background-radius: 12; -fx-padding: 4;">
+                <Button fx:id="tabPasswordBtn" text="🔑  Mot de passe"
+                        onAction="#showPasswordTab" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                        style="-fx-background-color: #0B63CE; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 13; -fx-background-radius: 10; -fx-padding: 10 16; -fx-cursor: hand;"/>
+                <Button fx:id="tabFaceBtn" text="📷  Reconnaissance faciale"
+                         maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                        style="-fx-background-color: transparent; -fx-text-fill: #64748b; -fx-font-size: 13; -fx-background-radius: 10; -fx-padding: 10 16; -fx-cursor: hand;"/>
+            </HBox>
+
+            <!-- PASSWORD PANEL -->
+            <GridPane fx:id="passwordPane" hgap="10" vgap="12">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+                <Label text="Nom d'utilisateur" GridPane.rowIndex="0"
+                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151; -fx-font-family: 'Segoe UI';"/>
+                <TextField fx:id="usernameField" GridPane.rowIndex="1" promptText="Entrez votre nom d'utilisateur"
+                           style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #dbeafe; -fx-background-color: #f8fafc; -fx-padding: 10 14; -fx-font-size: 13;"/>
+                <Label text="Mot de passe" GridPane.rowIndex="2"
+                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151; -fx-font-family: 'Segoe UI';"/>
+                <PasswordField fx:id="passwordField" GridPane.rowIndex="3" promptText="Entrez votre mot de passe"
+                               style="-fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #dbeafe; -fx-background-color: #f8fafc; -fx-padding: 10 14; -fx-font-size: 13;"/>
+                <Button fx:id="loginButton" text="Se connecter" GridPane.rowIndex="4"
+                        maxWidth="Infinity" onAction="#handlePasswordLogin"
+                        style="-fx-background-color: linear-gradient(to right, #0B63CE, #0FA36B); -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14; -fx-background-radius: 30; -fx-padding: 12 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(11,99,206,0.3), 10, 0, 0, 4);"/>
+            </GridPane>
+
+            <!-- FACE PANEL -->
+            <VBox fx:id="facePane" spacing="16" alignment="CENTER" visible="false" managed="false"
+                  style="-fx-background-color: #f0f9ff; -fx-background-radius: 16; -fx-padding: 24;">
+                <Label text="📷  Identification faciale"
+                       style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #0B63CE; -fx-font-family: 'Segoe UI Semibold';"/>
+                <Label text="Positionnez votre visage devant la caméra et cliquez sur Scanner"
+                       style="-fx-font-size: 13; -fx-text-fill: #6b7280; -fx-font-family: 'Segoe UI';" wrapText="true"/>
+                <Button fx:id="scanFaceBtn" text="📷   Scanner mon visage"
+                        maxWidth="Infinity"
+                        style="-fx-background-color: linear-gradient(to right, #0B63CE, #0FA36B); -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14; -fx-background-radius: 30; -fx-padding: 12 0; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(11,99,206,0.3), 10, 0, 0, 4);"/>
+            </VBox>
+
+            <!-- ERROR -->
+            <Label fx:id="errorLabel" wrapText="true" visible="false" managed="false"
+                   style="-fx-text-fill: #dc2626; -fx-font-size: 12; -fx-font-weight: bold; -fx-background-color: #fef2f2; -fx-background-radius: 8; -fx-padding: 8 12;"/>
+
+            <!-- LINKS -->
+            <HBox alignment="CENTER" spacing="20">
+                <Hyperlink fx:id="signUpLink" text="Pas encore de compte ? S'inscrire"
+                           style="-fx-text-fill: #0B63CE; -fx-font-size: 12; -fx-border-color: transparent;"/>
+                <Hyperlink fx:id="forgotPasswordLink" text="Mot de passe oublié ?"
+                           style="-fx-text-fill: #6b7280; -fx-font-size: 12; -fx-border-color: transparent;"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>
