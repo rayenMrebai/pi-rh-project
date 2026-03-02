@@ -15,6 +15,7 @@ import org.example.model.formation.Skill;
 import org.example.model.formation.TrainingProgram;
 import org.example.services.SkillService;
 import org.example.services.TrainingProgramService;
+import org.example.util.Session;
 
 import java.net.URL;
 import java.util.List;
@@ -314,8 +315,21 @@ public class ManageTrainingController implements Initializable {
         Alert a = new Alert(Alert.AlertType.CONFIRMATION);
         a.setTitle("Déconnexion");
         a.setHeaderText("Voulez-vous vraiment vous déconnecter ?");
-        if (a.showAndWait().get() == ButtonType.OK)
-            ((Stage) skillsTable.getScene().getWindow()).close();
+        if (a.showAndWait().get() == ButtonType.OK) {
+            Session.clear();
+            try {
+                Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
+                Stage stage = (Stage) skillsTable.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.setTitle("INTEGRA – Connexion");
+                stage.setResizable(false);
+                stage.setMaximized(false);
+                stage.centerOnScreen();
+                stage.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     // ======================== HELPERS ========================

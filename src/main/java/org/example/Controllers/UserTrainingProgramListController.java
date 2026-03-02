@@ -5,6 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
@@ -12,6 +13,7 @@ import javafx.stage.Stage;
 import org.example.model.formation.TrainingProgram;
 import org.example.services.QuizService;
 import org.example.services.TrainingProgramService;
+import org.example.util.Session;
 
 import java.net.URL;
 import java.util.List;
@@ -35,16 +37,17 @@ public class UserTrainingProgramListController implements Initializable {
     private QuizService quizResultService;
     private List<TrainingProgram> allTrainings;
 
-    // ✅ PAS de User.java — juste id et nom en dur
-    private static final int    TEMP_USER_ID   = 1;
-    private static final String TEMP_USER_NAME = "John Doe";
+    private int    userId;
+    private String userName;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         trainingService   = new TrainingProgramService();
         quizResultService = new QuizService();
 
-        welcomeLabel.setText("👤 Bienvenue, " + TEMP_USER_NAME);
+        userId   = Session.getUserId();
+        userName = Session.getUsername();
+        welcomeLabel.setText("👤 Bienvenue, " + userName);
 
         colId.setCellValueFactory(d -> new SimpleStringProperty(
                 String.format("%04d", d.getValue().getId())));
@@ -59,8 +62,7 @@ public class UserTrainingProgramListController implements Initializable {
 
         // ✅ Colonne quiz — utilise TEMP_USER_ID
         colQuiz.setCellValueFactory(d -> {
-            boolean taken = quizResultService.hasAlreadyTaken(
-                    TEMP_USER_ID, d.getValue().getId());
+            boolean taken = quizResultService.hasAlreadyTaken(userId, d.getValue().getId());
             return new SimpleStringProperty(taken ? "✅ Complété" : "📝 Disponible");
         });
 
@@ -110,7 +112,7 @@ public class UserTrainingProgramListController implements Initializable {
 
             UserTrainingDetailController ctrl = loader.getController();
             // ✅ int + String au lieu de User
-            ctrl.setData(TEMP_USER_ID, TEMP_USER_NAME, training);
+            ctrl.setData(userId, userName, training);
 
             stage.showAndWait();
             trainingsTable.refresh();
@@ -129,7 +131,19 @@ public class UserTrainingProgramListController implements Initializable {
 
     @FXML
     private void handleLogout() {
-        ((Stage) trainingsTable.getScene().getWindow()).close();
+        Session.clear();
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
+            Stage stage = (Stage) trainingsTable.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("INTEGRA – Connexion");
+            stage.setResizable(false);
+            stage.setMaximized(false);
+            stage.centerOnScreen();
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void applyStyles() {

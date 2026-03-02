@@ -1,4 +1,4 @@
-package org.example;
+package test;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -6,15 +6,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class MainApp extends Application {
-
+public class MainFX extends Application {
     @Override
+
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
-        primaryStage.setTitle("INTEGRA – Connexion");
+        primaryStage.setTitle("Connexion - INTEGRA");
         primaryStage.setScene(new Scene(root));
-        primaryStage.setResizable(false);
-        primaryStage.centerOnScreen();
+        primaryStage.setMaximized(true); // déjà fait
         primaryStage.show();
     }
 
