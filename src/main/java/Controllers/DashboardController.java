@@ -19,7 +19,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.Services.currency.CurrencyService;
-import org.example.Services.excel.ExcelExportService; // EXCEL EXPORT
+import org.example.Services.excel.ExcelExportService;
 import org.example.Services.pdf.PdfExportService;
 import org.example.Services.projet.ProjectAssignmentService;
 import org.example.Services.projet.ProjectService;
@@ -69,14 +69,12 @@ public class DashboardController implements Initializable {
     @FXML private Button assignEmployeeButton;
     @FXML private Button updateAssignmentButton;
     @FXML private Button removeAssignmentButton;
-    // PDF Export buttons
     @FXML private Button exportAllPdfButton;
     @FXML private Button exportProjectPdfButton;
-    // EXCEL EXPORT buttons
     @FXML private Button exportAllExcelButton;
     @FXML private Button exportProjectExcelButton;
-
-    @FXML private Button aiAssistantButton;
+    @FXML private Button aiAssistantButton;         // Ollama
+    @FXML private Button aiRecommendButton;        // Nouveau bouton pour la recommandation
 
     private final ProjectService projectService = new ProjectService();
     private final ProjectAssignmentService assignmentService = new ProjectAssignmentService();
@@ -137,7 +135,22 @@ public class DashboardController implements Initializable {
                 new EmployesDTO(102, "Michael Chen"),
                 new EmployesDTO(103, "Emily Rodriguez"),
                 new EmployesDTO(104, "David Thompson"),
-                new EmployesDTO(105, "Jessica Martinez")
+                new EmployesDTO(105, "Jessica Martinez"),
+                new EmployesDTO(106, "Ahmed Benali"),
+                new EmployesDTO(107, "Fatima Zahra"),
+                new EmployesDTO(108, "Thomas Dubois"),
+                new EmployesDTO(109, "Sophie Laurent"),
+                new EmployesDTO(110, "Carlos Mendez"),
+                new EmployesDTO(111, "Yuki Tanaka"),
+                new EmployesDTO(112, "Olga Ivanova"),
+                new EmployesDTO(113, "James Wilson"),
+                new EmployesDTO(114, "Linda Brown"),
+                new EmployesDTO(115, "Robert Garcia"),
+                new EmployesDTO(116, "Maria Gonzalez"),
+                new EmployesDTO(117, "Jean Dupont"),
+                new EmployesDTO(118, "Anna Kowalski"),
+                new EmployesDTO(119, "Mohammed Al-Farsi"),
+                new EmployesDTO(120, "Elena Petrova")
         );
     }
 
@@ -317,14 +330,19 @@ public class DashboardController implements Initializable {
         });
         removeAssignmentButton.setOnAction(e -> deleteSelectedAssignment());
 
-        // PDF Export buttons
+        // PDF Export
         exportAllPdfButton.setOnAction(e -> exportAllToPdf());
         exportProjectPdfButton.setOnAction(e -> exportSelectedProjectToPdf());
 
-        // EXCEL EXPORT buttons
+        // EXCEL Export
         exportAllExcelButton.setOnAction(e -> exportAllToExcel());
         exportProjectExcelButton.setOnAction(e -> exportSelectedProjectToExcel());
+
+        // AI Assistant (Ollama)
         aiAssistantButton.setOnAction(e -> openAIAssistant());
+
+        // AI Recommendation (HuggingFace)
+        aiRecommendButton.setOnAction(e -> openAIRecommendation());
     }
 
     // ==================== PDF EXPORT (inchangé) ====================
@@ -409,7 +427,6 @@ public class DashboardController implements Initializable {
 
             List<ProjectAssignment> assignments = assignmentService.getByProjectId(selected.getProjectId());
             ExcelExportService excelService = new ExcelExportService();
-            // Appel de la nouvelle méthode
             excelService.exportSingleProject(selected, assignments, employeeList, file.getAbsolutePath());
             showAlert("Succès", "Excel généré : " + file.getName());
         } catch (Exception e) {
@@ -417,8 +434,61 @@ public class DashboardController implements Initializable {
             showAlert("Erreur", "Impossible de générer le fichier Excel : " + e.getMessage());
         }
     }
-    // =====================================================
 
+    // ==================== AI Assistant (Ollama) ====================
+    private void openAIAssistant() {
+        Project selected = projectsListView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Aucun projet", "Veuillez sélectionner un projet.");
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AIAssistant.fxml"));
+            Parent root = loader.load();
+            AIAssistantController controller = loader.getController();
+            controller.setProject(selected);
+            controller.setEmployeeMap(employeeNameMap);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Assistant IA - " + selected.getName());
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir l'assistant IA.");
+        }
+    }
+
+    // ==================== AI Recommendation (HuggingFace) ====================
+    private void openAIRecommendation() {
+        Project selected = projectsListView.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Aucun projet", "Veuillez sélectionner un projet.");
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AIRecommendation.fxml"));
+            Parent root = loader.load();
+            AIRecommendationController controller = loader.getController();
+            controller.setProject(selected);
+            controller.setEmployeeList(new java.util.ArrayList<>(employeeList));
+            controller.setEmployeeMap(employeeNameMap);
+            controller.setOnAssignCallback(this::refreshAfterSave);
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("🤖 Recommandation IA - " + selected.getName());
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ouvrir la recommandation IA.");
+        }
+    }
+
+    // ==================== Méthodes métier communes ====================
     private void showProjectDetails(Project p) {
         detailName.setText(p.getName());
         detailDescription.setText(p.getDescription());
@@ -545,29 +615,5 @@ public class DashboardController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    private void openAIAssistant() {
-        Project selected = projectsListView.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("Aucun projet", "Veuillez sélectionner un projet.");
-            return;
-        }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AIAssistant.fxml"));
-            Parent root = loader.load();
-            AIAssistantController controller = loader.getController();
-            controller.setProject(selected);
-            controller.setEmployeeMap(employeeNameMap); // pour avoir les noms des employés si besoin
-
-            Stage stage = new Stage();
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setTitle("Assistant IA - " + selected.getName());
-            stage.setScene(new Scene(root));
-            stage.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Erreur", "Impossible d'ouvrir l'assistant IA.");
-        }
     }
 }

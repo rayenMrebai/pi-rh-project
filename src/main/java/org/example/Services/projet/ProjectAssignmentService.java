@@ -134,4 +134,35 @@ public class ProjectAssignmentService implements GlobalInterface<ProjectAssignme
         }
         return list;
     }
+    /**
+     * Récupère toutes les affectations d'un employé donné
+     */
+    public List<ProjectAssignment> getByEmployeeId(int employeeId) {
+        List<ProjectAssignment> result = new ArrayList<>();
+        String sql = "SELECT pa.*, p.name as projectName FROM projectassignment pa " +
+                "LEFT JOIN project p ON pa.projectId = p.projectId " +
+                "WHERE pa.employeeId = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, employeeId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Project p = new Project();
+                p.setProjectId(rs.getInt("projectId"));
+                p.setName(rs.getString("projectName"));
+
+                ProjectAssignment a = new ProjectAssignment();
+                a.setIdAssignment(rs.getInt("idAssignment"));
+                a.setProject(p);
+                a.setEmployeeId(rs.getInt("employeeId"));
+                a.setRole(rs.getString("role"));
+                a.setAllocationRate(rs.getInt("allocationRate"));
+                a.setAssignedFrom(rs.getDate("assignedFrom") != null ? rs.getDate("assignedFrom").toLocalDate() : null);
+                a.setAssignedTo(rs.getDate("assignedTo") != null ? rs.getDate("assignedTo").toLocalDate() : null);
+                result.add(a);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }
