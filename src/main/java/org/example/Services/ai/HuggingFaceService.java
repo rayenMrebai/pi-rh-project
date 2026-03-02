@@ -8,6 +8,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public class HuggingFaceService {
 
@@ -16,19 +17,36 @@ public class HuggingFaceService {
                     "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2/" +
                     "pipeline/feature-extraction";
 
-    // APRÈS — token lu depuis variable d'environnement
-    private static final String API_TOKEN = System.getenv("HF_API_TOKEN") != null
-            ? System.getenv("HF_API_TOKEN")
-            : "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"; // fallback local uniquement
+    private static final String API_TOKEN = loadToken();
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    /**
-     * Envoie un texte à HuggingFace et retourne un vecteur embedding (float[])
-     */
-    public float[] getEmbedding(String text) throws Exception {
+    private static String loadToken() {
+        // 1. Variable d'environnement système
+        String token = System.getenv("HF_TOKEN");
+        if (token != null && !token.isBlank()) return token.trim();
 
-        // Payload simplifié — le nouveau router n'accepte pas "options"
+        // 2. Fichier config.properties à la racine du projet
+        try {
+            File configFile = new File("config.properties");
+            if (configFile.exists()) {
+                Properties props = new Properties();
+                props.load(new FileInputStream(configFile));
+                token = props.getProperty("HF_TOKEN");
+                if (token != null && !token.isBlank()) return token.trim();
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lecture config.properties : " + e.getMessage());
+        }
+
+        throw new RuntimeException(
+                "Token HuggingFace introuvable.\n" +
+                        "Crée un fichier config.properties à la racine avec :\n" +
+                        "HF_TOKEN=hf_..."
+        );
+    }
+
+    public float[] getEmbedding(String text) throws Exception {
         Map<String, Object> payload = new HashMap<>();
         payload.put("inputs", text);
         String jsonBody = mapper.writeValueAsString(payload);
@@ -62,16 +80,12 @@ public class HuggingFaceService {
         );
         JsonNode root = mapper.readTree(responseBody);
 
-        // Gestion des 3 formats de réponse possibles
         JsonNode vectorNode;
         if (root.isArray() && root.size() > 0 && root.get(0).isArray()) {
-            // cas [[v1, v2, ...]]
             vectorNode = root.get(0);
         } else if (root.isArray() && root.size() > 0 && root.get(0).isNumber()) {
-            // cas [v1, v2, ...]
             vectorNode = root;
         } else if (root.has("embeddings")) {
-            // cas {"embeddings": [[...]]}
             vectorNode = root.get("embeddings").get(0);
         } else {
             throw new RuntimeException("Format de réponse inattendu : " + root.toString());
@@ -84,9 +98,6 @@ public class HuggingFaceService {
         return vector;
     }
 
-    /**
-     * Calcule la similarité cosinus entre deux vecteurs (retourne 0..1)
-     */
     public double cosineSimilarity(float[] a, float[] b) {
         if (a.length != b.length)
             throw new IllegalArgumentException("Vectors must have same length");

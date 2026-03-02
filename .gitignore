@@ -37,3 +37,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+# Secrets locaux — ne jamais pusher
+config.properties
+*.properties
