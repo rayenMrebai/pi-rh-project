@@ -7,8 +7,8 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.model.formation.Skill;
 import org.example.model.formation.TrainingProgram;
-import org.example.services.SkillService;
-import org.example.services.TrainingProgramService;
+import org.example.services.formation.SkillService;
+import org.example.services.formation.TrainingProgramService;
 
 import java.net.URL;
 import java.sql.Date;

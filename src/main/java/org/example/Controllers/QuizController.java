@@ -1,6 +1,5 @@
 package org.example.Controllers;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -8,9 +7,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.example.model.formation.Quiz;
 import org.example.model.formation.TrainingProgram;
-import org.example.services.QuizApiService;
-import org.example.services.QuizApiService.QuizQuestion;
-import org.example.services.QuizService;
+import org.example.services.formation.QuizApiService;
+import org.example.services.formation.QuizApiService.QuizQuestion;
+import org.example.services.formation.QuizService;
 
 import java.net.URL;
 import java.util.List;

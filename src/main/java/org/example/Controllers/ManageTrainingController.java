@@ -14,8 +14,8 @@ import javafx.stage.Stage;
 import org.example.model.formation.Skill;
 import org.example.model.formation.TrainingProgram;
 import org.example.model.user.UserAccount;
-import org.example.services.SkillService;
-import org.example.services.TrainingProgramService;
+import org.example.services.formation.SkillService;
+import org.example.services.formation.TrainingProgramService;
 import org.example.util.SessionManager;
 
 import java.io.IOException;
@@ -26,8 +26,6 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class ManageTrainingController implements Initializable {
-
-    // ===================== FXML FIELDS =====================
 
     @FXML private Label userNameLabel;
 
@@ -56,8 +54,6 @@ public class ManageTrainingController implements Initializable {
     @FXML private Label detailSkillLabel;
     @FXML private Label footerLabel;
 
-    // ===================== FIELDS =====================
-
     private SkillService skillService;
     private TrainingProgramService trainingService;
     private ObservableList<Skill> allSkills;
@@ -79,13 +75,11 @@ public class ManageTrainingController implements Initializable {
         skillService = new SkillService();
         trainingService = new TrainingProgramService();
 
-        // Colonnes Skills
         skillIdColumn.setCellValueFactory(d -> new SimpleStringProperty(String.valueOf(d.getValue().getId())));
         skillNameColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getNom()));
         skillLevelColumn.setCellValueFactory(d -> new SimpleStringProperty(getLevelBadge(d.getValue().getLevelRequired())));
         skillCategoryColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getCategorie().toUpperCase()));
 
-        // Colonnes Trainings
         trainingIdColumn.setCellValueFactory(d -> new SimpleStringProperty(String.format("%04d", d.getValue().getId())));
         trainingNameColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getTitle()));
         trainingDurationColumn.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getDuration() + " sem."));
@@ -100,7 +94,6 @@ public class ManageTrainingController implements Initializable {
         filterCategoryCombo.setOnAction(e -> applyFilters());
         searchSkillField.textProperty().addListener((obs, old, nv) -> applyFilters());
 
-        // Listener skill sélectionné
         skillsTable.getSelectionModel().selectedItemProperty().addListener(
                 (obs, o, n) -> {
                     if (n != null) loadTrainingsForSkill(n);
@@ -113,7 +106,6 @@ public class ManageTrainingController implements Initializable {
             }
         });
 
-        // Listener training sélectionné → afficher détails
         trainingsTable.getSelectionModel().selectedItemProperty().addListener(
                 (obs, o, n) -> {
                     if (n != null) displayTrainingDetails(n);
@@ -134,8 +126,12 @@ public class ManageTrainingController implements Initializable {
 
     private void loadSkills() {
         try {
-            allSkills = FXCollections.observableArrayList(skillService.getAll());
+            List<Skill> skills = skillService.getAll();
+            // ✅ Forcer le rafraîchissement complet
+            skillsTable.setItems(null);
+            allSkills = FXCollections.observableArrayList(skills);
             skillsTable.setItems(allSkills);
+            skillsTable.refresh();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -209,6 +205,7 @@ public class ManageTrainingController implements Initializable {
             updateFooter();
         } catch (Exception e) {
             showAlert("❌ " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -220,15 +217,26 @@ public class ManageTrainingController implements Initializable {
             return;
         }
         try {
+            // ✅ ORDRE CORRECT : load → getController → setSkill → showAndWait
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/UpdateFormSkill.fxml"));
-            Stage popup = buildPopup(loader, "Modifier la Compétence");
+            Parent root = loader.load();                            // 1. charger FXML
+
             UpdateFormSkillController ctrl = loader.getController();
-            ctrl.setSkill(sel);
-            popup.showAndWait();
+            ctrl.setSkill(sel);                                     // 2. passer données
+
+            Stage popup = new Stage();
+            popup.initModality(Modality.APPLICATION_MODAL);
+            popup.initOwner(skillsTable.getScene().getWindow());
+            popup.setTitle("Modifier la Compétence");
+            popup.setResizable(false);
+            popup.setScene(new Scene(root));
+            popup.showAndWait();                                    // 3. ouvrir
+
             loadSkills();
             updateFooter();
         } catch (Exception e) {
             showAlert("❌ " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -264,6 +272,7 @@ public class ManageTrainingController implements Initializable {
             updateFooter();
         } catch (Exception e) {
             showAlert("❌ " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -275,15 +284,26 @@ public class ManageTrainingController implements Initializable {
             return;
         }
         try {
+            // ✅ ORDRE CORRECT : load → getController → setTrainingProgram → showAndWait
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/UpdateFormTrainingProgram.fxml"));
-            Stage popup = buildPopup(loader, "Modifier la Formation");
+            Parent root = loader.load();                            // 1. charger FXML
+
             UpdateFormTrainingProgramController ctrl = loader.getController();
-            ctrl.setTrainingProgram(sel);
-            popup.showAndWait();
+            ctrl.setTrainingProgram(sel);                           // 2. passer données
+
+            Stage popup = new Stage();
+            popup.initModality(Modality.APPLICATION_MODAL);
+            popup.initOwner(trainingsTable.getScene().getWindow());
+            popup.setTitle("Modifier la Formation");
+            popup.setResizable(false);
+            popup.setScene(new Scene(root));
+            popup.showAndWait();                                    // 3. ouvrir
+
             loadAllTrainings();
             updateFooter();
         } catch (Exception e) {
             showAlert("❌ " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -366,18 +386,7 @@ public class ManageTrainingController implements Initializable {
 
     // ===================== HELPERS =====================
 
-    private Stage buildPopup(FXMLLoader loader, String title) throws Exception {
-        Parent root = loader.load();
-        Stage popup = new Stage();
-        popup.initModality(Modality.APPLICATION_MODAL);
-        popup.initOwner(skillsTable.getScene().getWindow());
-        popup.setTitle(title);
-        popup.setResizable(false);
-        popup.setScene(new Scene(root));
-        popup.show();
-        return popup;
-    }
-
+    // ✅ openModal : pour les formulaires Add (aucune donnée à passer avant ouverture)
     private void openModal(String fxml, String title) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(fxml));
         Stage popup = new Stage();

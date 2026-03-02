@@ -1,10 +1,9 @@
-package org.example.services;
+package org.example.services.formation;
 
 import org.example.model.formation.Quiz;
 import org.example.util.DatabaseConnection;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 
 public class QuizService {
 

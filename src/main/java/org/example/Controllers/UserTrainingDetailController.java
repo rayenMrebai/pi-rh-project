@@ -10,8 +10,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.model.formation.Quiz;
 import org.example.model.formation.TrainingProgram;
-import org.example.services.QuizService;
-import org.example.services.SkillService;
+import org.example.services.formation.QuizService;
+import org.example.services.formation.SkillService;
 
 import java.net.URL;
 import java.util.ResourceBundle;

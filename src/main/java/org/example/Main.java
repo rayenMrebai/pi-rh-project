@@ -2,15 +2,12 @@ package org.example;
 
 import org.example.model.formation.Skill;
 import org.example.model.formation.TrainingProgram;
-import org.example.services.SkillService;
-import org.example.services.TrainingProgramService;
+import org.example.services.formation.SkillService;
+import org.example.services.formation.TrainingProgramService;
 import org.example.util.DatabaseConnection;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.time.LocalDate;
 import java.util.Date;
-import java.util.List;
 
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or

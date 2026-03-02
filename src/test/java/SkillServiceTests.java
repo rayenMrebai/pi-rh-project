@@ -1,8 +1,8 @@
 import org.example.model.formation.Skill;
 import org.example.model.formation.TrainingProgram;
 import org.junit.jupiter.api.*;
-import org.example.services.SkillService;
-import org.example.services.TrainingProgramService;
+import org.example.services.formation.SkillService;
+import org.example.services.formation.TrainingProgramService;
 
 import java.util.Date;
 import java.util.List;

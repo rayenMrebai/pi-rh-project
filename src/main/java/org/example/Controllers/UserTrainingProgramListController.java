@@ -13,12 +13,11 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.model.formation.TrainingProgram;
 import org.example.model.user.UserAccount;
-import org.example.services.TrainingProgramService;
+import org.example.services.formation.TrainingProgramService;
 import org.example.util.SessionManager;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 

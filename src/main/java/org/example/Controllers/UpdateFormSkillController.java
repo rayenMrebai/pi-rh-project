@@ -6,7 +6,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.example.model.formation.Skill;
-import org.example.services.SkillService;
+import org.example.services.formation.SkillService;
 
 import java.net.URL;
 import java.util.ResourceBundle;
