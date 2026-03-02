@@ -8,15 +8,15 @@ import java.util.ArrayList;
 public class UserAccount {
 
     private int id;
-    private String name;
+    private String username;
     private String email;
     private UserRole role;
 
 
     // Constructeur user
-    public UserAccount(int id, String name, String email) {
+    public UserAccount(int id, String username, String email) {
         this.id = id;
-        this.name = name;
+        this.username = username;
         this.email = email;
     }
     public UserAccount() {}
@@ -31,7 +31,7 @@ public class UserAccount {
     }
 
     public String getName() {
-        return name;
+        return username;
     }
 
     public String getEmail() {
@@ -51,7 +51,7 @@ public class UserAccount {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.username = name;
     }
 
     public void setEmail(String email) {

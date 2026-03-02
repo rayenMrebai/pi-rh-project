@@ -18,6 +18,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import java.io.InputStream;
 
 public class PDFService {
 
@@ -89,7 +91,7 @@ public class PDFService {
             document.addPage(page);
 
             PDPageContentStream content = new PDPageContentStream(document, page);
-
+            drawLogo(document, content);
             float yPosition = PAGE_HEIGHT - MARGIN;
 
             // En-tête principal
@@ -268,6 +270,27 @@ public class PDFService {
         drawLine(content, MARGIN, yPosition, PAGE_WIDTH - MARGIN, yPosition);
 
         return yPosition - 10;
+    }
+
+    private void drawLogo(PDDocument document, PDPageContentStream content) throws IOException {
+
+        InputStream is = getClass().getClassLoader().getResourceAsStream("images/logo2.png");
+
+        if (is != null) {
+            PDImageXObject logo = PDImageXObject.createFromByteArray(
+                    document,
+                    is.readAllBytes(),
+                    "logo"
+            );
+
+            float logoWidth = 80;   // largeur du logo
+            float logoHeight = 50;  // hauteur du logo
+
+            float x = PAGE_WIDTH - MARGIN - logoWidth;
+            float y = PAGE_HEIGHT - MARGIN - logoHeight + 20;
+
+            content.drawImage(logo, x, y, logoWidth, logoHeight);
+        }
     }
 
     // =========================================================================

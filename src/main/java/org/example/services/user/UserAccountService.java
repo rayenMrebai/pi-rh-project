@@ -15,15 +15,15 @@ public class UserAccountService implements GlobalInterface<UserAccount> {
     @Override
     public List<UserAccount> getAll() {
         List<UserAccount> users = new ArrayList<>();
-        String sql = "SELECT id, name, email FROM useraccount";
+        String sql = "SELECT userId, username, email FROM user_account";
 
         try (PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 users.add(new UserAccount(
-                        rs.getInt("id"),
-                        rs.getString("name"),
+                        rs.getInt("userId"),
+                        rs.getString("username"),
                         rs.getString("email")
                 ));
             }
@@ -38,7 +38,7 @@ public class UserAccountService implements GlobalInterface<UserAccount> {
      * ⭐ Récupère un utilisateur par son ID
      */
     public UserAccount getById(int id) {
-        String sql = "SELECT id, name, email FROM useraccount WHERE id = ?";
+        String sql = "SELECT userId, username, email FROM user_account WHERE id = ?";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -46,8 +46,8 @@ public class UserAccountService implements GlobalInterface<UserAccount> {
 
             if (rs.next()) {
                 return new UserAccount(
-                        rs.getInt("id"),
-                        rs.getString("name"),
+                        rs.getInt("userId"),
+                        rs.getString("username"),
                         rs.getString("email")
                 );
             }

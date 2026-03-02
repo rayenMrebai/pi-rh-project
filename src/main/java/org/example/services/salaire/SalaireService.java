@@ -57,9 +57,9 @@ public class SalaireService implements GlobalInterface<Salaire> {
                         s.id, s.userId, s.baseAmount, s.bonusAmount, s.totalAmount,
                         s.status, s.datePaiement,
                         s.createdAt, s.updatedAt,
-                        u.name, u.email
+                        u.username, u.email
                     FROM salaire s
-                    JOIN useraccount u ON s.userId = u.id
+                    JOIN user_account u ON s.userId = u.userId
                 """;
 
         try (PreparedStatement ps = conn.prepareStatement(sql);
@@ -162,7 +162,7 @@ public class SalaireService implements GlobalInterface<Salaire> {
 
         UserAccount user = new UserAccount(
                 rs.getInt("userId"),
-                rs.getString("name"),
+                rs.getString("username"),
                 rs.getString("email")
         );
 
@@ -186,9 +186,9 @@ public class SalaireService implements GlobalInterface<Salaire> {
                         s.id, s.baseAmount, s.bonusAmount, s.totalAmount,
                         s.status, s.datePaiement,
                         s.createdAt, s.updatedAt,
-                        u.id as userId, u.name, u.email
+                        u.userId as userId, u.username, u.email
                     FROM salaire s
-                    JOIN useraccount u ON s.userId = u.id
+                    JOIN user_account u ON s.userId = u.userId
                     WHERE s.id = ?
                 """;
 

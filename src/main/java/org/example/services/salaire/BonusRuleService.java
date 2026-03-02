@@ -141,10 +141,10 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
                 br.id, br.nomRegle, br.percentage, br.bonus, 
                 br.condition_text, br.status, br.createdAt, br.updatedAt,
                 s.id as salaryId, s.baseAmount, s.bonusAmount, s.totalAmount,
-                u.id as userId, u.name, u.email
+                u.userId as userId, u.username, u.email
             FROM bonus_rule br
             JOIN salaire s ON br.salaryId = s.id
-            JOIN useraccount u ON s.userId = u.id
+            JOIN user_account u ON s.userId = u.userId
             WHERE br.salaryId = ?
         """;
 
@@ -167,7 +167,7 @@ public class BonusRuleService implements GlobalInterface<BonusRule> {
                 // Créer le salaire complet
                 UserAccount user = new UserAccount(
                         rs.getInt("userId"),
-                        rs.getString("name"),
+                        rs.getString("username"),
                         rs.getString("email")
                 );
 
