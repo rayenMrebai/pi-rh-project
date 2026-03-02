@@ -75,6 +75,8 @@ public class DashboardController implements Initializable {
     @FXML private Button exportProjectExcelButton;
     @FXML private Button aiAssistantButton;         // Ollama
     @FXML private Button aiRecommendButton;        // Nouveau bouton pour la recommandation
+    @FXML private Label usdRateLabel;
+    @FXML private Label eurRateLabel;
 
     private final ProjectService projectService = new ProjectService();
     private final ProjectAssignmentService assignmentService = new ProjectAssignmentService();
@@ -118,8 +120,21 @@ public class DashboardController implements Initializable {
     private void startRateUpdater() {
         scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate(() -> {
-            String rates = currencyService.getDisplayRates();
-            Platform.runLater(() -> rateDisplayLabel.setText(rates));
+            try {
+                // Récupérer les taux depuis le service
+                Map<String, Double> rates = currencyService.getRates(); // méthode à ajouter
+                double usd = rates.get("USD");
+                double eur = rates.get("EUR");
+                Platform.runLater(() -> {
+                    usdRateLabel.setText(String.format("%.2f", usd));
+                    eurRateLabel.setText(String.format("%.2f", eur));
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    usdRateLabel.setText("—");
+                    eurRateLabel.setText("—");
+                });
+            }
         }, 0, 60, TimeUnit.SECONDS);
     }
 
