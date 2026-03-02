@@ -701,7 +701,7 @@ public class SalaireManagementController {
 
     @FXML
     private void handleNavStatistics() {
-        if (!SessionManager.isAdmin()) {
+        if (!SessionManager.isAdmin() && !SessionManager.isManager()) {
             showAlert("Accès refusé",
                     "Seuls les administrateurs peuvent accéder aux statistiques.",
                     Alert.AlertType.ERROR);
