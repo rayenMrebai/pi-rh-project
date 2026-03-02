@@ -47,36 +47,21 @@ public class LoginController {
                 System.out.println("✅ Connecté : " + user.getUsername()
                         + " | Rôle : " + user.getRole());
 
+                // ✅ Naviguer vers le Dashboard pour tous les rôles
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/Dashboard.fxml"));
+                Parent root = loader.load();
+
+                // ✅ Passer l'utilisateur connecté au DashboardController
+                DashboardController dashboardController = loader.getController();
+                dashboardController.setLoggedInUser(user);
+
                 Stage stage = (Stage) loginButton.getScene().getWindow();
-
-                // ✅ ADMIN ou MANAGER → ManageTraining (votre interface admin formation)
-                if (user.getRole() == UserRole.ADMINISTRATEUR
-                        || user.getRole() == UserRole.MANAGER) {
-
-                    FXMLLoader loader = new FXMLLoader(
-                            getClass().getResource("/ManageTraining.fxml"));
-                    Parent root = loader.load();
-
-                    stage.setScene(new Scene(root));
-                    stage.setTitle("INTEGRA – Administration des Formations");
-                    stage.setMinWidth(1100);
-                    stage.setMinHeight(650);
-                    stage.show();
-                    Platform.runLater(() -> stage.setMaximized(true));
-
-                    // ✅ USER → UserTrainingList (votre interface user formation)
-                } else {
-                    FXMLLoader loader = new FXMLLoader(
-                            getClass().getResource("/UserTrainingList.fxml"));
-                    Parent root = loader.load();
-
-                    stage.setScene(new Scene(root));
-                    stage.setTitle("INTEGRA – Mes Formations");
-                    stage.setMinWidth(900);
-                    stage.setMinHeight(620);
-                    stage.show();
-                    Platform.runLater(() -> stage.setMaximized(true));
-                }
+                stage.setScene(new Scene(root));
+                stage.setTitle("INTEGRA – Tableau de Bord");
+                stage.setMinWidth(900);
+                stage.setMinHeight(620);
+                stage.show();
+                Platform.runLater(() -> stage.setMaximized(true));
 
             } else {
                 showAlert(Alert.AlertType.ERROR, "Erreur",

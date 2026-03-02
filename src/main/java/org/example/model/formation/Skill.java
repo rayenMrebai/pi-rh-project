@@ -1,8 +1,5 @@
 package org.example.model.formation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Skill {
     //Attributs
     private int id;

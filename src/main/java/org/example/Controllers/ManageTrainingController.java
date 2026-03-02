@@ -13,10 +13,12 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.model.formation.Skill;
 import org.example.model.formation.TrainingProgram;
+import org.example.model.user.UserAccount;
 import org.example.services.SkillService;
 import org.example.services.TrainingProgramService;
 import org.example.util.SessionManager;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +26,10 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class ManageTrainingController implements Initializable {
+
+    // ===================== FXML FIELDS =====================
+
+    @FXML private Label userNameLabel;
 
     @FXML private TableView<Skill> skillsTable;
     @FXML private TableColumn<Skill, String> skillIdColumn;
@@ -50,9 +56,23 @@ public class ManageTrainingController implements Initializable {
     @FXML private Label detailSkillLabel;
     @FXML private Label footerLabel;
 
+    // ===================== FIELDS =====================
+
     private SkillService skillService;
     private TrainingProgramService trainingService;
     private ObservableList<Skill> allSkills;
+    private UserAccount loggedInUser;
+
+    // ===================== SET USER =====================
+
+    public void setLoggedInUser(UserAccount user) {
+        this.loggedInUser = user;
+        if (userNameLabel != null && user != null) {
+            userNameLabel.setText(user.getUsername() + " (" + user.getRole() + ")");
+        }
+    }
+
+    // ===================== INITIALIZE =====================
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -80,27 +100,25 @@ public class ManageTrainingController implements Initializable {
         filterCategoryCombo.setOnAction(e -> applyFilters());
         searchSkillField.textProperty().addListener((obs, old, nv) -> applyFilters());
 
-        // ✅ Listener skill sélectionné
+        // Listener skill sélectionné
         skillsTable.getSelectionModel().selectedItemProperty().addListener(
                 (obs, o, n) -> {
                     if (n != null) loadTrainingsForSkill(n);
                     else loadAllTrainings();
                 });
 
-        // ✅ Listener clic zone vide skillsTable
         skillsTable.setOnMouseClicked(event -> {
             if (skillsTable.getSelectionModel().getSelectedItem() == null) {
                 loadAllTrainings();
             }
         });
 
-        // ✅ Listener training sélectionné → afficher détails
+        // Listener training sélectionné → afficher détails
         trainingsTable.getSelectionModel().selectedItemProperty().addListener(
                 (obs, o, n) -> {
                     if (n != null) displayTrainingDetails(n);
                 });
 
-        // ✅ Listener clic zone vide trainingsTable
         trainingsTable.setOnMouseClicked(event -> {
             if (skillsTable.getSelectionModel().getSelectedItem() == null) {
                 loadAllTrainings();
@@ -112,7 +130,7 @@ public class ManageTrainingController implements Initializable {
         updateFooter();
     }
 
-    // ======================== LOAD DATA ========================
+    // ===================== LOAD DATA =====================
 
     private void loadSkills() {
         try {
@@ -169,8 +187,8 @@ public class ManageTrainingController implements Initializable {
         String status = getStatus(t);
         detailStatusLabel.setText(status);
         detailStatusLabel.setStyle(
-                status.equals("EN COURS")   ? "-fx-text-fill: #66bb6a; -fx-font-weight: bold; -fx-font-size: 13px;" :
-                        status.equals("PROGRAMMÉ")  ? "-fx-text-fill: #1e88e5; -fx-font-weight: bold; -fx-font-size: 13px;" :
+                status.equals("EN COURS")  ? "-fx-text-fill: #66bb6a; -fx-font-weight: bold; -fx-font-size: 13px;" :
+                        status.equals("PROGRAMMÉ") ? "-fx-text-fill: #1e88e5; -fx-font-weight: bold; -fx-font-size: 13px;" :
                                 "-fx-text-fill: #f57c00; -fx-font-weight: bold; -fx-font-size: 13px;");
 
         String skillName = getSkillForTraining(t);
@@ -180,7 +198,7 @@ public class ManageTrainingController implements Initializable {
                 : "-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-padding: 3 8; -fx-background-radius: 4; -fx-font-weight: bold;");
     }
 
-    // ======================== ACTIONS SKILL ========================
+    // ===================== ACTIONS SKILL =====================
 
     @FXML
     private void handleAddSkill() {
@@ -221,13 +239,11 @@ public class ManageTrainingController implements Initializable {
             showAlert("⚠️ Sélectionnez une compétence à supprimer");
             return;
         }
-
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmer la suppression");
         confirm.setHeaderText("Supprimer la compétence ?");
         confirm.setContentText("Voulez-vous vraiment supprimer '" + sel.getNom() + "' ?");
         Optional<ButtonType> result = confirm.showAndWait();
-
         if (result.isPresent() && result.get() == ButtonType.OK) {
             skillService.delete(sel.getId());
             loadSkills();
@@ -237,7 +253,7 @@ public class ManageTrainingController implements Initializable {
         }
     }
 
-    // ======================== ACTIONS TRAINING ========================
+    // ===================== ACTIONS TRAINING =====================
 
     @FXML
     private void handleAddTraining() {
@@ -253,7 +269,6 @@ public class ManageTrainingController implements Initializable {
 
     @FXML
     private void handleUpdateTraining() {
-        // ✅ Récupérer le training sélectionné dans trainingsTable
         TrainingProgram sel = trainingsTable.getSelectionModel().getSelectedItem();
         if (sel == null) {
             showAlert("⚠️ Sélectionnez un programme de formation à modifier");
@@ -279,13 +294,11 @@ public class ManageTrainingController implements Initializable {
             showAlert("⚠️ Sélectionnez un programme de formation à supprimer");
             return;
         }
-
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmer la suppression");
         confirm.setHeaderText("Supprimer la formation ?");
         confirm.setContentText("Voulez-vous vraiment supprimer '" + sel.getTitle() + "' ?");
         Optional<ButtonType> result = confirm.showAndWait();
-
         if (result.isPresent() && result.get() == ButtonType.OK) {
             trainingService.delete(sel.getId());
             loadAllTrainings();
@@ -310,13 +323,32 @@ public class ManageTrainingController implements Initializable {
         updateFooter();
     }
 
+    // ===================== NAVIGATION =====================
+
+    @FXML
+    private void handleGoToDashboard() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Dashboard.fxml"));
+            Parent root = loader.load();
+            DashboardController ctrl = loader.getController();
+            ctrl.setLoggedInUser(loggedInUser);
+
+            Stage stage = (Stage) skillsTable.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Mon Tableau de Bord");
+            stage.setMaximized(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     private void handleLogout() {
         Alert a = new Alert(Alert.AlertType.CONFIRMATION);
         a.setTitle("Déconnexion");
         a.setHeaderText("Voulez-vous vraiment vous déconnecter ?");
         if (a.showAndWait().get() == ButtonType.OK) {
-            SessionManager.clear();
+            SessionManager.clearSession();
             try {
                 Parent root = FXMLLoader.load(getClass().getResource("/Login.fxml"));
                 Stage stage = (Stage) skillsTable.getScene().getWindow();
@@ -332,7 +364,7 @@ public class ManageTrainingController implements Initializable {
         }
     }
 
-    // ======================== HELPERS ========================
+    // ===================== HELPERS =====================
 
     private Stage buildPopup(FXMLLoader loader, String title) throws Exception {
         Parent root = loader.load();
@@ -342,7 +374,7 @@ public class ManageTrainingController implements Initializable {
         popup.setTitle(title);
         popup.setResizable(false);
         popup.setScene(new Scene(root));
-        popup.show(); // ✅ show() au lieu de showAndWait() pour que le controller soit prêt
+        popup.show();
         return popup;
     }
 

@@ -20,6 +20,14 @@
                        style="-fx-text-fill: #90caf9; -fx-font-size: 11px;"/>
             </VBox>
             <Region HBox.hgrow="ALWAYS"/>
+
+            <!-- Bouton retour Dashboard -->
+            <Button text="🏠  Dashboard" onAction="#handleGoToDashboard"
+                    style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white;
+                           -fx-font-weight: bold; -fx-padding: 8 16;
+                           -fx-background-radius: 6; -fx-cursor: hand;"/>
+
+            <!-- Bouton Logout -->
             <Button text="⎋  Logout" onAction="#handleLogout"
                     style="-fx-background-color: #e53935; -fx-text-fill: white;
                            -fx-font-weight: bold; -fx-padding: 8 16;
@@ -44,7 +52,7 @@
                                -fx-background-radius: 6; -fx-cursor: hand;"/>
             </HBox>
 
-            <Label text="💡 Double-cliquez sur une formation pour voir les détails et accéder au quiz"
+            <Label text="💡 Double-cliquez sur une formation pour voir les détails"
                    style="-fx-font-size: 11px; -fx-text-fill: #90a4ae; -fx-font-style: italic;"/>
 
             <!-- Table formations -->
