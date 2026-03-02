@@ -27,7 +27,7 @@
 
     <!-- PODIUM TOP 3 -->
     <HBox fx:id="podiumBox" alignment="BOTTOM_CENTER" spacing="16"
-          style="-fx-background-color: linear-gradient(to bottom, #1e3a5f, #0f2744); -fx-padding: 18 28 20 28;">
+          style="-fx-background-color: linear-gradient(to bottom, #1e3a5f, #145493); -fx-padding: 18 28 20 28;">
 
         <!-- 2nd place -->
         <VBox fx:id="card2" alignment="CENTER" spacing="6" prefWidth="190"
