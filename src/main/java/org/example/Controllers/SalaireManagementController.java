@@ -630,7 +630,7 @@ public class SalaireManagementController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/AddFormBonusRule.fxml"));
             Parent root = loader.load();
-            AddFormBonusRuleController controller = loader.getController();
+            org.example.controllers.AddFormBonusRuleController controller = loader.getController();
             controller.setSalaire(selectedSalaire);
             Stage stage = new Stage();
             stage.setTitle("Ajouter une Règle de Bonus");
