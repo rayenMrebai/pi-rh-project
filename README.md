@@ -1,13 +1,19 @@
 # Integra RH – Application Desktop Intelligente de Gestion RH 
 
 <p align="center">
-  <img src="https://github.com/rayenMrebai/pi-rh-project/blob/e6aef2d7852dc8ab638d047d6dcd1b4517e3c228/java.png?raw=true" alt="Java Logo" width="200">
+  <img src="https://github.com/rayenMrebai/pi-rh-project/blob/e6aef2d7852dc8ab638d047d6dcd1b4517e3c228/java.png?raw=true" alt="Java Logo" width="600">
 </p>
 
 ## Sommaire
 
 * [Description](#description)
 * [Fonctionnalités principales](#fonctionnalités-principales)
+  * [👥 Gestion des utilisateurs](#-gestion-des-utilisateurs)
+  * [📢 Gestion du recrutement](#-gestion-du-recrutement)
+  * [🎓 Gestion des formations](#-gestion-des-formations)
+  * [💰 Gestion des salaires](#-gestion-des-salaires)
+  * [📁 Gestion de projets et affectations](#-gestion-de-projets-et-affectations)
+  * [📊 Dashboard & Statistiques](#-dashboard--statistiques)
 * [Fonctionnalités IA](#fonctionnalités-ia)
 * [Technologies utilisées](#technologies-utilisées)
 * [Architecture](#architecture)
@@ -31,6 +37,7 @@ Cette version Desktop couvre principalement :
 * Gestion du recrutement
 * Gestion des formations
 * Gestion des salaires
+* **Gestion de projets et des affectations d’employés**
 
 Le système offre une expérience RH avancée avec une interface moderne, responsive et multi-plateforme.
 
@@ -89,6 +96,23 @@ Le système offre une expérience RH avancée avec une interface moderne, respon
 * Graphiques interactifs QuickChart
 * Prédiction salariale par régression linéaire
 
+### 📁 Gestion de projets et affectations
+
+* CRUD complet des projets et des affectations d’employés
+* Recherche et filtrage avancés (statut, dates, projet, rôle)
+* Validation métier côté serveur
+* Export PDF (iText) et Excel (Apache POI) avec statistiques et graphiques
+* Assistant IA intégré (résumé, amélioration de description, traduction)
+* Recommandation d’employés par similarité sémantique (IA)
+* Dictée vocale pour la description des projets
+* Taux de change en direct (USD/TND, EUR/TND)
+
+### 📊 Dashboard & Statistiques
+
+* KPIs RH interactifs
+* Graphiques dynamiques
+* Suivi des utilisateurs actifs/inactifs
+
 ---
 
 ## Fonctionnalités IA
@@ -102,6 +126,9 @@ Le système intègre plusieurs fonctionnalités d’intelligence artificielle :
 * 📝 Génération automatique de quiz
 * ✉️ Génération de lettres RH
 * 📊 Prédiction salariale basée sur la régression linéaire
+* 🧠 Assistant de projet (résumé, amélioration, traduction)
+* 🧑‍💼 Recommandation d’employés pour un projet
+* 🎤 Dictée vocale pour les descriptions de projet
 
 ---
 
@@ -126,9 +153,9 @@ Le système intègre plusieurs fonctionnalités d’intelligence artificielle :
 * Groq API
 * Coursera RapidAPI
 * ESCO Europe API
-* Telegram Bot API
 * Gmail API
 * QuickChart API
+* Ollama (LLM local)
 
 ### Bibliothèques
 
